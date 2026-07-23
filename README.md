@@ -168,8 +168,6 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 Frontend runs on:  
 http://localhost:3000
 
-## 🧪 Available Scripts
-
 ### Frontend
 
 ```bash
@@ -271,7 +269,7 @@ This project was developed as part of the **Code the Dream** program. We are gra
 
 Special thanks to:
 
-- **Frank Stepanski** - Associate Director of CTD , for supporting the program and creating opportunities for students to gain real-world software development experience.
+- **Frank Stepanski** - Team Manager , for supporting the program and creating opportunities for students to gain real-world software development experience.
 - **Roy Mosby** - Lead Mentor, for providing guidance, technical support, and valuable feedback throughout the project.
 - **Rodrigo M. F. Castilho** - Mentor, for guidance, support, and contributions to our learning journey.
 - **Anastasia Nikulkina** - Assistant Mentor, for mentorship, code reviews, and encouragement.
