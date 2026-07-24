@@ -1,200 +1,136 @@
-# Project Name
+# Neighborhood Helper
 
-Short, clear description of what this application does and who it’s for.  
-(1–2 sentences max.)
+A full-stack community platform with a React frontend and Node/Express backend that connects people who need assistance with volunteers.
 
-**Example:**  
-A full-stack web application with a React frontend and a Node/Express backend that allows users to create, manage, and track data stored in a database.
-
-## 🚀 Live Demo
-
-- **Frontend Live Site:** https://your-frontend-url.com  
-- **Frontend Repo:** /frontend  
-- **Backend Repo:** /backend
-
-## 🧠 Problem Statement
-
-What problem does this project solve?
-
-- Who is this application for?
-- What pain point does it address?
-- Why does this solution matter?
-
-Focus on the **user problem**, not the technology.
-
-## 🎯 Features
-
-- User authentication (register, login, logout)
-- CRUD operations for core resources
-- Protected routes and authorization
-- Responsive UI (mobile & desktop)
-- Form validation and error handling
-- RESTful API integration
-
-## 📸 Screenshots
-
-Add screenshots or GIFs of key features here.
-
-
-
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Frontend
-- React
-- JavaScript (ES6+)
-- HTML5
-- CSS3 / Tailwind / Bootstrap
-- Vite or Create React App
+- React (Vite) + TypeScript
+- React Router DOM
+- Material UI
+- React Hook Form
+- TanStack Query (React Query)
+- Axios
 
 ### Backend
-- Node.js
-- Express.js
-- REST API
-
-### Database
-- MongoDB (Mongoose) **or**
-- PostgreSQL (Prisma / Knex / Sequelize)
+- Node.js + Express
+- Prisma ORM + PostgreSQL
+- JWT, bcrypt, helmet, cors, cookie-parser, rate limiting, XSS sanitization
 
 ### Tooling
+- ESLint + Prettier
 - Git & GitHub
-- dotenv (environment variables)
-- ESLint / Prettier
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 project-root/
 ├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   ├── services/        
-│   │   ├── styles/
-│   │   ├── utils/
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   └── package.json
-│
-├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   ├── middleware/
-│   ├── config/
-│   ├── app.js
-│   ├── server.js
-│   └── package.json
-│
-└── README.md
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── layouts/
+│       ├── services/
+│       ├── hooks/
+│       ├── context/
+│       ├── utils/
+│       └── routes/
+└── backend/
+    └── src/
+        ├── routes/
+        ├── controllers/
+        ├── middleware/
+        ├── services/
+        ├── utils/
+        └── validations/
+    └── prisma/
 ```
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- npm or yarn
-- MongoDB or PostgreSQL (local or cloud)
+- Node.js (v18+)
+- npm
+- PostgreSQL (local or cloud)
 
-### Backend Setup
+### 1. Backend Setup
 
 ```bash
 cd backend
 npm install
+cp .env.example .env
+# Edit .env with your DATABASE_URL and JWT_SECRET
+npm run db:generate
+npm run db:migrate   # requires a running PostgreSQL instance
 npm run dev
 ```
 
-Create a `.env` file inside the `backend` folder:
+Backend runs on: **http://localhost:5000**
 
-```env
-PORT=5000
-DATABASE_URL=your_database_url
-JWT_SECRET=your_secret_key
-```
-
-Backend runs on:  
-http://localhost:8080
-
-### Frontend Setup
+### 2. Frontend Setup
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-Frontend runs on:  
-http://localhost:5173
+Frontend runs on: **http://localhost:5173**
 
-## 🧪 Available Scripts
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `PORT` | Server port (default: 5000) |
+| `DATABASE_URL` | PostgreSQL connection string for Prisma |
+| `JWT_SECRET` | Secret key for JWT signing |
+| `FRONTEND_URL` | Frontend origin for CORS (default: http://localhost:5173) |
+| `NODE_ENV` | Environment (`development` / `production`) |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | Backend API base URL (default: http://localhost:5000) |
+
+## Available Scripts
 
 ### Frontend
 ```bash
-npm run dev
-npm run build
-npm run preview
+npm run dev       # Start dev server
+npm run build     # Production build
+npm run lint      # Run ESLint
+npm run format    # Run Prettier
 ```
 
 ### Backend
 ```bash
-npm run dev
-npm start
+npm run dev          # Start dev server with nodemon
+npm start            # Start production server
+npm run lint         # Run ESLint
+npm run format       # Run Prettier
+npm run db:generate  # Generate Prisma client
+npm run db:migrate   # Run database migrations
+npm run db:studio    # Open Prisma Studio
 ```
 
-## 🔐 API Overview
+## API Overview
 
-### Example Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Health check |
+| GET | `/api/hello` | Sample API endpoint |
 
-```text
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/items
-POST   /api/items
-PUT    /api/items/:id
-DELETE /api/items/:id
-```
+## Team Workflow
 
-## 🤝 Team & Collaboration
-
-### Team Members
-- Name — Role
-- Name — Role
-- Name — Role
-
-### Workflow
 - GitHub Issues for task tracking
 - Feature branches for development
-- Pull Requests required for all merges
-- Code reviews before merging to `main`
+- Pull Requests required for merges to `main`
+- Code reviews before merging
 
+## License
 
-## 🧩 Development Process
-
-- Agile / sprint-based workflow
-- Backend API built before frontend integration
-- MVP defined early
-- Incremental feature development
-
-## 📌 Known Issues / Limitations
-
-- Limited role-based access control
-- No automated tests yet
-- Performance optimizations pending
-
-## 🛣 Future Improvements
-
-- Add automated testing (Jest, Supertest)
-- Improve security and validation
-- Add caching and performance improvements
-- Dockerize the application
-
-## 🙌 Acknowledgments
-
-- Mentors
-- Instructors
-- Open-source libraries and tools
-
-## 📄 License
-
-This project is for educational purposes only.
+Educational use only.
