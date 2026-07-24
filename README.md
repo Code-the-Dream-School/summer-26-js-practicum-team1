@@ -65,7 +65,7 @@ npm run db:migrate   # requires a running PostgreSQL instance
 npm run dev
 ```
 
-Backend runs on: **http://localhost:5000**
+Backend runs on: **http://localhost:5001**
 
 ### 2. Frontend Setup
 
@@ -84,7 +84,7 @@ Frontend runs on: **http://localhost:5173**
 
 | Variable | Description |
 |----------|-------------|
-| `PORT` | Server port (default: 5000) |
+| `PORT` | Server port (default: 5001) |
 | `DATABASE_URL` | PostgreSQL connection string for Prisma |
 | `JWT_SECRET` | Secret key for JWT signing |
 | `FRONTEND_URL` | Frontend origin for CORS (default: http://localhost:5173) |
@@ -94,7 +94,7 @@ Frontend runs on: **http://localhost:5173**
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_URL` | Backend API base URL (default: http://localhost:5000) |
+| `VITE_API_URL` | Backend API base URL (optional in dev; required for production) |
 
 ## Available Scripts
 
