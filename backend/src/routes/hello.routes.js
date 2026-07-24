@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getHello } = require('../controllers/hello.controller');
+const { validateHelloQuery } = require('../validations/hello.validation');
 
-// GET /api/hello
-router.get('/', getHello);
+router.get('/', validateHelloQuery, getHello);
 
 module.exports = router;

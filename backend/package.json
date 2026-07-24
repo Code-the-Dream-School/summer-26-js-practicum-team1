@@ -5,19 +5,34 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@prisma/adapter-pg": "^7.9.0",
+    "@prisma/client": "^7.9.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "helmet": "^7.1.0",
-    "morgan": "^1.10.0",
+    "express": "^4.19.2",
     "express-rate-limit": "^7.3.0",
-    "mongoose": "^8.4.0",
+    "express-xss-sanitizer": "^2.0.2",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.0",
     "pg": "^8.11.5"
   },
   "devDependencies": {
-    "nodemon": "^3.0.3"
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.7.0",
+    "nodemon": "^3.0.3",
+    "prettier": "^3.9.6",
+    "prisma": "^7.9.0"
   }
 }
