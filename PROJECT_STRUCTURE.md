@@ -9,7 +9,7 @@ Overview of the Neighborhood Helper codebase.
 ## Architecture
 
 ```text
-Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5000)  →  PostgreSQL
+Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5001)  →  PostgreSQL
 ```
 
 ---
@@ -34,7 +34,6 @@ layouts/MainLayout.tsx   Navbar + page shell
 pages/HomePage.tsx       Home page
 components/
   HelloMessage.tsx    Fetches and shows API message
-  ContactForm.tsx     Form example (React Hook Form + MUI)
 services/api.ts       Axios client + API functions
 hooks/useHello.ts     React Query hook for /api/hello
 context/AppContext.tsx   Global app state (AppProvider)
@@ -47,10 +46,10 @@ utils/constants.ts    API_URL constant
 HelloMessage → useHello → getHello() → GET /api/hello
 ```
 
-**Env:** `frontend/.env`
+**Env:** `frontend/.env` (optional in dev — Vite proxies `/api` to the backend)
 
 ```env
-VITE_API_URL=http://localhost:5000
+# VITE_API_URL=http://localhost:5001  # only needed for production builds
 ```
 
 **Run:**
@@ -90,7 +89,7 @@ helmet → cors → json → cookies → xss → morgan → rate-limit → route
 **Env:** `backend/.env`
 
 ```env
-PORT=5000
+PORT=5001
 DATABASE_URL=postgresql://user:password@localhost:5432/neighborhood_helper
 JWT_SECRET=your_secret_key
 FRONTEND_URL=http://localhost:5173
@@ -126,4 +125,3 @@ cd backend && npm install && cp .env.example .env && npm run db:generate && npm 
 ## Notes
 
 - Auth utils (`jwt.js`, `hash.js`, `auth.js`) are ready but not wired to routes yet.
-- `ContactForm` is client-side only (no backend POST yet).
