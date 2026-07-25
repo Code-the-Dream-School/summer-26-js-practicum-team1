@@ -12,8 +12,4 @@ module.exports = defineConfig([
     files: ['**/*.js'],
     languageOptions: { sourceType: 'commonjs', globals: { ...globals.node } },
   },
-  {
-    files: ['**/*.{js,mjs,cjs}'],
-    languageOptions: { globals: globals.browser },
-  },
 ]);
