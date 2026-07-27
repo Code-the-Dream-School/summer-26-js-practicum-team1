@@ -6,8 +6,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export const getHello = async (): Promise<string> => {
-  const { data } = await api.get<{ data: { message: string } }>('/api/hello');
+export const getHello = async () => {
+  const { data } = await api.get('/api/hello');
   return data.data.message;
 };
 

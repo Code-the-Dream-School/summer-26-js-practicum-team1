@@ -5,7 +5,7 @@ const HelloMessage = () => {
   const { data, isLoading, isError } = useHello();
 
   if (isLoading) return <CircularProgress size={24} />;
-  if (isError) return <Alert severity="error">Backend bağlantısı kurulamadı.</Alert>;
+  if (isError) return <Alert severity="error">Could not connect to backend.</Alert>;
 
   return (
     <Typography>

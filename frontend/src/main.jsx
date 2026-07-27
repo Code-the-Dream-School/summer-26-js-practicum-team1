@@ -9,7 +9,7 @@ import App from './App';
 const queryClient = new QueryClient();
 const theme = createTheme();
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AppProvider>

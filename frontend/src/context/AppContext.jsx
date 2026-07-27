@@ -1,12 +1,8 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext } from 'react';
 
-type AppContextValue = {
-  appName: string;
-};
+const AppContext = createContext(null);
 
-const AppContext = createContext<AppContextValue | null>(null);
-
-export const AppProvider = ({ children }: { children: ReactNode }) => {
+export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{ appName: 'Neighborhood Helper' }}>
       {children}
