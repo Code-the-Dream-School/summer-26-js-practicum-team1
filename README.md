@@ -5,7 +5,7 @@ A full-stack community platform with a React frontend and Node/Express backend t
 ## Tech Stack
 
 ### Frontend
-- React (Vite) + TypeScript
+- React (Vite) + JavaScript
 - React Router DOM
 - Material UI
 - React Hook Form
@@ -14,8 +14,8 @@ A full-stack community platform with a React frontend and Node/Express backend t
 
 ### Backend
 - Node.js + Express
-- Prisma ORM + PostgreSQL
-- JWT, bcrypt, helmet, cors, cookie-parser, rate limiting, XSS sanitization
+- Prisma ORM + PostgreSQL (schema in SCRUM-78)
+- helmet, cors, cookie-parser, rate limiting, XSS sanitization
 
 ### Tooling
 - ESLint + Prettier
@@ -43,7 +43,6 @@ project-root/
         ├── services/
         ├── utils/
         └── validations/
-    └── prisma/
 ```
 
 ## Setup & Installation
@@ -59,9 +58,6 @@ project-root/
 cd backend
 npm install
 cp .env.example .env
-# Edit .env with your DATABASE_URL and JWT_SECRET
-npm run db:generate
-npm run db:migrate   # requires a running PostgreSQL instance
 npm run dev
 ```
 
@@ -85,8 +81,7 @@ Frontend runs on: **http://localhost:5173**
 | Variable | Description |
 |----------|-------------|
 | `PORT` | Server port (default: 5001) |
-| `DATABASE_URL` | PostgreSQL connection string for Prisma |
-| `JWT_SECRET` | Secret key for JWT signing |
+| `DATABASE_URL` | PostgreSQL connection string for Prisma (SCRUM-78) |
 | `FRONTEND_URL` | Frontend origin for CORS (default: http://localhost:5173) |
 | `NODE_ENV` | Environment (`development` / `production`) |
 

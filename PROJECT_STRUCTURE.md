@@ -9,7 +9,7 @@ Overview of the Neighborhood Helper codebase.
 ## Architecture
 
 ```text
-Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5001)  →  PostgreSQL
+Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5001)
 ```
 
 ---
@@ -17,7 +17,7 @@ Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5001)  →  Pos
 ## Root
 
 ```text
-├── frontend/     React app (Vite + TypeScript)
+├── frontend/     React app (Vite + JavaScript)
 ├── backend/      Express API
 └── README.md     Setup instructions
 ```
@@ -27,17 +27,17 @@ Browser  →  Frontend (localhost:5173)  →  Backend (localhost:5001)  →  Pos
 ## Frontend (`frontend/src/`)
 
 ```text
-main.tsx              Entry point + providers (Router, MUI, React Query)
-App.tsx               Renders routes
-routes/index.tsx      URL → page mapping
-layouts/MainLayout.tsx   Navbar + page shell
-pages/HomePage.tsx       Home page
+main.jsx              Entry point + providers (Router, MUI, React Query)
+App.jsx               Renders routes
+routes/index.jsx      URL → page mapping
+layouts/MainLayout.jsx   Navbar + page shell
+pages/HomePage.jsx       Home page
 components/
-  HelloMessage.tsx    Fetches and shows API message
-services/api.ts       Axios client + API functions
-hooks/useHello.ts     React Query hook for /api/hello
-context/AppContext.tsx   Global app state (AppProvider)
-utils/constants.ts    API_URL constant
+  HelloMessage.jsx    Fetches and shows API message
+services/api.js       Axios client + API functions
+hooks/useHello.js     React Query hook for /api/hello
+context/AppContext.jsx   Global app state (AppProvider)
+utils/constants.js    API_URL constant
 ```
 
 **Data flow:**
@@ -63,15 +63,13 @@ cd frontend && npm install && cp .env.example .env && npm run dev
 ## Backend (`backend/src/`)
 
 ```text
-server.js             Starts server + DB connection
+server.js             Starts server
 app.js                Express app + middleware
 routes/               URL definitions
 controllers/          Request/response handling
 services/             Business logic
-middleware/           Auth, errors, 404
+middleware/           Error handling, 404
 validations/          Input validation
-utils/                Prisma, JWT, bcrypt helpers
-prisma/schema.prisma  Database models (User)
 ```
 
 **Request flow:**
@@ -91,14 +89,13 @@ helmet → cors → json → cookies → xss → morgan → rate-limit → route
 ```env
 PORT=5001
 DATABASE_URL=postgresql://user:password@localhost:5432/neighborhood_helper
-JWT_SECRET=your_secret_key
 FRONTEND_URL=http://localhost:5173
 ```
 
 **Run:**
 
 ```bash
-cd backend && npm install && cp .env.example .env && npm run db:generate && npm run dev
+cd backend && npm install && cp .env.example .env && npm run dev
 ```
 
 ---
@@ -114,14 +111,8 @@ cd backend && npm install && cp .env.example .env && npm run db:generate && npm 
 
 ## Adding Features
 
-**New page:** `pages/` → add route in `routes/index.tsx`
+**New page:** `pages/` → add route in `routes/index.jsx`
 
-**New API call (frontend):** add function in `services/api.ts` → create hook in `hooks/`
+**New API call (frontend):** add function in `services/api.js` → create hook in `hooks/`
 
 **New API route (backend):** `validations/` → `services/` → `controllers/` → `routes/` → mount in `app.js`
-
----
-
-## Notes
-
-- Auth utils (`jwt.js`, `hash.js`, `auth.js`) are ready but not wired to routes yet.
