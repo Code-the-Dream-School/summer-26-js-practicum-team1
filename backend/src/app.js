@@ -1,31 +1,19 @@
 const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
-
+const { applyMiddleware } = require('./middleware');
+const { notFound, errorHandler } = require('./middleware/error.middleware');
 const helloRoutes = require('./routes/hello.routes');
 
 const app = express();
 
-// Security & best‑practice middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+applyMiddleware(app);
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
-});
-app.use(limiter);
-
-// Routes
 app.use('/api/hello', helloRoutes);
 
-// Root route
 app.get('/', (req, res) => {
   res.send('Backend API is running');
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
