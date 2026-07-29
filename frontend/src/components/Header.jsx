@@ -33,10 +33,10 @@ const ROLE_SETTINGS = {
     { label: 'Account', path: '/' },
     { label: 'My Offers', path: '/' },
   ],
-  manager: [
+  admin: [
     { label: 'Profile', path: '/' },
     { label: 'Account', path: '/' },
-    { label: 'Manager Dashboard', path: '/' },
+    { label: 'Admin Dashboard', path: '/' },
   ],
 };
 
