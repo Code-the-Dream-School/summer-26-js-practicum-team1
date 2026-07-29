@@ -1,7 +1,16 @@
 import { useForm } from 'react-hook-form';
-import { Box, TextField, Typography, Button, Alert } from '@mui/material';
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  Alert,
+  FormControlLabel,
+  Checkbox,
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import GoogleIcon from '@mui/icons-material/Google';
 
 const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: 'Invalid email or password',
@@ -38,9 +47,13 @@ function Login() {
     (ERROR_MESSAGES[loginError.message] ?? ERROR_MESSAGES.NETWORK_ERROR);
 
   return (
-    <>
-      <Typography variant="h4" gutterBottom>
-        Login
+    <Box sx={{ maxWidth: 520, mx: 'auto', px: 2 }}>
+      <Typography
+        variant="h4"
+        sx={{ textAlign: 'center', fontWeight: 700, letterSpacing: 1, mb: 4 }}
+        gutterBottom
+      >
+        WELCOME
       </Typography>
       <Box
         component="form"
@@ -51,6 +64,7 @@ function Login() {
         <TextField
           label="Email"
           type="email"
+          variant="standard"
           fullWidth
           margin="normal"
           autoComplete="email"
@@ -69,6 +83,7 @@ function Login() {
         <TextField
           label="Password"
           type="password"
+          variant="standard"
           fullWidth
           margin="normal"
           autoComplete="current-password"
@@ -78,11 +93,19 @@ function Login() {
           slotProps={{ formHelperText: { id: 'password-error' } }}
           aria-describedby={errors.password ? 'password-error' : undefined}
         />
+
+        <FormControlLabel
+          sx={{ mt: 2 }}
+          control={<Checkbox {...register('recaptcha')} />}
+          label="Recaptcha"
+        />
+
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {errorMessage}
           </Alert>
         )}
+
         <Button
           type="submit"
           variant="contained"
@@ -90,22 +113,35 @@ function Login() {
           fullWidth
           disabled={isLoggingIn}
           loading={isLoggingIn}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
         >
-          Log In
+          Login
         </Button>
+
+        <Button
+          type="button"
+          variant="contained"
+          color="charcoal"
+          fullWidth
+          disabled={isLoggingIn}
+          startIcon={<GoogleIcon />}
+          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
+        >
+          Google Login
+        </Button>
+
         <Button
           variant="contained"
-          color="secondary"
+          color="olive"
           component={Link}
-          to={'/'}
+          to="/signup"
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
         >
-          Don't have an account? Sign up
+          Don't have an account? Signup
         </Button>
       </Box>
-    </>
+    </Box>
   );
 }
 
