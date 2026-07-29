@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { Box, TextField, Typography, Button, Alert } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const ERROR_MESSAGES = {
@@ -86,10 +86,23 @@ function Login() {
         <Button
           type="submit"
           variant="contained"
+          color="primary"
+          fullWidth
           disabled={isLoggingIn}
+          loading={isLoggingIn}
           sx={{ mt: 2 }}
         >
-          {isLoggingIn ? 'Logging in...' : 'Log In'}
+          Log In
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          component={Link}
+          to={'/'}
+          fullWidth
+          sx={{ mt: 2 }}
+        >
+          Don't have an account? Sign up
         </Button>
       </Box>
     </>

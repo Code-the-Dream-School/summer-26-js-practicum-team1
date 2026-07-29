@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-
 import {
   AppBar,
   Toolbar,
@@ -14,10 +13,8 @@ import {
   MenuItem,
   Box,
 } from '@mui/material';
-
 import MenuIcon from '@mui/icons-material/Menu';
 import logo from '../assets/logo.png';
-
 import { Link, useNavigate } from 'react-router-dom';
 
 const PAGES = [
@@ -46,7 +43,18 @@ const ROLE_SETTINGS = {
 /** Renders a list of { label, path } as MenuItems, closing the parent menu on click. */
 function NavMenuItems({ items, onItemClick }) {
   return items.map(({ label, path }) => (
-    <MenuItem key={label} component={Link} to={path} onClick={onItemClick}>
+    <MenuItem
+      key={label}
+      component={Link}
+      to={path}
+      onClick={onItemClick}
+      sx={{
+        '&:hover': {
+          backgroundColor: 'secondary.main',
+          color: 'secondary.contrastText',
+        },
+      }}
+    >
       <Typography sx={{ textAlign: 'center' }}>{label}</Typography>
     </MenuItem>
   ));
@@ -149,16 +157,43 @@ function Header() {
 
               {!user && (
                 <>
-                  <MenuItem component={Link} to="/login" onClick={handleCloseNavMenu}>
+                  <MenuItem
+                    component={Link}
+                    to="/login"
+                    onClick={handleCloseNavMenu}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'secondary.main',
+                        color: 'secondary.contrastText',
+                      },
+                    }}
+                  >
                     <Typography sx={{ textAlign: 'center' }}>Log In</Typography>
                   </MenuItem>
-                  <MenuItem component={Link} to="/" onClick={handleCloseNavMenu}>
-                    <Typography sx={{ textAlign: 'center' }}>Sign Up</Typography>
+                  <MenuItem
+                    component={Link}
+                    to="/"
+                    onClick={handleCloseNavMenu}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: 'secondary.main',
+                        color: 'secondary.contrastText',
+                      },
+                    }}
+                  >
+                    <Typography sx={{ textAlign: 'center' }}>
+                      Sign Up
+                    </Typography>
                   </MenuItem>
                 </>
               )}
 
-              {user && <NavMenuItems items={settings} onItemClick={handleCloseNavMenu} />}
+              {user && (
+                <NavMenuItems
+                  items={settings}
+                  onItemClick={handleCloseNavMenu}
+                />
+              )}
 
               {user && (
                 <MenuItem
@@ -193,7 +228,15 @@ function Header() {
                 component={Link}
                 to={path}
                 onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'black', display: 'block' }}
+                sx={{
+                  my: 2,
+                  color: 'black',
+                  display: 'block',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    color: 'secondary.contrastText',
+                  },
+                }}
               >
                 {label}
               </Button>
@@ -204,7 +247,9 @@ function Header() {
             <>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name}>{user.name?.[0]?.toUpperCase()}</Avatar>
+                  <Avatar alt={user.name} sx={{ bgcolor: 'primary.main' }}>
+                    {user.name?.[0]?.toUpperCase()}
+                  </Avatar>
                 </IconButton>
               </Tooltip>
               <Menu
@@ -217,22 +262,46 @@ function Header() {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                <NavMenuItems items={settings} onItemClick={handleCloseUserMenu} />
-                <MenuItem onClick={handleLogout}>
+                <NavMenuItems
+                  items={settings}
+                  onItemClick={handleCloseUserMenu}
+                />
+                <MenuItem
+                  onClick={handleLogout}
+                  sx={{ '&:hover': { backgroundColor: 'secondary.main' } }}
+                >
                   <Typography sx={{ textAlign: 'center' }}>Logout</Typography>
                 </MenuItem>
               </Menu>
             </>
           ) : (
             <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-              <Button component={Link} to="/login" sx={{ color: 'black' }}>
+              <Button
+                component={Link}
+                to="/login"
+                sx={{
+                  color: 'black',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    color: 'secondary.contrastText',
+                  },
+                }}
+              >
                 Log In
               </Button>
               <Button
                 component={Link}
                 to="/"
                 variant="outlined"
-                sx={{ color: 'black', borderColor: 'black' }}
+                color="secondary"
+                sx={{
+                  color: 'secondary.contrastText',
+                  borderColor: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'secondary.main',
+                    borderColor: 'primary.dark',
+                  },
+                }}
               >
                 Sign Up
               </Button>
