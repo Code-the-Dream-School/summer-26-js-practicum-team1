@@ -9,13 +9,23 @@ const queryClient = new QueryClient();
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#5B8C5A',
-      dark: '#4A7549',
+      main: '#1B741B',
+      dark: '#165D16',
     },
     secondary: {
       main: '#E8F0E7',
       dark: '#D9E6D8',
       contrastText: '#3A5A39',
+    },
+    olive: {
+      main: '#A6BA91',
+      dark: '#8FA378',
+      contrastText: '#fff',
+    },
+    charcoal: {
+      main: '#2B2E28',
+      dark: '#1E211C',
+      contrastText: '#fff',
     },
   },
 });
