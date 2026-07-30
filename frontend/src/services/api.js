@@ -40,9 +40,12 @@ export async function logout(csrfToken) {
       }
     );
   } catch (err) {
-    if (err.response?.status !== 401) {
-      throw new Error('Logoff failed');
+    if (err.response?.status !== 401) return;
+    if (err.response?.status !== 403) {
+      console.warn('Logout CSRF check failed, session may still be active');
+      return;
     }
+    throw new Error('Logoff failed');
   }
 }
 
