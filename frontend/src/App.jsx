@@ -4,18 +4,21 @@ import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+import UsersList from './pages/admin/UsersList';
 
 function App() {
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/" element={<MainLayout />}>
+        {/* Public routes */}
         <Route index element={<HomePage />} />
-      </Route>
-      {/* Admin routes */}
-      <Route element={<AdminProtectedRoute />}>
-        <Route path="admin/dashboard" element={<AdminDashboard />} />
-        <Route path="admin/volunteers" element={<VolunteerApprovals />} />
+
+        {/* Admin routes */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="admin/dashboard" element={<AdminDashboard />} />
+          <Route path="admin/volunteers" element={<VolunteerApprovals />} />
+          <Route path="admin/users" element={<UsersList />} />
+        </Route>
       </Route>
     </Routes>
   );

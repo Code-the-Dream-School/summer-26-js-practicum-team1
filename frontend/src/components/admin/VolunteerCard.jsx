@@ -55,7 +55,14 @@ function VolunteerCard({
 
         action={<Chip label={status} color="warning" size="small" />}
         subheader={
-          <Stack spacing={3} direction="row" sx={{ mt: 1 }}>
+          <Stack
+            spacing={3}
+            direction={{
+              xs: 'column',
+              sm: 'row',
+            }}
+            sx={{ mt: 1 }}
+          >
             <Typography variant="body2">📞 {phone}</Typography>
 
             <Typography variant="body2">📧 {email}</Typography>
@@ -75,7 +82,7 @@ function VolunteerCard({
         <Button
           color="success"
           variant="contained"
-          fullWidth
+
           onClick={() => approveMutation.mutate(id)}
           sx={{
             borderRadius: 3,
@@ -94,7 +101,7 @@ function VolunteerCard({
         <Button
           color="error"
           variant="outlined"
-          fullWidth
+
           onClick={() => rejectMutation.mutate(id)}
           sx={{
             borderRadius: 3,

@@ -11,13 +11,18 @@ import {
 import { useDashboardStats } from '../../hooks/admin/useDashboardStats';
 import DashboardCard from '../../components/admin/DashboardCard';
 import { useNavigate } from 'react-router-dom';
-//import { teal } from '@mui/material/colors';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 
 function AdminDashboard() {
   const navigate = useNavigate();
 
-  const handleNavigation = () => {
+  const handleNavigationVolunteers = () => {
     navigate('/admin/volunteers');
+  };
+
+  const handleNavigationUsers = () => {
+    navigate('/admin/users');
   };
 
   const dashboardCards = [
@@ -41,14 +46,14 @@ function AdminDashboard() {
       color: '#f0e7f1',
     }, // Light Purple
   ];
-  const { data: stats, isLoading, error } = useDashboardStats();
+  const { data: stats = {}, isLoading, error } = useDashboardStats();
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <CircularProgress color="success" aria-label="Loading…" />;
   }
 
   if (error) {
-    return <p>Error loading dashboard</p>;
+    return <Alert severity="error">This is an error Alert.</Alert>;
   }
 
   return (
@@ -56,26 +61,44 @@ function AdminDashboard() {
       <Typography variant="h4" align="left" sx={{ margin: 3, marginLeft: 0 }}>
         ADMIN DASHBOARD
       </Typography>
+
       <Grid container spacing={6}>
         {dashboardCards.map((card) => (
-          <Grid size={6} key={card.id}>
+          <Grid
+            key={card.id}
+            size={{
+              xs: 12,
+              sm: 6,
+              md: 6,
+            }}
+          >
             <DashboardCard
               title={card.title}
-              value={stats[card.key]}
+              value={stats?.[card.key] ?? 0}
               bgColor={card.color}
             />
           </Grid>
         ))}
-        <Grid size={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+        <Grid
+          size={12}
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
           <Button
             size="medium"
             variant="contained"
             color="success"
-            onClick={handleNavigation}
-            fullWidth
+            onClick={handleNavigationVolunteers}
+
             sx={{
               borderRadius: 2,
               boxShadow: 3,
+              width: 400,
               transition: '0.3s',
 
               '&:hover': {
@@ -85,6 +108,26 @@ function AdminDashboard() {
             }}
           >
             Pending Volunteers
+          </Button>
+          <Button
+            size="medium"
+            variant="contained"
+            color="success"
+            onClick={handleNavigationUsers}
+
+            sx={{
+              borderRadius: 2,
+              boxShadow: 3,
+              width: 400,
+              transition: '0.3s',
+
+              '&:hover': {
+                boxShadow: 8,
+                transform: 'translateY(-4px)',
+              },
+            }}
+          >
+            View Users
           </Button>
         </Grid>
       </Grid>
