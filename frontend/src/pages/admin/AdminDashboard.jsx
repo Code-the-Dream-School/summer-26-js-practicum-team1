@@ -21,10 +21,25 @@ function AdminDashboard() {
   };
 
   const dashboardCards = [
-    { title: 'Total Users', key: 'totalUsers', color: '#e2ecf3' }, // Light Blue
-    { title: 'Total Requesters', key: 'totalRequesters', color: '#def5e0' }, // Light Green
-    { title: 'Total Volunteers', key: 'totalVolunteers', color: '#f7efe3' }, // Light Orange
-    { title: 'Pending Volunteers', key: 'pendingVolunteers', color: '#f0e7f1' }, // Light Purple
+    { id: 1, title: 'Total Users', key: 'totalUsers', color: '#e2ecf3' }, // Light Blue
+    {
+      id: 2,
+      title: 'Total Requesters',
+      key: 'totalRequesters',
+      color: '#def5e0',
+    }, // Light Green
+    {
+      id: 3,
+      title: 'Total Volunteers',
+      key: 'totalVolunteers',
+      color: '#f7efe3',
+    }, // Light Orange
+    {
+      id: 4,
+      title: 'Pending Volunteers',
+      key: 'pendingVolunteers',
+      color: '#f0e7f1',
+    }, // Light Purple
   ];
   const { data: stats, isLoading, error } = useDashboardStats();
 
@@ -43,7 +58,7 @@ function AdminDashboard() {
       </Typography>
       <Grid container spacing={6}>
         {dashboardCards.map((card) => (
-          <Grid size={6}>
+          <Grid size={6} key={card.id}>
             <DashboardCard
               title={card.title}
               value={stats[card.key]}
@@ -57,7 +72,7 @@ function AdminDashboard() {
             variant="contained"
             color="success"
             onClick={handleNavigation}
-            fullwidth
+            fullWidth
             sx={{
               borderRadius: 2,
               boxShadow: 3,
