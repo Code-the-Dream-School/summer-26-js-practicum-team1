@@ -17,15 +17,25 @@ const theme = createTheme({
       dark: '#D9E6D8',
       contrastText: '#3A5A39',
     },
-    olive: {
-      main: '#A6BA91',
-      dark: '#8FA378',
-      contrastText: '#fff',
+    background: {
+      default: '#FFFFFF',
+      paper: '#F8F8F6',
     },
-    charcoal: {
-      main: '#2B2E28',
-      dark: '#1E211C',
-      contrastText: '#fff',
+    text: {
+      secondary: '#6B6B66',
+    },
+    divider: '#E5E5E3',
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
     },
   },
 });
