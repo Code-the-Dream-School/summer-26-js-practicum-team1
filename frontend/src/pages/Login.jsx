@@ -5,12 +5,12 @@ import {
   Typography,
   Button,
   Alert,
-  FormControlLabel,
-  Checkbox,
+  Divider,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import GoogleIcon from '@mui/icons-material/Google';
+import logo from '../assets/logo.png';
 
 const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: 'Invalid email or password',
@@ -47,99 +47,146 @@ function Login() {
     (ERROR_MESSAGES[loginError.message] ?? ERROR_MESSAGES.NETWORK_ERROR);
 
   return (
-    <Box sx={{ maxWidth: 520, mx: 'auto', px: 2 }}>
-      <Typography
-        variant="h4"
-        sx={{ textAlign: 'center', fontWeight: 700, letterSpacing: 1, mb: 4 }}
-        gutterBottom
-      >
-        WELCOME
-      </Typography>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        py: { xs: 6, sm: 8, md: 10 },
+      }}
+    >
       <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ mt: 2 }}
-        noValidate
+        sx={{
+          width: '100%',
+          maxWidth: { xs: 400, sm: 460, md: 500 },
+          bgcolor: 'background.paper',
+          borderRadius: '24px',
+          p: { xs: 3, sm: 4, md: 5 },
+        }}
       >
-        <TextField
-          label="Email"
-          type="email"
-          variant="standard"
-          fullWidth
-          margin="normal"
-          autoComplete="email"
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: 'Enter a valid email address',
-            },
-          })}
-          error={!!errors.email}
-          helperText={errors.email?.message}
-          slotProps={{ formHelperText: { id: 'email-error' } }}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          variant="standard"
-          fullWidth
-          margin="normal"
-          autoComplete="current-password"
-          {...register('password', { required: 'Password is required' })}
-          error={!!errors.password}
-          helperText={errors.password?.message}
-          slotProps={{ formHelperText: { id: 'password-error' } }}
-          aria-describedby={errors.password ? 'password-error' : undefined}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 4 }}>
+          <Box
+            component="img"
+            src={logo}
+            alt="Neighborhood Helper Logo"
+            sx={{ width: 25, height: 25 }}
+          />
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Neighborhood Helper
+          </Typography>
+        </Box>
 
-        <FormControlLabel
-          sx={{ mt: 2 }}
-          control={<Checkbox {...register('recaptcha')} />}
-          label="Recaptcha"
-        />
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
+          Welcome back
+        </Typography>
 
-        {errorMessage && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {errorMessage}
-          </Alert>
-        )}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+            Email
+          </Typography>
+          <TextField
+            placeholder="name@example.com"
+            type="email"
+            variant="outlined"
+            fullWidth
+            autoComplete="email"
+            sx={{ mb: 2 }}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            slotProps={{ formHelperText: { id: 'email-error' } }}
+            aria-describedby={errors.email ? 'email-error' : undefined}
+          />
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={isLoggingIn}
-          loading={isLoggingIn}
-          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
-        >
-          Login
-        </Button>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+            Password
+          </Typography>
+          <TextField
+            placeholder="Enter your password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            autoComplete="current-password"
+            sx={{ mb: 1 }}
+            {...register('password', { required: 'Password is required' })}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            slotProps={{ formHelperText: { id: 'password-error' } }}
+            aria-describedby={errors.password ? 'password-error' : undefined}
+          />
 
-        <Button
-          type="button"
-          variant="contained"
-          color="charcoal"
-          fullWidth
-          disabled={isLoggingIn}
-          startIcon={<GoogleIcon />}
-          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
-        >
-          Google Login
-        </Button>
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {errorMessage}
+            </Alert>
+          )}
 
-        <Button
-          variant="contained"
-          color="olive"
-          component={Link}
-          to="/signup"
-          fullWidth
-          sx={{ mt: 2, py: 1.2, fontWeight: 600 }}
-        >
-          Don't have an account? Signup
-        </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={isLoggingIn}
+            loading={isLoggingIn}
+            disableElevation
+            sx={{
+              mt: 1,
+              py: 1.3,
+              fontSize: '1rem',
+            }}
+          >
+            Login
+          </Button>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
+            <Divider sx={{ flex: 1 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ mx: 1.5 }}>
+              or
+            </Typography>
+            <Divider sx={{ flex: 1 }} />
+          </Box>
+
+          <Button
+            type="button"
+            variant="outlined"
+            fullWidth
+            disabled={isLoggingIn}
+            startIcon={<GoogleIcon />}
+            sx={{
+              py: 1.3,
+              fontSize: '1rem',
+              color: 'text.primary',
+              borderColor: 'divider',
+              bgcolor: 'white',
+              '&:hover': {
+                borderColor: 'text.secondary',
+                bgcolor: 'white',
+              },
+            }}
+          >
+            Continue with Google
+          </Button>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: 'center', mt: 3 }}
+          >
+            Don&apos;t have an account?{' '}
+            <Link to="/" style={{ color: 'inherit', fontWeight: 600 }}>
+              <Box component="span" sx={{ color: 'primary.main' }}>
+                Sign up
+              </Box>
+            </Link>
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
