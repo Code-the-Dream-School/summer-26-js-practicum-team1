@@ -7,7 +7,7 @@ const{
      getPendingVolunteers,
      approveVolunteer,
      rejectVolunteer
-}= require("../controllers/adminControllers");
+}= require("../controllers/admin.controllers");
 router.get("/dashboard",getAdminDashboard);
 router.get("/volunteers/pending",getPendingVolunteers);
 router.put("/volunteers/:id/approve",
