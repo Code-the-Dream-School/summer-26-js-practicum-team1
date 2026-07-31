@@ -56,10 +56,8 @@ function VolunteerList({ volunteers }) {
             fullWidth
             sx={{
               mb: 3,
-
               boxShadow: 3,
               borderColor: 'success.main',
-              backgroundColor: '#dff6d8',
             }}
           >
             <InputLabel>Sort By</InputLabel>

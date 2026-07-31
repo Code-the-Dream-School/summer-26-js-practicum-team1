@@ -1,8 +1,16 @@
+import { Typography, Box } from '@mui/material';
+import UserTable from '../../components/admin/UserTable';
+
 function UsersList() {
   return (
-    <>
-      <h1>UsersList</h1>
-    </>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 3 }}>
+        USER MANAGEMENT
+      </Typography>
+
+      <UserTable />
+    </Box>
   );
 }
+
 export default UsersList;

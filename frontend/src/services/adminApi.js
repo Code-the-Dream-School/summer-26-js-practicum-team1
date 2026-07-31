@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { API_URL } from '../utils/constants';
-import { pendingVolunteers, dashboardStats } from '../mock/adminMockData';
+import {
+  pendingVolunteers,
+  dashboardStats,
+  users,
+} from '../mock/adminMockData';
 
 //remove after backend implementation
 let pendingVolunteersData = [...pendingVolunteers];
@@ -10,7 +14,7 @@ const adminApi = axios.create({
 });
 
 export const getDashboardStats = async () => {
-  //const { data } = await adminApi.get('/admin/dashboard/stats');
+  //const { data } = await adminApi.get('/admin/dashboard');
   //return data;
 
   //mock data replace with Api call once backend is ready
@@ -52,6 +56,12 @@ export const rejectVolunteer = async (id) => {
     success: true,
     message: 'Volunteer rejected',
   });
+};
+
+export const getUsers = async () => {
+  // const {data}= await adminApi.get('/admin/users');
+  //return data;
+  return Promise.resolve(users);
 };
 
 export default adminApi;

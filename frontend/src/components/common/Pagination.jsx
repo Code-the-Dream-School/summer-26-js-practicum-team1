@@ -13,7 +13,7 @@ function Pagination({ page, totalPages, onChange }) {
         count={totalPages}
         page={page}
         onChange={(event, value) => onChange(value)}
-        color="primary"
+        color="success"
       />
     </Box>
   );
