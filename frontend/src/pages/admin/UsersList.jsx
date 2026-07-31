@@ -1,5 +1,6 @@
 import { Typography, Box } from '@mui/material';
 import UserTable from '../../components/admin/UserTable';
+import UserChart from '../../components/admin/UserChart';
 
 function UsersList() {
   return (
@@ -11,7 +12,6 @@ function UsersList() {
       >
         USER MANAGEMENT
       </Typography>
-
       <UserTable />
     </Box>
   );

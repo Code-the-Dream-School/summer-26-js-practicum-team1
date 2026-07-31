@@ -13,8 +13,16 @@ import DashboardCard from '../../components/admin/DashboardCard';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import UserChart from '../../components/admin/UserChart';
+import { useUsers } from '../../hooks/admin/useUsers';
 
 function AdminDashboard() {
+  const {
+    data: users = [],
+    isLoading: usersLoading,
+    isError: userError,
+  } = useUsers();
+
   const navigate = useNavigate();
 
   const handleNavigationVolunteers = () => {
@@ -134,6 +142,14 @@ function AdminDashboard() {
             View Users
           </Button>
         </Grid>
+
+        {usersLoading ? (
+          <CircularProgress color="success" />
+        ) : userError ? (
+          <Alert severity="error">Failed to load users.</Alert>
+        ) : (
+          <UserChart users={users} />
+        )}
       </Grid>
     </>
   );
