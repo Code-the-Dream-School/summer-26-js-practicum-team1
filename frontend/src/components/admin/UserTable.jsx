@@ -5,6 +5,8 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  CircularProgress,
+  Alert,
   TableHead,
   TableRow,
   Paper,
@@ -22,7 +24,7 @@ import { red, grey } from '@mui/material/colors';
 import Pagination from '../common/Pagination';
 
 function UserTable() {
-  const { data: users = [] } = useUsers();
+  const { data: users = [], isLoading, error } = useUsers();
 
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('ALL');
@@ -31,14 +33,20 @@ function UserTable() {
 
   const rowsPerPage = 5;
 
-  // Search + Role filter
+  if (isLoading) {
+    return <CircularProgress color="success" />;
+  }
+
+  if (error) {
+    return <Alert severity="error">Failed to load users.</Alert>;
+  }
+
   const filteredUsers = users
     .filter((user) =>
       `${user.name} ${user.email}`.toLowerCase().includes(search.toLowerCase())
     )
     .filter((user) => (role === 'ALL' ? true : user.role === role));
 
-  // Sort createdAt
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (sortOrder === 'newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
@@ -47,7 +55,6 @@ function UserTable() {
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
 
-  // Pagination
   const totalPages = Math.ceil(sortedUsers.length / rowsPerPage);
 
   const currentUsers = sortedUsers.slice(
@@ -196,7 +203,7 @@ function UserTable() {
                         justifyContent: 'center',
                       }}
                       spacing={3}
-                      alignItems="center"
+                     
                     >
                       <Avatar
                         src={user.profileImage}

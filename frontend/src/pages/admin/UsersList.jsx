@@ -4,7 +4,11 @@ import UserTable from '../../components/admin/UserTable';
 function UsersList() {
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+      <Typography
+        variant="h5"
+        align="center"
+        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
+      >
         USER MANAGEMENT
       </Typography>
 

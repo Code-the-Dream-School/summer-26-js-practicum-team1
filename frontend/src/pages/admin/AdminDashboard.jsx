@@ -32,19 +32,19 @@ function AdminDashboard() {
       title: 'Total Requesters',
       key: 'totalRequesters',
       color: '#def5e0',
-    }, // Light Green
+    },
     {
       id: 3,
       title: 'Total Volunteers',
       key: 'totalVolunteers',
       color: '#f7efe3',
-    }, // Light Orange
+    },
     {
       id: 4,
       title: 'Pending Volunteers',
       key: 'pendingVolunteers',
       color: '#f0e7f1',
-    }, // Light Purple
+    },
   ];
   const { data: stats = {}, isLoading, error } = useDashboardStats();
 
@@ -58,7 +58,11 @@ function AdminDashboard() {
 
   return (
     <>
-      <Typography variant="h4" align="left" sx={{ margin: 3, marginLeft: 0 }}>
+      <Typography
+        variant="h5"
+        align="center"
+        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
+      >
         ADMIN DASHBOARD
       </Typography>
 

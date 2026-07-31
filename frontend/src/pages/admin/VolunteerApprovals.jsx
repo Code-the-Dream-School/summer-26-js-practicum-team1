@@ -16,7 +16,11 @@ function VolunteerApprovals() {
   }
   return (
     <>
-      <Typography variant="h4" align="left" sx={{ margin: 3, marginLeft: 0 }}>
+      <Typography
+        variant="h5"
+        align="center"
+        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
+      >
         PENDING VOLUNTEERS
       </Typography>
       <VolunteerList volunteers={volunteers} />
