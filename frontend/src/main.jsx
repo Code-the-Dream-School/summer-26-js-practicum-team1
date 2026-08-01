@@ -6,7 +6,39 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 
 const queryClient = new QueryClient();
-const theme = createTheme();
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1B741B',
+      dark: '#165D16',
+    },
+    secondary: {
+      main: '#E8F0E7',
+      dark: '#D9E6D8',
+      contrastText: '#3A5A39',
+    },
+    background: {
+      default: '#FFFFFF',
+      paper: '#F8F8F6',
+    },
+    text: {
+      secondary: '#6B6B66',
+    },
+    divider: '#E5E5E3',
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,5 +50,5 @@ createRoot(document.getElementById('root')).render(
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );
