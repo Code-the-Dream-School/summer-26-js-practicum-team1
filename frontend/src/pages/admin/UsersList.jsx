@@ -8,7 +8,7 @@ function UsersList() {
       <Typography
         variant="h5"
         align="center"
-        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
+        sx={{ marginLeft: 0, fontWeight: 700, mb: 5 }}
       >
         USER MANAGEMENT
       </Typography>

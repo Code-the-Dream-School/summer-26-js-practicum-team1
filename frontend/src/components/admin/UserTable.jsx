@@ -71,7 +71,7 @@ function UserTable() {
         }}
         spacing={3}
         sx={{
-          mb: 3,
+          mb: 5,
         }}
       >
         <TextField
@@ -203,7 +203,6 @@ function UserTable() {
                         justifyContent: 'center',
                       }}
                       spacing={3}
-                     
                     >
                       <Avatar
                         src={user.profileImage}
