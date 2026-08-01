@@ -3,6 +3,7 @@ import { API_URL } from '../utils/constants';
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 });
 
 export async function getHello() {
@@ -11,11 +12,11 @@ export async function getHello() {
 }
 
 export async function getUser() {
-  /*const { data } = await axios.get(`${API_URL}/auth/me`, {
-    withCredentials: true,
+  /*const { data } = await api.get(`/auth/me`, {
+   return data; 
   });
 
-  return data;*/
+  */
   //mockdata
   return {
     id: 1,

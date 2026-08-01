@@ -11,6 +11,7 @@ let pendingVolunteersData = [...pendingVolunteers];
 
 const adminApi = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 });
 
 export const getDashboardStats = async () => {
