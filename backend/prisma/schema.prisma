@@ -34,6 +34,8 @@ model User {
   dob             DateTime
   gender          Gender
   profileImage    Bytes? @map("profile_image")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
 
                    @@map("users")
 }
