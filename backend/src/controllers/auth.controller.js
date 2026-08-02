@@ -1,8 +1,6 @@
-const crypto = require('crypto');
 const { randomUUID } = require('crypto');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const util = require('util');
-const scrypt = util.promisify(crypto.scrypt);
 const prisma = require('../config/prisma');
 const { authSchema } = require('../validation/authSchema');
 
@@ -21,20 +19,7 @@ const setJwtCookie = (req, res, user) => {
   return payload.csrfToken;
 };
 
-async function hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const derivedKey = await scrypt(password, salt, 64);
-  return `${salt}:${derivedKey.toString('hex')}`;
-}
-
-async function comparePassword(inputPassword, storedHash) {
-  const [salt, key] = storedHash.split(':');
-  const keyBuffer = Buffer.from(key, 'hex');
-  const derivedKey = await scrypt(inputPassword, salt, 64);
-  return crypto.timingSafeEqual(keyBuffer, derivedKey);
-}
-
-const logon = async (req, res) => {
+const logon = async (req, res, next) => {
   const { error, value } = authSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({
@@ -43,35 +28,39 @@ const logon = async (req, res) => {
     });
   }
 
-  const { email, password } = value;
-  const user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      passwordHash: true,
-    },
-  });
+  try {
+    const { email, password } = value;
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        passwordHash: true,
+      },
+    });
 
-  if (!user) {
-    return res.status(401).json({ message: 'Authentication Failed' });
+    if (!user) {
+      return res.status(401).json({ message: 'Authentication Failed' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Authentication Failed' });
+    }
+
+    const csrfToken = setJwtCookie(req, res, user);
+
+    res.status(200).json({
+      id: user.id,
+      name: user.name,
+      role: user.role,
+      csrfToken,
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const isMatch = await comparePassword(password, user.passwordHash);
-  if (!isMatch) {
-    return res.status(401).json({ message: 'Authentication Failed' });
-  }
-
-  const csrfToken = setJwtCookie(req, res, user);
-
-  return {
-    id: user.id,
-    name: user.name,
-    role: user.role,
-    csrfToken,
-  };
 };
 
 module.exports = { logon };
