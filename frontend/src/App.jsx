@@ -5,6 +5,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
+import Login from './pages/Login';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         {/* Public routes */}
         <Route index element={<HomePage />} />
+        <Route path="login" element={<Login />} />
 
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
