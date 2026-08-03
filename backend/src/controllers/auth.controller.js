@@ -127,4 +127,4 @@ const logon = async (req, res, next) => {
   }
 };
 
-module.exports = { logon };
+module.exports = { logon, MAX_FAILED_ATTEMPTS, LOCK_DURATION_MS };

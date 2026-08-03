@@ -15,3 +15,4 @@ const loginLimiter = rateLimit({
 router.post('/logon', loginLimiter, logon);
 
 module.exports = router;
+module.exports.loginLimiter = loginLimiter;
