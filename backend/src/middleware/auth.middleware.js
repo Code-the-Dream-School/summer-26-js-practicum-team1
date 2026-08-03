@@ -1,10 +1,10 @@
 function mockAuth(req, res, next) {
-    req.user = {
-        id: 1,
-        role: "ADMIN"
-    };
+  req.user = {
+    id: 1,
+    role: 'ADMIN',
+  };
 
-    next();
+  next();
 }
 
 module.exports = mockAuth;

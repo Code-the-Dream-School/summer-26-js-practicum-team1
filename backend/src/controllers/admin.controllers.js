@@ -1,178 +1,55 @@
+const adminService = require('../services/admin.service');
+const asyncHandler = require('../utils/asyncHandler');
+const { VerificationStatus } = require('@prisma/client');
 
-const prisma = require("../config/prisma")
-async function getAdminDashboard(req,res){
-    try {
-        const totalUsers =await prisma.user.count();
-        const pendingVolunteers =await prisma.volunteerProfile.count({
-            where:{
-                verificationStatus:"PENDING"
-            }
-        });
-        const totalRequesters =await prisma.user.count({
-            where: {
-                role:"REQUESTER"
-            }
-        });
-        const totalVolunteers =await prisma.user.count({
-            where:{
-                role:"VOLUNTEER"
-            }
-        });
-        res.status(200).json({
-            totalUsers,
-            totalRequesters,
-            totalVolunteers,
-            pendingVolunteers
-        });
-    }catch (error){
-        console.error(error);
-        res.status(500).json({
-            message:"server error"
-        })
-    }
-}
-async function getPendingVolunteers(req,res) 
-{ 
-    try {
-    const pendingVolunteers =await prisma.volunteerProfile.findMany({
-        where:{
-            verificationStatus: "PENDING"
-        },
-        include:{
-            user:{
-                select:{
-                    id:true,
-                    name: true,
-                    email:true,
-                    phone:true,
-                    dob:true,
-                    gender:true,
-                    profileImage:true
-                }
-            }
-        }
-    });res.status(200).json({
-        pendingVolunteers
-    });
-
-
-}
-catch (error){
-    console.error ("Error fetching pending volunteers:", error);
-    res.status(500).json({
-        message: "Server error"
-    });
-}
-    
-}
-async function approveVolunteer(req,res){
-    try{
-        const volunteerId=Number (req.params.id);
-        const adminId =req.user.id;
-        const volunteerProfile =await prisma.volunteerProfile.findUnique({
-            where:{
-                userId:volunteerId
-            }
-        });
-        if(!volunteerProfile){
-            return res.status(404).json({
-                message:"Volunteer profile not found"
-            });
-        }
-        if(volunteerProfile.verificationStatus!== "PENDING"){
-            return res.status(400).json({
-                message:"Volunteer request is already approved or rejected"
-            })
-        }
-    await prisma.$transaction([
-  prisma.volunteerProfile.update({
-    where: {
-      userId: volunteerId
-    },
-    data: {
-      verificationStatus: "APPROVED"
-    }
-  }),
-
-  prisma.volunteerVerification.create({
-    data: {
-      volunteerId: volunteerId,
-      status: "APPROVED",
-      reviewedBy: adminId,
-      notes: "Approved by admin"
-    }
-  })
-]);
-res.status(200).json({
-    message:"Volunteer approved successfully"
+const getAdminDashboard = asyncHandler(async (req, res) => {
+  const stats = await adminService.getDashboardStats();
+  return res.status(200).json({ success: true, data: stats });
 });
-    } catch (error){
-        console.error("Error approving volunteer:", error);
-        res.status(500).json({
-      message: "Server error"
-    });
-    }
-}
-async function rejectVolunteer(req, res) {
-  try {
-    const volunteerId = Number(req.params.id);
-    const adminId = req.user.id;
-    
 
-    const volunteerProfile = await prisma.volunteerProfile.findUnique({
-      where: {
-        userId: volunteerId
-      }
-    });
+const getPendingVolunteers = asyncHandler(async (req, res) => {
+  const page = Math.max(Number(req.query.page) || 1, 1);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+  const result = await adminService.getPendingVolunteers({ page, limit });
+  return res.status(200).json({ success: true, data: result });
+});
 
-    if (!volunteerProfile) {
-      return res.status(404).json({
-        message: "Volunteer profile not found"
-      });
-    }
-
-    if (volunteerProfile.verificationStatus !== "PENDING") {
-      return res.status(400).json({
-        message: "Volunteer request has already been reviewed"
-      });
-    }
-
-    await prisma.$transaction([
-      prisma.volunteerProfile.update({
-        where: {
-          userId: volunteerId
-        },
-        data: {
-          verificationStatus: "REJECTED"
-        }
-      }),
-
-      prisma.volunteerVerification.create({
-        data: {
-          volunteerId: volunteerId,
-          status: "REJECTED",
-          reviewedBy: adminId,
-          notes: "Rejected by admin"
-        }
-      })
-    ]);
-
-    res.status(200).json({
-      message: "Volunteer rejected successfully"
-    });
-
-  } catch (error) {
-    console.error("Error rejecting volunteer:", error);
-
-    res.status(500).json({
-      message: "Server error"
+async function reviewVolunteer(req, res, status) {
+  const volunteerId = Number(req.params.id);
+  if (Number.isNaN(volunteerId) || volunteerId <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid volunteer id',
     });
   }
-}
-module.exports={
-   getAdminDashboard,
-   getPendingVolunteers,
-   approveVolunteer,
-   rejectVolunteer
+  const { notes } = req.body || {};
+  const adminId = req.user.id;
 
+  const updated = await adminService.reviewVolunteer({
+    volunteerId,
+    adminId,
+    status,
+    notes,
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: `Volunteer request ${status.toLowerCase()} successfully`,
+    data: updated,
+  });
 }
+
+const approveVolunteer = asyncHandler((req, res) =>
+  reviewVolunteer(req, res, VerificationStatus.APPROVED)
+);
+
+const rejectVolunteer = asyncHandler((req, res) =>
+  reviewVolunteer(req, res, VerificationStatus.REJECTED)
+);
+
+module.exports = {
+  getAdminDashboard,
+  getPendingVolunteers,
+  approveVolunteer,
+  rejectVolunteer,
+};

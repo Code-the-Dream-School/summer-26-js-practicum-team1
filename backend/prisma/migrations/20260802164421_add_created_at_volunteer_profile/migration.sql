@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "volunteer_profiles" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

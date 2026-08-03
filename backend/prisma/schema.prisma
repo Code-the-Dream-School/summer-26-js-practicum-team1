@@ -51,11 +51,12 @@ model VolunteerProfile {
   userId             Int                @id
   bio                String?
   verificationStatus VerificationStatus @default(PENDING)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt          DateTime           @default(now())
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   verifications VolunteerVerification[]
 
+  @@index([verificationStatus])
   @@map("volunteer_profiles")
 }
 
