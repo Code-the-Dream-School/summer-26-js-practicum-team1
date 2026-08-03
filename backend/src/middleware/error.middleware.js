@@ -4,8 +4,9 @@ function notFound(req, res) {
 
 function errorHandler(err, req, res, _next) {
   console.error(err);
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error',
+  const status = err.status || 500;
+  res.status(status).json({
+    error: status >= 500 ? 'Internal server error' : err.message,
   });
 }
 
