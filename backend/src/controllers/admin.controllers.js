@@ -16,7 +16,7 @@ const getPendingVolunteers = asyncHandler(async (req, res) => {
 
 async function reviewVolunteer(req, res, status) {
   const volunteerId = Number(req.params.id);
-  if (Number.isNaN(volunteerId) || volunteerId <= 0) {
+  if (Number.isInteger(volunteerId) || volunteerId <= 0) {
     return res.status(400).json({
       success: false,
       message: 'Invalid volunteer id',
