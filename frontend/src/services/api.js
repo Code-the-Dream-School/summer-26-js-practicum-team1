@@ -51,6 +51,7 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
+  //uncomment once registration is ready
   /*try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;
@@ -58,6 +59,7 @@ export async function getMe() {
     return null;
   }*/
 
+  //mock data for testing only
   return {
     id: 1,
     name: 'Test Admin',
