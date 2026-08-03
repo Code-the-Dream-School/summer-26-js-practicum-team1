@@ -277,7 +277,10 @@ describe('POST /api/auth/logon — server errors', () => {
     const res = await login(CREDENTIALS);
 
     expect(res.status).toBe(500);
-    expect(res.body).toEqual({ error: 'Internal server error' });
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Internal server error',
+    });
     expect(JSON.stringify(res.body)).not.toContain('10.0.0.5');
   });
 });
