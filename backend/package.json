@@ -11,6 +11,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -22,7 +23,7 @@
     "helmet": "^7.1.0",
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.11.5"
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
