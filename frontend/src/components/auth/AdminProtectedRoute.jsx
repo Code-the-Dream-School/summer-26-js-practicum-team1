@@ -1,11 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useContext } from 'react';
-import AppContext from '../../context/AppContext';
-
+import { useAuth } from '../../hooks/useAuth';
 function AdminProtectedRoute() {
-  const { user, isLoading } = useContext(AppContext);
+  const { user, isCheckingSession } = useAuth();
 
-  if (isLoading) {
+  if (isCheckingSession) {
     return <p>Loading...</p>;
   }
 

@@ -78,7 +78,10 @@ function UserTable() {
           sx={{
             minWidth: 160,
             boxShadow: 3,
-            borderColor: 'success.main',
+            borderRadius: 3,
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
           }}
           label="Search User"
           value={search}
@@ -92,7 +95,10 @@ function UserTable() {
           sx={{
             minWidth: 160,
             boxShadow: 3,
-            borderColor: 'success.main',
+            borderRadius: 3,
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
           }}
         >
           <InputLabel>Role</InputLabel>
@@ -119,7 +125,10 @@ function UserTable() {
           sx={{
             minWidth: 160,
             boxShadow: 3,
-            borderColor: 'success.main',
+            borderRadius: 3,
+            '& .MuiOutlinedInput-notchedOutline': {
+              border: 'none',
+            },
           }}
         >
           <InputLabel>Sort</InputLabel>

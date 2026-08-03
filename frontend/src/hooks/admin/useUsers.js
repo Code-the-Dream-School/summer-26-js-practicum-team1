@@ -4,7 +4,6 @@ import { getUsers } from '../../services/adminApi';
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
-
     queryFn: getUsers,
   });
 }

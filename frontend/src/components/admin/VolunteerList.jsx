@@ -54,10 +54,15 @@ function VolunteerList({ volunteers }) {
         <>
           <FormControl
             fullWidth
+
             sx={{
               mb: 3,
               boxShadow: 3,
-              borderColor: 'success.main',
+              borderRadius: 3,
+
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
             }}
           >
             <InputLabel>Sort By</InputLabel>
@@ -92,7 +97,6 @@ function VolunteerList({ volunteers }) {
                   status={volunteer.status}
                   dob={volunteer.dob}
                   phone={volunteer.phone}
-                  location={volunteer.location}
                 />
               </Grid>
             ))}
