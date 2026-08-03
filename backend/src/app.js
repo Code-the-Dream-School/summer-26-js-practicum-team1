@@ -1,7 +1,6 @@
 const express = require('express');
 const { applyMiddleware } = require('./middleware');
 const { notFound, errorHandler } = require('./middleware/error.middleware');
-//const { adminAuth } = require('./middleware/adminAuth');
 const helloRoutes = require('./routes/hello.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
