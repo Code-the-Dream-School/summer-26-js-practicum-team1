@@ -6,7 +6,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 // ENUMS
 
 enum Role {
@@ -21,7 +20,14 @@ enum Gender {
   OTHER
   PREFER_NOT_TO_SAY
 }
-                                          // USERS
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// USERS
 
 model User {
   id              Int      @id @default(autoincrement())
@@ -37,6 +43,35 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-                   @@map("users")
+  volunteerProfile       VolunteerProfile?
+  volunteerVerifications VolunteerVerification[] @relation("Reviewer")
+
+  @@map("users")
 }
-                                         
+
+model VolunteerProfile {
+  userId             Int                @id
+  bio                String?
+  verificationStatus VerificationStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  verifications VolunteerVerification[]
+
+  @@index([verificationStatus])
+  @@map("volunteer_profiles")
+}
+
+model VolunteerVerification {
+  id          Int                @id @default(autoincrement())
+  volunteerId Int
+  status      VerificationStatus
+  reviewedBy  Int?
+  reviewedAt  DateTime           @default(now())
+  notes       String?
+  volunteer   VolunteerProfile   @relation(fields: [volunteerId], references: [userId], onDelete: Cascade)
+
+  reviewer User? @relation("Reviewer", fields: [reviewedBy], references: [id])
+
+  @@map("volunteer_verifications")
+}
