@@ -30,16 +30,18 @@ enum VerificationStatus {
 // USERS
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique @db.VarChar(255)
-  name         String   @db.VarChar(100)
-  passwordHash String   @map("hashed_password") @db.VarChar(255)
-  role         Role     @default(REQUESTER)
-  phone        String?  @db.VarChar(20)
-  createdAt    DateTime @default(now()) @map("created_at")
-  dob          DateTime
-  gender       Gender
-  profileImage Bytes?   @map("profile_image")
+  id              Int      @id @default(autoincrement())
+  email           String   @unique @db.VarChar(255)
+  name            String   @db.VarChar(100)
+  passwordHash    String @map("hashed_password") @db.VarChar(255)
+  role            Role     @default(REQUESTER)
+  phone           String? @db.VarChar(20)
+  createdAt       DateTime @default(now()) @map("created_at")
+  dob             DateTime
+  gender          Gender
+  profileImage    Bytes? @map("profile_image")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
 
   volunteerProfile       VolunteerProfile?
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")

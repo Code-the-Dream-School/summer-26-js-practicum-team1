@@ -1,6 +1,4 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const { registerSchema } = require('./registerSchema');
+const { registerSchema } = require('../src/validations/registerSchema');
 
 const validBody = {
   name: 'Derya Kendircikahraman',
@@ -17,8 +15,8 @@ describe('registerSchema', () => {
       email: 'DeryaKendircikahraman@Example.com',
     });
 
-    assert.equal(error, undefined);
-    assert.equal(value.email, 'deryakendircikahraman@example.com');
+    expect(error).toBeUndefined();
+    expect(value.email).toBe('deryakendircikahraman@example.com');
   });
 
   it('rejects a weak password', () => {
@@ -27,7 +25,7 @@ describe('registerSchema', () => {
       password: 'password',
     });
 
-    assert.ok(error);
+    expect(error).toBeDefined();
   });
 
   it('rejects users under 18', () => {
@@ -36,8 +34,8 @@ describe('registerSchema', () => {
       dob: '2015-01-01',
     });
 
-    assert.ok(error);
-    assert.equal(error.details[0].message, 'You must be at least 18 years old');
+    expect(error).toBeDefined();
+    expect(error.details[0].message).toBe('You must be at least 18 years old');
   });
 
   it('rejects role in the request body', () => {
@@ -46,12 +44,12 @@ describe('registerSchema', () => {
       role: 'ADMIN',
     });
 
-    assert.ok(error);
+    expect(error).toBeDefined();
   });
 
   it('allows phone to be omitted', () => {
     const { error } = registerSchema.validate(validBody);
-    assert.equal(error, undefined);
+    expect(error).toBeUndefined();
   });
 
   it('rejects an empty name', () => {
@@ -60,6 +58,6 @@ describe('registerSchema', () => {
       name: '',
     });
 
-    assert.ok(error);
+    expect(error).toBeDefined();
   });
 });
