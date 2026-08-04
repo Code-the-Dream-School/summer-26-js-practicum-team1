@@ -5,7 +5,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 
 function VolunteerApprovals() {
-  const { data: volunteers, isLoading, error } = usePendingVolunteers();
+  const { data, isLoading, error } = usePendingVolunteers();
+  const volunteers = data?.volunteers ?? [];
 
   if (isLoading) {
     return <CircularProgress color="success" aria-label="Loading…" />;

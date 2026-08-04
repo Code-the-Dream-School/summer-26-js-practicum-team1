@@ -12,7 +12,7 @@ import {
 import VolunteerCard from './VolunteerCard';
 import Pagination from '../common/Pagination';
 
-function VolunteerList({ volunteers }) {
+function VolunteerList({ volunteers = [] }) {
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('newest');
 
@@ -83,20 +83,20 @@ function VolunteerList({ volunteers }) {
           <Grid container spacing={3}>
             {currentVolunteers.map((volunteer) => (
               <Grid
-                key={volunteer.id}
+                key={volunteer.userId}
                 size={{
                   xs: 12,
                   md: 12,
                 }}
               >
                 <VolunteerCard
-                  id={volunteer.id}
-                  name={volunteer.name}
-                  email={volunteer.email}
-                  gender={volunteer.gender}
-                  status={volunteer.status}
-                  dob={volunteer.dob}
-                  phone={volunteer.phone}
+                  userId={volunteer.userId}
+                  name={volunteer.user.name}
+                  email={volunteer.user.email}
+                  gender={volunteer.user.gender}
+                  status={volunteer.verificationStatus}
+                  dob={volunteer.user.dob}
+                  phone={volunteer.user.phone}
                 />
               </Grid>
             ))}

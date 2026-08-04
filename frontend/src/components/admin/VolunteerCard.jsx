@@ -15,7 +15,7 @@ import { useApproveVolunteer } from '../../hooks/admin/useApproveVolunteer';
 import { useRejectVolunteer } from '../../hooks/admin/useRejectVolunteer';
 
 function VolunteerCard({
-  id,
+  userId,
   name,
   email,
   status,
@@ -83,7 +83,7 @@ function VolunteerCard({
           color="success"
           variant="contained"
 
-          onClick={() => approveMutation.mutate(id)}
+          onClick={() => approveMutation.mutate(userId)}
           sx={{
             borderRadius: 3,
             boxShadow: 3,
@@ -102,7 +102,7 @@ function VolunteerCard({
           color="error"
           variant="outlined"
 
-          onClick={() => rejectMutation.mutate(id)}
+          onClick={() => rejectMutation.mutate(userId)}
           sx={{
             borderRadius: 3,
             boxShadow: 3,

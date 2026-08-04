@@ -1,13 +1,6 @@
 import axios from 'axios';
 import { API_URL } from '../utils/constants';
-import {
-  pendingVolunteers,
-  dashboardStats,
-  users,
-} from '../mock/adminMockData';
-
-//remove after backend implementation
-let pendingVolunteersData = [...pendingVolunteers];
+import { users } from '../mock/adminMockData';
 
 const adminApi = axios.create({
   baseURL: API_URL,
@@ -15,52 +8,30 @@ const adminApi = axios.create({
 });
 
 export const getDashboardStats = async () => {
-  //const { data } = await adminApi.get('/admin/dashboard');
-  //return data;
-
-  //mock data replace with Api call once backend is ready
-  return Promise.resolve(dashboardStats);
+  const { data } = await adminApi.get('/api/admin/dashboard');
+  return data.data;
 };
 
 export const getPendingVolunteers = async () => {
-  //const { data } = await adminApi.get('/admin/volunteers/pending');
-  //return data;
-
-  //mock data replace with Api call once backend is ready
-  return Promise.resolve(pendingVolunteersData);
+  const { data } = await adminApi.get('/api/admin/volunteers/pending');
+  return data.data;
 };
 
-export const approveVolunteer = async (id) => {
-  //const { data } = await adminApi.patch(`/admin/volunteers/${id}/approve`);
-  //return data;
-
-  console.log('Approve volunteer:', id);
-  //mock data replace with Api call once backend is ready
-  pendingVolunteersData = pendingVolunteersData.filter(
-    (volunteer) => volunteer.id !== id
+export const approveVolunteer = async (userId) => {
+  const { data } = await adminApi.put(
+    `/api/admin/volunteers/${userId}/approve`
   );
-  return Promise.resolve({
-    success: true,
-    message: 'Volunteer approved',
-  });
+  return data;
 };
 
-export const rejectVolunteer = async (id) => {
-  //const { data } = await adminApi.patch(`/admin/volunteers/${id}/reject`);
-  //return data;
-
-  console.log('Reject volunteer:', id);
-  pendingVolunteersData = pendingVolunteersData.filter(
-    (volunteer) => volunteer.id !== id
-  );
-  return Promise.resolve({
-    success: true,
-    message: 'Volunteer rejected',
-  });
+export const rejectVolunteer = async (userId) => {
+  const { data } = await adminApi.put(`/api/admin/volunteers/${userId}/reject`);
+  return data;
 };
 
+// TODO: Replace with GET /api/admin/users once backend endpoint is available.
 export const getUsers = async () => {
-  // const {data}= await adminApi.get('/admin/users');
+  // const {data}= await adminApi.get('/api/admin/users');
   //return data;
   return Promise.resolve(users);
 };
