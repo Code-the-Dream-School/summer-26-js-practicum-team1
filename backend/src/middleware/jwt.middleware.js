@@ -1,9 +1,10 @@
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
+const asyncHandler = require('../utils/asyncHandler');
 
 const unauthorized = (res) => res.status(401).json({ error: 'Unauthorized' });
 
-const jwtMiddleware = async (req, res, next) => {
+const jwtMiddleware = asyncHandler(async (req, res, next) => {
   const token = req.cookies?.jwt;
   if (!token) {
     return unauthorized(res);
@@ -26,22 +27,18 @@ const jwtMiddleware = async (req, res, next) => {
     return unauthorized(res);
   }
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, name: true, role: true },
-    });
+  const user = await prisma.user.findUnique({
+    where: { id: decoded.id },
+    select: { id: true, name: true, role: true },
+  });
 
-    if (!user) {
-      return unauthorized(res);
-    }
-
-    req.user = user;
-    req.auth = { csrfToken: decoded.csrfToken };
-    return next();
-  } catch (err) {
-    return next(err);
+  if (!user) {
+    return unauthorized(res);
   }
-};
+
+  req.user = user;
+  req.auth = { csrfToken: decoded.csrfToken };
+  return next();
+});
 
 module.exports = jwtMiddleware;
