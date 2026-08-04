@@ -1,96 +1,76 @@
 # Requester Registration — System Design
 
-HELPER-40 · parent HELPER-8 · related HELPER-41 (UI), HELPER-42 (API)  
-Author: Derya · last updated August 2026
-
-Defines what we collect when a requester signs up, how we validate it, and the API contract. Use this for the registration form (HELPER-41) and the register endpoint (HELPER-42). If rules change here, update the code too.
+HELPER-40 · parent HELPER-8 · related HELPER-41 (UI), HELPER-42 (API)
 
 User story: as a requester, I want to create an account so I can request help from trusted community members.
-
-Implemented in HELPER-42 — see PR #13.
 
 ---
 
 ## Scope
 
-**In:**
+**In scope**
 
 - Create a `users` row with role `REQUESTER`
-- Fields from the current Prisma `User` model
-- Client + server validation
+- Fields from the Prisma `User` model
+- Client and server validation
 - Duplicate email → 409
 - Password hashing with bcrypt
 - `POST /api/auth/register`
-- Rate limit on register: 10 requests / 15 min / IP
+- Rate limit: 10 requests / 15 min / IP
 
-**Out:**
+**Out of scope**
 
 - Login / logout
-- Profile completion (address, mobility, emergency contact)
+- Profile completion
 - Profile picture
-- `REQUESTER_PROFILES` table
-- Volunteer / admin signup on this endpoint
-- Email verification, password reset
+- Volunteer or admin signup
+- Email verification
+- Password reset
 
 ---
 
 ## Flow
 
-Form → client validation → `POST /api/auth/register` → server validation → normalize email, check duplicate → hash password → create user as `REQUESTER` → 201.
-
-Nothing hits the database until server validation passes.
+Form submit → client validation → `POST /api/auth/register` → server validation → normalize email → check duplicate → hash password → create user with role `REQUESTER` → 201
 
 ---
 
 ## Role
 
-Everyone who registers through this endpoint gets `REQUESTER`. Set it on the server in `user.create`, not from the request body. Do not create a `VolunteerProfile` here.
+Role is always `REQUESTER`. It is set by the server. It is not accepted from the request body.
 
 ---
 
 ## Fields
 
-| UI (Figma) | API key | Prisma / DB | Required | Notes |
-|------------|---------|-------------|----------|-------|
-| Full Name | `name` | `name` | yes | max 100 |
-| Email | `email` | `email` | yes | unique, max 255 |
-| Password | `password` | — | yes | API only; stored as `passwordHash` |
-| Date of Birth | `dob` | `dob` | yes | `YYYY-MM-DD` |
-| Gender | `gender` | `gender` | yes | Prisma `Gender` enum |
-| Phone | `phone` | `phone` | no | max 20 |
+| Field | API key | Required | Rules |
+|-------|---------|----------|-------|
+| Full Name | `name` | yes | trim, 2–100 chars, letters / spaces / hyphens / apostrophes |
+| Email | `email` | yes | trim, lowercase, valid email, max 255, unique |
+| Password | `password` | yes | 8–72 chars, at least one uppercase, lowercase, and number; not trimmed; stored as bcrypt hash |
+| Date of Birth | `dob` | yes | `YYYY-MM-DD`, not future, age 18–120 |
+| Gender | `gender` | yes | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
+| Phone | `phone` | no | max 20; digits, spaces, `+ - ( )`; empty → `null` |
 
-Age on Figma is display-only — calculate from DOB, don't send to the API.
+Age is derived from `dob` for display only. It is not sent to the API.
 
-Gender: `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY`.
+Response fields: `id`, `name`, `role` only.
 
-Server also sets `id`, `role` (`REQUESTER`), `createdAt`, and the password hash. Response returns only `id`, `name`, `role` — never password or hash.
+Unknown fields (including `role`) are rejected.
 
 ---
 
-## Validation
+## Validation errors
 
-Same rules on client and server where possible.
-
-**name** — required, trim, 2–100 chars. Letters (unicode), spaces, hyphens, apostrophes.  
-Errors: `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters`.
-
-**email** — required, trim, lowercase before check/insert, valid format, max 255.  
-Duplicate → 409 `This email is already registered`.  
-Errors: `Email is required`, `Enter a valid email address`.
-
-**password** — required, 8–72 chars, at least one upper, lower, and number. Don't trim. Hash with bcrypt (12 rounds).  
-Errors: `Password is required`, `Password must be at least 8 characters`, `Password must be at most 72 characters`, `Password must include uppercase, lowercase, and a number`.
-
-**dob** — required, `YYYY-MM-DD`, not future, age 18–120.  
-Errors: `Date of birth is required`, `Date of birth must be YYYY-MM-DD`, `Date of birth cannot be in the future`, `You must be at least 18 years old`, `Enter a valid date of birth`.
-
-**gender** — required, must match enum.  
-Errors: `Gender is required`, `Please select a valid gender`.
-
-**phone** — optional; digits, spaces, `+ - ( )`; empty → `null`.  
-Errors: `Phone must be at most 20 characters`, `Enter a valid phone number`.
-
-Reject unknown fields (especially `role`).
+| Field | Messages |
+|-------|----------|
+| name | `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters` |
+| email | `Email is required`, `Enter a valid email address` |
+| password | `Password is required`, `Password must be at least 8 characters`, `Password must be at most 72 characters`, `Password must include uppercase, lowercase, and a number` |
+| dob | `Date of birth is required`, `Date of birth must be YYYY-MM-DD`, `Date of birth cannot be in the future`, `You must be at least 18 years old`, `Enter a valid date of birth` |
+| gender | `Gender is required`, `Please select a valid gender` |
+| phone | `Phone must be at most 20 characters`, `Enter a valid phone number` |
+| email (duplicate) | `This email is already registered` |
 
 ---
 
@@ -98,7 +78,7 @@ Reject unknown fields (especially `role`).
 
 `POST /api/auth/register`
 
-**Request:**
+**Request**
 
 ```json
 {
@@ -110,8 +90,6 @@ Reject unknown fields (especially `role`).
   "phone": "555-123-4567"
 }
 ```
-
-`phone` optional. No `role` in body.
 
 **201**
 
@@ -125,8 +103,6 @@ Reject unknown fields (especially `role`).
   }
 }
 ```
-
-`role` in the response is lowercase (`requester` / `volunteer` / `admin`). DB stores `REQUESTER`.
 
 **400**
 
@@ -153,35 +129,8 @@ Reject unknown fields (especially `role`).
 
 ## Security
 
-- bcrypt only; never log plain passwords
-- role from server only
-- duplicate check + unique constraint
-- register rate limit (10 / 15 min / IP)
-- public endpoint — no session required
-
----
-
-## UI notes (HELPER-41)
-
-Figma: `/requesterregistration`.
-
-| Figma | What to do |
-|-------|------------|
-| Name, email, DOB, gender | as above |
-| Age | show only, from DOB |
-| Password | not on Figma — add it |
-| Phone | optional |
-| Profile upload | skip for now |
-| "Update My Profile" | use "Create account" for signup |
-
-Handle loading, field errors, 409, network errors. After success, redirect to `/login` for MVP unless the team decides on auto-login.
-
-Likely files: `Register.jsx`, `register()` in `api.js`, `/register` route, fix the sign-up link on login. Match the login card layout.
-
----
-
-## Open questions
-
-- Auto-login after register?
-- Redirect after success (`/login` for MVP)
-- Shared Sign Up / role-choice page before requester vs volunteer registration
+- Passwords stored as bcrypt hashes only (12 rounds)
+- Role assigned by server only
+- Duplicate email blocked before insert; unique constraint as backup
+- Register rate limit: 10 / 15 min / IP
+- Public endpoint
