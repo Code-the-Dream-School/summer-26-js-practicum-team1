@@ -124,7 +124,14 @@ const logon = asyncHandler(async (req, res) => {
 });
 
 const me = asyncHandler(async (req, res) => {
-  return res.status(200).json({ user: req.user });
+  res.set('Cache-Control', 'no-store');
+
+  return res.status(200).json({
+    id: req.user.id,
+    name: req.user.name,
+    role: req.user.role,
+    csrfToken: req.auth.csrfToken,
+  });
 });
 
 module.exports = { logon, me, MAX_FAILED_ATTEMPTS, LOCK_DURATION_MS };
