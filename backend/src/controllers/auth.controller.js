@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../config/prisma');
 const { authSchema } = require('../validations/authSchema');
+const asyncHandler = require('../utils/asyncHandler');
 
 const SALT_ROUNDS = 12;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -38,7 +39,7 @@ const logLoginAttempt = (req, { email, outcome, userId = null }) => {
   );
 };
 
-const logon = async (req, res, next) => {
+const logon = asyncHandler(async (req, res) => {
   res.set('Cache-Control', 'no-store');
 
   const { error, value } = authSchema.validate(req.body, { abortEarly: false });
@@ -51,80 +52,79 @@ const logon = async (req, res, next) => {
 
   const { email, password } = value;
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        passwordHash: true,
-        failedLoginAttempts: true,
-        lockedUntil: true,
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      passwordHash: true,
+      failedLoginAttempts: true,
+      lockedUntil: true,
+    },
+  });
+
+  if (!user) {
+    await bcrypt.compare(password, DUMMY_HASH);
+    logLoginAttempt(req, { email, outcome: 'unknown_email' });
+    return res.status(401).json({ error: 'Authentication failed' });
+  }
+
+  if (user.lockedUntil && user.lockedUntil > new Date()) {
+    logLoginAttempt(req, { email, outcome: 'locked', userId: user.id });
+    return res.status(423).json({
+      error: 'Account temporarily locked due to too many failed login attemps',
+    });
+  }
+
+  const isMatch = await bcrypt.compare(password, user.passwordHash);
+
+  if (!isMatch) {
+    const attempts = user.failedLoginAttempts + 1;
+    const lock = attempts >= MAX_FAILED_ATTEMPTS;
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: lock ? 0 : attempts,
+        lockedUntil: lock ? new Date(Date.now() + LOCK_DURATION_MS) : null,
       },
     });
 
-    if (!user) {
-      await bcrypt.compare(password, DUMMY_HASH);
-      logLoginAttempt(req, { email, outcome: 'unknown_email' });
-      return res.status(401).json({ error: 'Authentication failed' });
-    }
-
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      logLoginAttempt(req, { email, outcome: 'locked', userId: user.id });
-      return res.status(423).json({
-        error:
-          'Account temporarily locked due to too many failed login attemps',
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-
-    if (!isMatch) {
-      const attempts = user.failedLoginAttempts + 1;
-      const lock = attempts >= MAX_FAILED_ATTEMPTS;
-
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          failedLoginAttempts: lock ? 0 : attempts,
-          lockedUntil: lock ? new Date(Date.now() + LOCK_DURATION_MS) : null,
-        },
-      });
-
-      logLoginAttempt(req, {
-        email,
-        outcome: lock ? 'locked_now' : 'bad_password',
-        userId: user.id,
-      });
-
-      return lock
-        ? res.status(423).json({
-            error:
-              'Account temporarily locked due to too many failed login attemps',
-          })
-        : res.status(401).json({ error: 'Authentication failed' });
-    }
-
-    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { failedLoginAttempts: 0, lockedUntil: null },
-      });
-    }
-
-    const csrfToken = setJwtCookie(res, user);
-    logLoginAttempt(req, { email, outcome: 'success', userId: user.id });
-
-    return res.status(200).json({
-      id: user.id,
-      name: user.name,
-      role: user.role,
-      csrfToken,
+    logLoginAttempt(req, {
+      email,
+      outcome: lock ? 'locked_now' : 'bad_password',
+      userId: user.id,
     });
-  } catch (err) {
-    return next(err);
-  }
-};
 
-module.exports = { logon, MAX_FAILED_ATTEMPTS, LOCK_DURATION_MS };
+    return lock
+      ? res.status(423).json({
+          error:
+            'Account temporarily locked due to too many failed login attemps',
+        })
+      : res.status(401).json({ error: 'Authentication failed' });
+  }
+
+  if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginAttempts: 0, lockedUntil: null },
+    });
+  }
+
+  const csrfToken = setJwtCookie(res, user);
+  logLoginAttempt(req, { email, outcome: 'success', userId: user.id });
+
+  return res.status(200).json({
+    id: user.id,
+    name: user.name,
+    role: user.role,
+    csrfToken,
+  });
+});
+
+const me = asyncHandler(async (req, res) => {
+  return res.status(200).json({ user: req.user });
+});
+
+module.exports = { logon, me, MAX_FAILED_ATTEMPTS, LOCK_DURATION_MS };
