@@ -1,16 +1,14 @@
 const multer = require('multer');
 
 const MAX_SIZE = 2 * 1024 * 1024;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const ALLOWED_TYPES = ['image/jpeg', 'image/png'];
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_SIZE },
   fileFilter: (_req, file, cb) => {
     if (!ALLOWED_TYPES.includes(file.mimetype)) {
-      const err = new Error(
-        'Profile picture must be a JPEG, PNG, WebP, or GIF image'
-      );
+      const err = new Error('Profile picture must be a JPEG or PNG image');
       err.code = 'INVALID_FILE_TYPE';
       return cb(err);
     }

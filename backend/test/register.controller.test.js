@@ -107,7 +107,7 @@ describe('POST /api/auth/register — profile image', () => {
       details: [
         {
           field: 'profileImage',
-          message: 'Profile picture must be a JPEG, PNG, WebP, or GIF image',
+          message: 'Profile picture must be a JPEG or PNG image',
         },
       ],
     });
