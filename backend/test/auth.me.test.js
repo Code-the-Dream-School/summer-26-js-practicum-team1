@@ -40,15 +40,16 @@ afterEach(() => {
 });
 
 describe('GET /api/auth/me', () => {
-  
   describe('when the user is successfully authenticated', () => {
     let authCookie;
     let loginResponsePayload;
 
     beforeEach(async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
-      
-      const loginRes = await request(app).post('/api/auth/logon').send(CREDENTIALS);
+
+      const loginRes = await request(app)
+        .post('/api/auth/logon')
+        .send(CREDENTIALS);
       authCookie = getJwtCookie(loginRes);
       loginResponsePayload = loginRes.body;
     });
@@ -119,8 +120,10 @@ describe('GET /api/auth/me', () => {
 
     it('returns 401 if the user record is deleted mid-session', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
-      const loginRes = await request(app).post('/api/auth/logon').send(CREDENTIALS);
-      
+      const loginRes = await request(app)
+        .post('/api/auth/logon')
+        .send(CREDENTIALS);
+
       prisma.user.findUnique.mockResolvedValue(null);
 
       const res = await request(app)

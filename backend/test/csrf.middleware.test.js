@@ -45,7 +45,10 @@ describe('csrf middleware', () => {
     it.each(STATE_CHANGING)(
       '%s succeeds with a valid header',
       async (method) => {
-        const res = await sendAuthenticatedRequest(method).set('X-CSRF-TOKEN', CSRF_TOKEN);
+        const res = await sendAuthenticatedRequest(method).set(
+          'X-CSRF-TOKEN',
+          CSRF_TOKEN
+        );
 
         expect(res.status).toBe(200);
         expect(res.body).toEqual({ ok: true });
@@ -62,7 +65,10 @@ describe('csrf middleware', () => {
     it.each(STATE_CHANGING)(
       '%s is rejected with a mismatched header',
       async (method) => {
-        const res = await sendAuthenticatedRequest(method).set('X-CSRF-TOKEN', 'not-the-token');
+        const res = await sendAuthenticatedRequest(method).set(
+          'X-CSRF-TOKEN',
+          'not-the-token'
+        );
 
         expect(res.status).toBe(403);
         expect(res.body).toEqual(FORBIDDEN);
@@ -70,7 +76,10 @@ describe('csrf middleware', () => {
     );
 
     it('is rejected with an empty header', async () => {
-      const res = await sendAuthenticatedRequest('post').set('X-CSRF-TOKEN', '');
+      const res = await sendAuthenticatedRequest('post').set(
+        'X-CSRF-TOKEN',
+        ''
+      );
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual(FORBIDDEN);
@@ -87,13 +96,19 @@ describe('csrf middleware', () => {
     });
 
     it('accepts the header regardless of header key casing variations', async () => {
-      const res = await sendAuthenticatedRequest('post').set('x-csrf-token', CSRF_TOKEN);
+      const res = await sendAuthenticatedRequest('post').set(
+        'x-csrf-token',
+        CSRF_TOKEN
+      );
 
       expect(res.status).toBe(200);
     });
 
     it('rejects when header structure is manipulated with non-string inputs', async () => {
-      const res = await sendAuthenticatedRequest('post').set('X-CSRF-TOKEN', ['token1', 'token2']);
+      const res = await sendAuthenticatedRequest('post').set('X-CSRF-TOKEN', [
+        'token1',
+        'token2',
+      ]);
 
       expect(res.status).toBe(403);
       expect(res.body).toEqual(FORBIDDEN);
@@ -109,7 +124,10 @@ describe('csrf middleware', () => {
     });
 
     it('GET succeeds even with a wrong csrf header', async () => {
-      const res = await sendAuthenticatedRequest('get').set('X-CSRF-TOKEN', 'wrong');
+      const res = await sendAuthenticatedRequest('get').set(
+        'X-CSRF-TOKEN',
+        'wrong'
+      );
 
       expect(res.status).toBe(200);
     });
