@@ -65,7 +65,10 @@ const logon = asyncHandler(async (req, res) => {
   if (error) {
     return res.status(400).json({
       error: 'Validation failed',
-      details: error.details.map((detail) => detail.message),
+      details: error.details.map((detail) => ({
+        field: detail.path[0],
+        message: detail.message,
+      })),
     });
   }
 
