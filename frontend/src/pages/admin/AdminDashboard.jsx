@@ -61,7 +61,7 @@ function AdminDashboard() {
   }
 
   if (error) {
-    return <Alert severity="error">This is an error Alert.</Alert>;
+    return <Alert severity="error">Failed to load data..</Alert>;
   }
 
   return (

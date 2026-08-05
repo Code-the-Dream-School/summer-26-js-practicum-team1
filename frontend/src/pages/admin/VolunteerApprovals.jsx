@@ -13,7 +13,11 @@ function VolunteerApprovals() {
   }
 
   if (error) {
-    return <Alert severity="error">This is an error Alert.</Alert>;
+    return (
+      <Alert severity="error">
+        Failed to load Data.. Checking Connections...
+      </Alert>
+    );
   }
   return (
     <>
