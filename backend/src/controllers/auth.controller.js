@@ -1,16 +1,24 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
-const { authSchema } = require('../validations/authSchema');
 const asyncHandler = require('../utils/asyncHandler');
 const { verifyCredentials } = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+const COOKIE_FLAGS = {
+  httpOnly: true,
+  secure: IS_PROD,
+  sameSite: IS_PROD ? 'None' : 'Lax',
+};
+
 const LOCKED = {
   status: 423,
   body: {
     error: 'Account temporarily locked due to too many failed login attempts',
   },
 };
+
 const AUTH_FAILED = {
   status: 401,
   body: { error: 'Authentication failed' },
@@ -23,18 +31,12 @@ const LOGON_FAILURES = {
   locked_now: LOCKED,
 };
 
-const cookieFlags = () => {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-  };
-};
-
 const setJwtCookie = (res, user) => {
   const payload = { id: user.id, csrfToken: randomUUID() };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
-  res.cookie('jwt', token, { ...cookieFlags(), maxAge: JWT_TTL_MS });
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: JWT_TTL_MS / 1000,
+  });
+  res.cookie('jwt', token, { ...COOKIE_FLAGS, maxAge: JWT_TTL_MS });
   return payload.csrfToken;
 };
 
@@ -61,18 +63,7 @@ const clientSession = (user, csrfToken) => ({
 const logon = asyncHandler(async (req, res) => {
   res.set('Cache-Control', 'no-store');
 
-  const { error, value } = authSchema.validate(req.body, { abortEarly: false });
-  if (error) {
-    return res.status(400).json({
-      error: 'Validation failed',
-      details: error.details.map((detail) => ({
-        field: detail.path[0],
-        message: detail.message,
-      })),
-    });
-  }
-
-  const { email, password } = value;
+  const { email, password } = req.body;
   const { outcome, user } = await verifyCredentials({ email, password });
 
   logLoginAttempt(req, { email, outcome, userId: user?.id ?? null });
