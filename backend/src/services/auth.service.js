@@ -2,7 +2,15 @@ const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
 
-async function createRequester({ name, email, password, dob, gender, phone }) {
+async function createRequester({
+  name,
+  email,
+  password,
+  dob,
+  gender,
+  phone,
+  profileImage,
+}) {
   const existing = await prisma.user.findUnique({
     where: { email },
     select: { id: true },
@@ -23,6 +31,7 @@ async function createRequester({ name, email, password, dob, gender, phone }) {
         dob: new Date(dob),
         gender,
         phone: phone || null,
+        profileImage: profileImage || null,
         role: 'REQUESTER',
       },
       select: {

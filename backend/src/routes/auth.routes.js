@@ -2,6 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const { logon, register } = require('../controllers/auth.controller');
+const profileImageUpload = require('../middleware/profileImageUpload');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -24,7 +25,7 @@ const registerLimiter = rateLimit({
 });
 
 router.post('/logon', loginLimiter, logon);
-router.post('/register', registerLimiter, register);
+router.post('/register', registerLimiter, profileImageUpload, register);
 
 module.exports = router;
 module.exports.loginLimiter = loginLimiter;

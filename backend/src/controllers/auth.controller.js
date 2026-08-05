@@ -146,7 +146,10 @@ const register = asyncHandler(async (req, res) => {
     });
   }
 
-  const user = await createRequester(value);
+  const user = await createRequester({
+    ...value,
+    profileImage: req.file ? req.file.buffer : null,
+  });
 
   return res.status(201).json({
     success: true,
