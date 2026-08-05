@@ -12,18 +12,18 @@ const ROLES = [
     label: 'I Can Help (As a Volunteer)',
     description: 'Offer your time to support neighbors in your community.',
     icon: VolunteerActivismIcon,
-    path: '/register/volunteer',
+    path: '/volunteerRegistration',
   },
   {
     key: 'requester',
     label: 'I Need Help (An Older Adult)',
     description: 'Request assistance from volunteers near you.',
     icon: ElderlyIcon,
-    path: '/register/requester',
+    path: '/requesterRegistration',
     // TODO: this flow isn't scoped/built yet. Confirm with teammate/PM
     // whether it's a stub, in progress, or a separate future ticket, then
     // remove `disabled` and give it a real destination.
-    disabled: true,
+    disabled: false,
   },
 ];
 
@@ -34,13 +34,6 @@ function RoleCard({ label, description, icon, onClick, disabled }) {
       variant="outlined"
       sx={{ borderRadius: '16px', position: 'relative', opacity: disabled ? 0.6 : 1 }}
     >
-      {disabled && (
-        <Chip
-          label="Coming soon"
-          size="small"
-          sx={{ position: 'absolute', top: 12, right: 12 }}
-        />
-      )}
       <CardActionArea
         onClick={onClick}
         disabled={disabled}
