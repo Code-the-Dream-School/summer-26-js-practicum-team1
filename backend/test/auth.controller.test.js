@@ -12,7 +12,7 @@ const { loginLimiter } = require('../src/routes/auth.routes');
 const {
   MAX_FAILED_ATTEMPTS,
   LOCK_DURATION_MS,
-} = require('../src/controllers/auth.controller');
+} = require('../src/services/auth.service');
 
 const PASSWORD = 'Correct-password!';
 const CREDENTIALS = { email: 'alice@example.com', password: PASSWORD };
@@ -73,7 +73,7 @@ describe('POST /api/auth/logon — successful login', () => {
     expect(res.body).toEqual({
       id: 1,
       name: 'Alice',
-      role: 'REQUESTER',
+      role: 'requester',
       csrfToken: expect.any(String),
     });
     expect(res.body).not.toHaveProperty('passwordHash');
@@ -246,25 +246,49 @@ describe('POST /api/auth/logon — account lockout', () => {
 
 describe('POST /api/auth/logon — malformed input', () => {
   const cases = [
-    ['missing email', { password: PASSWORD }],
-    ['missing password', { email: 'alice@example.com' }],
-    ['empty password', { email: 'alice@example.com', password: '' }],
-    ['malformed email', { email: 'not-an-email', password: PASSWORD }],
-    ['empty body', {}],
+    ['missing email', { password: PASSWORD }, ['email']],
+    ['missing password', { email: 'alice@example.com' }, ['password']],
+    [
+      'empty password',
+      { email: 'alice@example.com', password: '' },
+      ['password'],
+    ],
+    [
+      'malformed email',
+      { email: 'not-an-email', password: PASSWORD },
+      ['email'],
+    ],
+    ['empty body', {}, ['email', 'password']],
     [
       'password beyond bcrypt 72-byte limit',
       { email: 'alice@example.com', password: 'x'.repeat(73) },
+      ['password'],
     ],
   ];
 
-  it.each(cases)('rejects %s with a structured 400', async (_label, body) => {
-    const res = await login(body);
+  it.each(cases)(
+    'rejects %s with a structured 400',
+    async (_label, body, expectedFields) => {
+      const res = await login(body);
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Validation failed');
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+
+      expect(res.body.details).toEqual(
+        expectedFields.map((field) => ({
+          field,
+          message: expect.any(String),
+        }))
+      );
+    }
+  );
+
+  it('does not leak the submitted password in validation details', async () => {
+    const res = await login({ email: 'not-an-email', password: PASSWORD });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Validation failed');
-    expect(Array.isArray(res.body.details)).toBe(true);
-    expect(res.body.details.length).toBeGreaterThan(0);
-    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(JSON.stringify(res.body)).not.toContain(PASSWORD);
   });
 });
 
