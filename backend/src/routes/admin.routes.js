@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const mockAuth = require('../middleware/auth.middleware');
+const jwtMiddleware = require('../middleware/jwt.middleware');
+const csrfMiddleware = require('../middleware/csrf.middleware');
 const { adminAuth } = require('../middleware/adminAuth');
 
 const {
@@ -10,9 +11,33 @@ const {
   rejectVolunteer,
   getUsers,
 } = require('../controllers/admin.controllers');
-router.get('/dashboard', mockAuth, adminAuth, getAdminDashboard);
-router.get('/volunteers/pending', mockAuth, adminAuth, getPendingVolunteers);
-router.get('/users', mockAuth, adminAuth, getUsers);
-router.put('/volunteers/:id/approve', mockAuth, adminAuth, approveVolunteer);
-router.put('/volunteers/:id/reject', mockAuth, adminAuth, rejectVolunteer);
+router.get(
+  '/dashboard',
+  jwtMiddleware,
+  csrfMiddleware,
+  adminAuth,
+  getAdminDashboard
+);
+router.get(
+  '/volunteers/pending',
+  jwtMiddleware,
+  csrfMiddleware,
+  adminAuth,
+  getPendingVolunteers
+);
+router.get('/users', jwtMiddleware, csrfMiddleware, adminAuth, getUsers);
+router.put(
+  '/volunteers/:id/approve',
+  jwtMiddleware,
+  csrfMiddleware,
+  adminAuth,
+  approveVolunteer
+);
+router.put(
+  '/volunteers/:id/reject',
+  jwtMiddleware,
+  csrfMiddleware,
+  adminAuth,
+  rejectVolunteer
+);
 module.exports = router;
