@@ -10,7 +10,7 @@ jest.mock('../src/config/prisma', () => ({
 
 const prisma = require('../src/config/prisma');
 const app = require('../src/app');
-const { loginLimiter } = require('../src/routes/auth.routes');
+const { loginLimiter, registerLimiter } = require('../src/routes/auth.routes');
 
 const validFields = {
   name: 'Derya Kendircikahraman',
@@ -25,6 +25,13 @@ const tinyPng = Buffer.from(
   'base64'
 );
 
+const resetLimiters = () => {
+  ['::ffff:127.0.0.1', '127.0.0.1', '::1'].forEach((ip) => {
+    loginLimiter.resetKey(ip);
+    registerLimiter.resetKey(ip);
+  });
+};
+
 beforeEach(() => {
   prisma.user.findUnique.mockResolvedValue(null);
   prisma.user.create.mockResolvedValue({
@@ -33,31 +40,58 @@ beforeEach(() => {
     role: 'REQUESTER',
   });
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  ['::ffff:127.0.0.1', '127.0.0.1', '::1'].forEach((ip) =>
-    loginLimiter.resetKey(ip)
-  );
+  resetLimiters();
 });
 
 afterEach(() => jest.restoreAllMocks());
 
-describe('POST /api/auth/register — profile image', () => {
-  it('registers without a profile image', async () => {
+describe('POST /api/auth/register', () => {
+  it('registers a requester and returns the user resource', async () => {
     const res = await request(app).post('/api/auth/register').send(validFields);
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual({
-      success: true,
-      data: {
-        id: 1,
-        name: validFields.name,
-        role: 'requester',
-      },
+      id: 1,
+      name: validFields.name,
+      role: 'requester',
     });
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ profileImage: null }),
+        data: expect.objectContaining({
+          email: validFields.email,
+          role: 'REQUESTER',
+          profileImage: null,
+        }),
       })
     );
+  });
+
+  it('rejects invalid input with field details', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ ...validFields, password: 'short' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Validation failed');
+    expect(res.body.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ field: 'password' }),
+      ])
+    );
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a duplicate email with 409', async () => {
+    prisma.user.findUnique.mockResolvedValue({ id: 99 });
+
+    const res = await request(app).post('/api/auth/register').send(validFields);
+
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'This email is already registered',
+    });
+    expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
   it('saves an optional profile image', async () => {
@@ -74,7 +108,11 @@ describe('POST /api/auth/register — profile image', () => {
       });
 
     expect(res.status).toBe(201);
-    expect(res.body.success).toBe(true);
+    expect(res.body).toEqual({
+      id: 1,
+      name: validFields.name,
+      role: 'requester',
+    });
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -102,8 +140,7 @@ describe('POST /api/auth/register — profile image', () => {
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({
-      success: false,
-      message: 'Validation failed',
+      error: 'Validation failed',
       details: [
         {
           field: 'profileImage',

@@ -30,8 +30,7 @@ function profileImageUpload(req, res, next) {
     }
 
     return res.status(400).json({
-      success: false,
-      message: 'Validation failed',
+      error: 'Validation failed',
       details: [{ field: 'profileImage', message }],
     });
   });

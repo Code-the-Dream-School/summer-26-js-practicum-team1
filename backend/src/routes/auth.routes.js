@@ -1,8 +1,12 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const { logon, register } = require('../controllers/auth.controller');
+const { logon, me, register } = require('../controllers/auth.controller');
+const jwtMiddleware = require('../middleware/jwt.middleware');
+const validate = require('../middleware/validate.middleware');
 const profileImageUpload = require('../middleware/profileImageUpload');
+const { authSchema } = require('../validations/authSchema');
+const { registerSchema } = require('../validations/registerSchema');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -18,14 +22,19 @@ const registerLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: {
-    success: false,
-    message: 'Too many requests. Please try again later.',
-  },
+  message: { error: 'Too many requests. Please try again later.' },
 });
 
-router.post('/logon', loginLimiter, logon);
-router.post('/register', registerLimiter, profileImageUpload, register);
+router.post('/logon', loginLimiter, validate(authSchema), logon);
+router.get('/me', jwtMiddleware, me);
+router.post(
+  '/register',
+  registerLimiter,
+  profileImageUpload,
+  validate(registerSchema),
+  register
+);
 
 module.exports = router;
 module.exports.loginLimiter = loginLimiter;
+module.exports.registerLimiter = registerLimiter;
