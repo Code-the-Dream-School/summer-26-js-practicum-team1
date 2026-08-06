@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Card, CardActionArea, Chip } from '@mui/material';
+import { Box, Typography, Button, Card, CardActionArea } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ElderlyIcon from '@mui/icons-material/Elderly';
@@ -19,25 +19,19 @@ const ROLES = [
     label: 'I Need Help (An Older Adult)',
     description: 'Request assistance from volunteers near you.',
     icon: ElderlyIcon,
-    path: '/requesterRegistration',
-    // TODO: this flow isn't scoped/built yet. Confirm with teammate/PM
-    // whether it's a stub, in progress, or a separate future ticket, then
-    // remove `disabled` and give it a real destination.
-    disabled: false,
+    path: '/requestorRegistration',
   },
 ];
 
-function RoleCard({ label, description, icon, onClick, disabled }) {
+function RoleCard({ label, description, icon, onClick }) {
   const Icon = icon;
   return (
     <Card
       variant="outlined"
-      sx={{ borderRadius: '16px', position: 'relative', opacity: disabled ? 0.6 : 1 }}
+      sx={{ borderRadius: '16px', position: 'relative' }}
     >
       <CardActionArea
         onClick={onClick}
-        disabled={disabled}
-        aria-disabled={disabled}
         sx={{
           p: 3,
           display: 'flex',
@@ -138,13 +132,12 @@ function SignupPage() {
             gap: 2,
           }}
         >
-          {ROLES.map(({ key, label, description, icon, path, disabled }) => (
+          {ROLES.map(({ key, label, description, icon, path }) => (
             <RoleCard
               key={key}
               label={label}
               description={description}
               icon={icon}
-              disabled={disabled}
               onClick={() => navigate(path)}
             />
           ))}

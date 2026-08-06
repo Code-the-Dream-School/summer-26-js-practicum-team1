@@ -11,6 +11,9 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
+        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
+        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+        {/* <Route path="requestorRegistration" element={<RequestorRegistration/>}/> */}
       </Route>
     </Routes>
   );
