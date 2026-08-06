@@ -19,7 +19,7 @@ const ROLES = [
     label: 'I Need Help (An Older Adult)',
     description: 'Request assistance from volunteers near you.',
     icon: ElderlyIcon,
-    path: '/requestorRegistration',
+    path: '/requesterRegistration',
   },
 ];
 

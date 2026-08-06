@@ -13,7 +13,7 @@ function App() {
         <Route path="signup" element={<SignupPage />} />
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        {/* <Route path="requestorRegistration" element={<RequestorRegistration/>}/> */}
+        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
       </Route>
     </Routes>
   );
