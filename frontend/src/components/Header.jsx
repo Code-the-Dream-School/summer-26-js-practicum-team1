@@ -172,7 +172,7 @@ function Header() {
                   </MenuItem>
                   <MenuItem
                     component={Link}
-                    to="/"
+                    to="/register"
                     onClick={handleCloseNavMenu}
                     sx={{
                       '&:hover': {
@@ -291,7 +291,7 @@ function Header() {
               </Button>
               <Button
                 component={Link}
-                to="/"
+                to="/register"
                 variant="outlined"
                 color="secondary"
                 sx={{
