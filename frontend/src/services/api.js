@@ -28,6 +28,25 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+export async function registerUser(userData) {
+  try {
+    const { data } = await api.post('/api/auth/register', userData);
+
+    return data;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+
+    if (err.response.status === 400) {
+      const validationError = new Error('VALIDATION_FAILED');
+      validationError.details = err.response.data.details;
+      throw validationError;
+    }
+
+    throw new Error('REGISTER_FAILED');
+  }
+}
 
 export async function logout(csrfToken) {
   try {
