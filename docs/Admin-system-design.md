@@ -1,220 +1,266 @@
-------##Purpose##-----
-The admin feature Provides, manage volunteer verification and monitor platform activities. Only admin have administrative access (Admin dashboard). Where admin can approve or reject volunteer verification request.
+# Admin Feature
 
-------Business Rules-----
-Volunteer Approval Rules
-All users who register as volunteers must go through the admin verification process.
+## Purpose
 
-A volunteer account is not considered active until an admin approves the volunteer verification request.
+The Admin feature provides functionality to manage volunteer verification requests and monitor platform activities.
 
-The system must not create a VolunteerProfile record for a volunteer applicant before admin approval.
+Only users with the **ADMIN** role have administrative access to the Admin Dashboard.
 
-##When the admin approves a volunteer request##
+## The Admin Dashboard allows administrators to:
 
-The user's role/status is updated according to the approved volunteer workflow, allowing access to volunteer features.
+- Review volunteer verification requests.
+- Approve or reject volunteer applications.
+- View platform activity statistics.
 
-A VolunteerProfile record is created.
+---
 
-The user gains access to volunteer features.
+# Business Rules
 
-##When the admin rejects a volunteer request:##
+## Volunteer Approval Rules
 
-The user cannot access volunteer features.
+- All users who register as volunteers must go through the admin verification process.
+- When a volunteer application is submitted, a `VolunteerProfile` record is created with a default verification status of `PENDING`.
+- A volunteer account is not considered active until an admin approves the verification request.
+- Only approved volunteers can access volunteer features.
+- Only approved volunteers can accept and complete help requests.
+- A volunteer request cannot be approved or rejected more than once after it has already been reviewed.
 
-No VolunteerProfile record is created.
+---
 
-Only approved volunteers can accept and complete help requests.
+# Frontend
 
---------##briefcase Admin Role Responsibilities##--------
-Responsibility
-
-Access admin dashboard.
-
-Review and approve/reject volunteer verification request
-
-View platform activity data
-
-bust in silhouette Admin Account Creation
-Admin accounts are manually created or seeded by the system owner
-
-Admin role is assigned directly in the users table.
-
-Only users with the Admin role can access admin features.
-
-##Frontend##
 Frontend route protection improves user experience, but backend authorization is the final security layer.
-Create a protected frontend route such as: /admin
 
-example:
+A protected frontend route should be created:
 
-If someone visits:
+```text
+/admin
+```
 
+## Route Behavior
 
+- If the user is not logged in → Redirect to `/login`.
+- If the user is logged in and has the **ADMIN** role → Show the Admin Dashboard.
+- If the user is logged in but does not have the **ADMIN** role → Show "Access Denied" or redirect to the home page.
 
-http://localhost:5173/admin
-route guard checks:
+Users do not need to select an Admin option from the interface. Direct navigation to the `/admin` URL must still be protected.
 
-Not logged in → Redirect to /login
+## Login Role Redirect
 
-Logged in as ADMIN → Show the Admin Dashboard
+After successful login, the system identifies the user's role and redirects the user according to their role.
 
-Logged in but not ADMIN → Show "Access Denied" or redirect to the home page
+Example:
 
-The user doesn't have to click an "Admin" button—they can navigate directly to the URL.
-## Database Behavior
+- `ADMIN` users are redirected to the Admin Dashboard.
+- Other users are redirected according to their assigned role and available features.
 
-Before approval:
+Frontend redirects improve user experience, but access permissions must always be enforced by the backend.
+
+---
+
+# Database Behavior
+
+## When Volunteer Application Is Submitted
+
 - User account exists.
-- Volunteer verification request status is PENDING.
-- VolunteerProfile record does not exist.
+- `VolunteerProfile` record is created.
+- `verificationStatus` is set to `PENDING`.
+- User role remains `REQUESTER`.
 
-After approval:
-- User role is updated to VOLUNTEER.
-- VolunteerProfile record is created.
-- Verification status becomes APPROVED.
+---
 
-After rejection:
-- Verification status becomes REJECTED.
-- VolunteerProfile record is not created.
-##key Authentication and Authorization##
-##Authentication##
-Admin use the same login flow as other users.
+## After Approval
 
-Credentials are verified through the authentication service.
+- `VolunteerProfile.verificationStatus` changes to `APPROVED`.
+- User role changes from `REQUESTER` to `VOLUNTEER`.
+- A `VolunteerVerification` record is created for approval history.
+- User gains access to volunteer features.
 
-Successful login generates JWT/session.
+---
 
------##Authorization-##----
-Admin-only routes must check the user’s role.
+## After Rejection
 
-Non- admin users must receive 403 forbidden.
+- `VolunteerProfile.verificationStatus` changes to `REJECTED`.
+- User role remains unchanged.
+- A `VolunteerVerification` record is created for rejection history.
+- User cannot access volunteer features.
 
+---
 
-## Admin can ##
+# Key Authentication and Authorization
 
-Review volunteer verification request.
+## Authentication
 
-Approve volunteer status
+- Admin users use the same login flow as other users.
+- Credentials are verified through the authentication service.
+- Successful login creates a JWT/session containing authentication information.
+- Authenticated user information is available through the request user object.
 
-Reject volunteer profiles.
+---
 
- 
+## Authorization
 
------## flow diagram ##-----
-Volunteer submits application
-        ↓
-Admin reviews information
-        ↓
-Admin approves/rejects
-        ↓
-System updates volunteer status
-        ↓
-User receives notification
+Admin-only routes must verify the user's role.
 
+### Authorization Rules
 
-##Admin Dashboard Includes##
-pending volunteer verifications
+- User must be authenticated.
+- User role must be `ADMIN`.
+- Non-admin users receive `403 Forbidden`.
 
+---
 
-API Route 
+# Role Values
 
-GET   /api/admin/dashboard                              Get admin dashboard statistics
+Backend and database roles use uppercase values:
 
-GET  /api/admin/volunteers/pending                 Get all volunteers waiting for approval
+```text
+ADMIN
+VOLUNTEER
+REQUESTER
+```
 
-PUT /api/admin/volunteers/:id/approve             Approve a volunteer
+The backend and database use uppercase role values for authorization checks.
 
-PUT /api/admin/volunteers/:id/reject                 Reject a volunteer 
+If API responses transform role values for frontend use, frontend role checks should follow the API response format rather than directly using database enum values.
 
-Middleware
+---
 
-authenticateUser()
+# Admin Dashboard Includes
 
-checkRole("ADMIN")
+- Pending volunteer verification requests.
+- Total users.
+- Total volunteers.
+- Total requesters.
 
-Allow Access
+---
 
-Security Considerations
+# API Routes
 
-##Includes##
-Admin Routes require authentication
-admin permissions are checked on backeend ,not only frontend.
-The ADMIN role cannot be selected during user registration.
-JWT/session must contain role information.
-unauthorized access returns proper HTTP status code.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/admin/dashboard` | Get admin dashboard statistics |
+| GET | `/api/admin/users` | Get all users |
+| GET | `/api/admin/volunteers/pending` | Get volunteers waiting for approval |
+| PUT | `/api/admin/volunteers/:id/approve` | Approve volunteer request |
+| PUT | `/api/admin/volunteers/:id/reject` | Reject volunteer request |
 
+---
 
------## Error Handling ##-----
+# API Validation Rules
 
-The Admin API returns appropriate HTTP status codes and error messages to ensure consistent communication between the client and server.
+## Volunteer Review Request
 
-HTTP Status Code
+Before approving or rejecting a volunteer:
 
-Error
+- Volunteer ID must be a valid integer.
+- Volunteer profile must exist.
+- Volunteer request status must be `PENDING`.
 
-Description
+If the request has already been reviewed:
 
-200 OK
+- Return `409 Conflict`.
 
-Success
+Example:
 
-The request was completed successfully.
-
-400 Bad Request
-
-Invalid Request
-
-The request contains invalid or missing data.
-
-401 Unauthorized
-
-Authentication Required
-
-The user is not authenticated or the JWT/session is missing or invalid.
-
-403 Forbidden
-
-Access Denied
-
-The authenticated user does not have the ADMIN role.
-
-404 Not Found
-
-Resource Not Found
-
-The requested volunteer profile or resource does not exist.
-
-409 Conflict
-
-Conflict
-
-The volunteer has already been approved or rejected, so the requested action cannot be completed.
-
-500 Internal Server Error
-
-Server Error
-
-An unexpected error occurred while processing the request.
-
-Standard Error Response
-All error responses should follow a consistent JSON format.
-
-
-
+```json
 {
   "success": false,
-  "message": "Access denied. Admin privileges are required."
+  "message": "Volunteer request has already been reviewed"
 }
-##Error Handling Rules##
-Validate all incoming request data before processing.
+```
 
-Authenticate the user before allowing access to any admin endpoint.
+---
 
-Verify that the authenticated user has the ADMIN role.
+# Middleware
 
-Return appropriate HTTP status codes for all errors.
+Admin endpoints require authentication and authorization middleware.
 
-Do not expose sensitive system information, database details, or stack traces in API responses.
+## Authentication Middleware
 
-Log server-side errors for debugging and monitoring.
+Responsible for:
 
+- Validating user authentication.
+- Checking JWT/session information.
+- Attaching authenticated user information to the request.
+
+---
+
+## Admin Authorization Middleware (`adminAuth`)
+
+Responsible for:
+
+- Checking that the authenticated user's role is `ADMIN`.
+- Blocking unauthorized access.
+
+Unauthorized users receive proper HTTP status codes.
+
+---
+
+# Error Handling
+
+The Admin API returns appropriate HTTP status codes and messages.
+
+| Status Code | Error | Description |
+|---|---|---|
+| 200 OK | Success | Request completed successfully |
+| 400 Bad Request | Invalid Request | Request contains invalid or missing data |
+| 401 Unauthorized | Authentication Required | User is not authenticated or authentication information is invalid |
+| 403 Forbidden | Access Denied | Authenticated user does not have ADMIN privileges |
+| 404 Not Found | Resource Not Found | Volunteer profile or requested resource does not exist |
+| 409 Conflict | Conflict | Volunteer request has already been approved or rejected |
+| 500 Internal Server Error | Server Error | Unexpected server-side error |
+
+---
+
+# Error Response Format
+
+Authentication and authorization middleware return:
+
+## 401 Unauthorized
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+## 403 Forbidden
+
+```json
+{
+  "error": "Forbidden"
+}
+```
+
+Controller-level errors return:
+
+```json
+{
+  "success": false,
+  "message": "Error message"
+}
+```
+
+
+
+# Error Handling Rules
+
+- Validate all incoming request data before processing.
+- Authenticate users before allowing access to admin endpoints.
+- Verify the authenticated user's `ADMIN` role.
+- Return correct HTTP status codes.
+- Do not expose database details or stack traces.
+- Log server-side errors for debugging and monitoring.
+
+---
+
+# Security Considerations
+
+- Admin routes require authentication.
+- Backend authorization is the final security layer.
+- Frontend route protection alone is not sufficient.
+- The `ADMIN` role cannot be selected during user registration.
+- Admin permissions are checked on the backend.
+- Sensitive system information must not be exposed in API responses.
+- Unauthorized access attempts must return proper HTTP status codes.
