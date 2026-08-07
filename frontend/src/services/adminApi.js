@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { API_URL } from '../utils/constants';
-import { users } from '../mock/adminMockData';
+//import { users } from '../mock/adminMockData';
 
 const adminApi = axios.create({
   baseURL: API_URL,
@@ -31,9 +31,9 @@ export const rejectVolunteer = async (userId) => {
 
 // TODO: Replace with GET /api/admin/users once backend endpoint is available.
 export const getUsers = async () => {
-  // const {data}= await adminApi.get('/api/admin/users');
-  //return data;
-  return Promise.resolve(users);
+  const { data } = await adminApi.get('/api/admin/users');
+  return data.data;
+  //return Promise.resolve(users);
 };
 
 export default adminApi;

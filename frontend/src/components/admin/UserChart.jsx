@@ -48,7 +48,7 @@ function UserChart({ users }) {
           }}
         />
         <Tooltip />
-        <Bar dataKey="users" fill="#9db964" radius={[8, 8, 0, 0]} />
+        <Bar dataKey="users" fill="#c4e19e" radius={[8, 8, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

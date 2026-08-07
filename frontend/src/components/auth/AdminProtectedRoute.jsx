@@ -11,7 +11,7 @@ function AdminProtectedRoute() {
     return <Navigate to="/login" />;
   }
 
-  if (user.role !== 'ADMIN') {
+  if (user?.role?.toLowerCase() !== 'admin') {
     return <Navigate to="/" />;
   }
 

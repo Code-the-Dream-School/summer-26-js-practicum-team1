@@ -17,12 +17,8 @@ import UserChart from '../../components/admin/UserChart';
 import { useUsers } from '../../hooks/admin/useUsers';
 
 function AdminDashboard() {
-  const {
-    data: users = [],
-    isLoading: usersLoading,
-    isError: userError,
-  } = useUsers();
-
+  const { data, isLoading: usersLoading, isError: userError } = useUsers();
+  const users = data?.users ?? [];
   const navigate = useNavigate();
 
   const handleNavigationVolunteers = () => {

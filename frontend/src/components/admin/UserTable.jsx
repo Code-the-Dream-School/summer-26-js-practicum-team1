@@ -24,7 +24,8 @@ import { red, grey } from '@mui/material/colors';
 import Pagination from '../common/Pagination';
 
 function UserTable() {
-  const { data: users = [], isLoading, error } = useUsers();
+  const { data, isLoading, error } = useUsers();
+  const users = data?.users ?? [];
 
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('ALL');
