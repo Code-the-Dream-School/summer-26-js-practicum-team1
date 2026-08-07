@@ -115,7 +115,7 @@ describe('PUT /api/admin/volunteers/:id/reject', () => {
     expect(res.status).toBe(200);
   });
   it('should fail with invalid id', async () => {
-    const res = await request(app).put('/api/admin/volunteers/abc/approve');
+    const res = await request(app).put('/api/admin/volunteers/abc/reject');
 
     expect(res.status).not.toBe(200);
   });
