@@ -47,9 +47,26 @@ const rejectVolunteer = asyncHandler((req, res) =>
   reviewVolunteer(req, res, VerificationStatus.REJECTED)
 );
 
+async function getUsers(req, res, next) {
+  try {
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+
+    const users = await adminService.getUsers(page, limit);
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getUsers,
 };
