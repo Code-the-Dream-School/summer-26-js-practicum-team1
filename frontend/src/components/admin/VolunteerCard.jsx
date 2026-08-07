@@ -67,7 +67,14 @@ function VolunteerCard({
 
             <Typography variant="body2">📧 {email}</Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
-              🎂 {dob}
+              🎂{' '}
+              {dob
+                ? new Date(dob).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                : 'N/A'}
             </Typography>
 
             <Typography variant="body2" sx={{ mt: 1 }}>

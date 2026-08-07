@@ -84,6 +84,7 @@ function UserTable() {
               border: 'none',
             },
           }}
+
           label="Search User"
           value={search}
           onChange={(e) => {
@@ -236,7 +237,13 @@ function UserTable() {
 
                   <TableCell>{user.gender || 'N/A'}</TableCell>
 
-                  <TableCell>{user.dob || 'N/A'}</TableCell>
+                  <TableCell>
+                    {new Date(user.dob).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    }) || 'N/A'}
+                  </TableCell>
                 </TableRow>
               ))
             )}
