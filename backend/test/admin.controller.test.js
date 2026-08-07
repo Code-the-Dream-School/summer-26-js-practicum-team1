@@ -1,7 +1,31 @@
-const request = require('supertest');
-const app = require('../src/app');
+jest.mock('../src/middleware/jwt.middleware', () => {
+  return (req, res, next) => {
+    req.user = {
+      id: 1,
+      role: 'ADMIN',
+      name: 'Admin',
+    };
+
+    req.auth = {
+      csrfToken: 'test-csrf-token',
+    };
+
+    next();
+  };
+});
+
+jest.mock('../src/middleware/csrf.middleware', () => {
+  return (req, res, next) => next();
+});
+
+jest.mock('../src/middleware/adminAuth', () => ({
+  adminAuth: (req, res, next) => next(),
+}));
 
 jest.mock('../src/services/admin.service');
+
+const request = require('supertest');
+const app = require('../src/app');
 const adminService = require('../src/services/admin.service');
 
 describe('GET /api/admin/dashboard', () => {
@@ -99,12 +123,12 @@ describe('PUT /api/admin/volunteers/:id/approve', () => {
   it('should fail with invalid id', async () => {
     const res = await request(app).put('/api/admin/volunteers/abc/approve');
 
-    expect(res.status).not.toBe(200);
+    expect(res.status).toBe(400);
   });
 });
 
 describe('PUT /api/admin/volunteers/:id/reject', () => {
-  it('should approve volunteer', async () => {
+  it('should reject volunteer', async () => {
     adminService.reviewVolunteer.mockResolvedValue({
       userId: 1,
       verificationStatus: 'REJECTED',
@@ -117,6 +141,10 @@ describe('PUT /api/admin/volunteers/:id/reject', () => {
   it('should fail with invalid id', async () => {
     const res = await request(app).put('/api/admin/volunteers/abc/reject');
 
-    expect(res.status).not.toBe(200);
+    expect(res.status).toBe(400);
   });
+});
+
+afterEach(async () => {
+  jest.clearAllMocks();
 });
