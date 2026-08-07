@@ -9,21 +9,14 @@ const {
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getUsers,
 } = require('../controllers/admin.controllers');
+
+router.use(jwtMiddleware, csrfMiddleware, adminAuth);
+
 router.get('/dashboard', getAdminDashboard);
 router.get('/volunteers/pending', getPendingVolunteers);
-router.put(
-  '/volunteers/:id/approve',
-  jwtMiddleware,
-  csrfMiddleware,
-  adminAuth,
-  approveVolunteer
-);
-router.put(
-  '/volunteers/:id/reject',
-  jwtMiddleware,
-  csrfMiddleware,
-  adminAuth,
-  rejectVolunteer
-);
+router.get('/users', getUsers);
+router.put('/volunteers/:id/approve', approveVolunteer);
+router.put('/volunteers/:id/reject', rejectVolunteer);
 module.exports = router;

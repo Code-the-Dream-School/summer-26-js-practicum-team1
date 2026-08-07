@@ -105,8 +105,41 @@ async function reviewVolunteer({ volunteerId, adminId, status, notes }) {
   });
 }
 
+async function getUsers(page = 1, limit = 20) {
+  const skip = (page - 1) * limit;
+
+  const [users, total] = await prisma.$transaction([
+    prisma.user.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        gender: true,
+        phone: true,
+        dob: true,
+        createdAt: true,
+      },
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    users,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
 module.exports = {
   getDashboardStats,
   getPendingVolunteers,
   reviewVolunteer,
+  getUsers,
 };
