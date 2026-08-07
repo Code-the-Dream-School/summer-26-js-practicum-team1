@@ -1,0 +1,24 @@
+const express = require('express');
+const rateLimit = require('express-rate-limit');
+const router = express.Router();
+const { logon, logoff, me } = require('../controllers/auth.controller');
+const jwtMiddleware = require('../middleware/jwt.middleware');
+const csrfMiddleware = require('../middleware/csrf.middleware');
+const validate = require('../middleware/validate.middleware');
+const { authSchema } = require('../validations/authSchema');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts. Please try again later.' },
+});
+
+router.post('/logon', loginLimiter, validate(authSchema), logon);
+router.post('/logoff', jwtMiddleware, csrfMiddleware, logoff);  
+router.get('/me', jwtMiddleware, me);
+
+module.exports = router;
+module.exports.loginLimiter = loginLimiter;
