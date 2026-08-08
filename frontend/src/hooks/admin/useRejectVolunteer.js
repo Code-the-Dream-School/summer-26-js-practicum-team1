@@ -5,11 +5,18 @@ export function useRejectVolunteer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: rejectVolunteer,
+    mutationFn: (userId) => {
+      const me = queryClient.getQueryData(['me']);
+
+      return rejectVolunteer(userId, me?.csrfToken);
+    },
 
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['pendingVolunteers'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['dashboardStats'],
       });
     },
   });

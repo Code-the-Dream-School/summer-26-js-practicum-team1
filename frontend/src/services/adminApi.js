@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { API_URL } from '../utils/constants';
-//import { users } from '../mock/adminMockData';
 
 const adminApi = axios.create({
   baseURL: API_URL,
@@ -17,23 +16,37 @@ export const getPendingVolunteers = async () => {
   return data.data;
 };
 
-export const approveVolunteer = async (userId) => {
+export const approveVolunteer = async (userId, csrfToken) => {
   const { data } = await adminApi.put(
-    `/api/admin/volunteers/${userId}/approve`
+    `/api/admin/volunteers/${userId}/approve`,
+    {},
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+    }
   );
+
   return data;
 };
 
-export const rejectVolunteer = async (userId) => {
-  const { data } = await adminApi.put(`/api/admin/volunteers/${userId}/reject`);
+export const rejectVolunteer = async (userId, csrfToken) => {
+  const { data } = await adminApi.put(
+    `/api/admin/volunteers/${userId}/reject`,
+    {},
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+    }
+  );
+
   return data;
 };
 
-// TODO: Replace with GET /api/admin/users once backend endpoint is available.
 export const getUsers = async () => {
   const { data } = await adminApi.get('/api/admin/users');
   return data.data;
-  //return Promise.resolve(users);
 };
 
 export default adminApi;
