@@ -41,6 +41,7 @@ function UserChart({ users }) {
         />
 
         <YAxis
+          allowDecimals={false}
           label={{
             value: 'Users',
             angle: -90,
