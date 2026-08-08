@@ -21,7 +21,7 @@ const ERROR_MESSAGES = {
 const ROLE_REDIRECTS = {
   requester: '/',
   volunteer: '/',
-  admin: '/',
+  admin: '/admin/dashboard',
 };
 
 function Login() {
@@ -36,7 +36,8 @@ function Login() {
   const onSubmit = async (formData) => {
     try {
       const data = await login(formData);
-      navigate(ROLE_REDIRECTS[data.role] ?? '/');
+
+      navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
     } catch (err) {
       console.error(err);
     }
