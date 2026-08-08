@@ -8,9 +8,9 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 
 | Field                   | Type        | Required | Notes                                                                                                                         |
 | ----------------------- | ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| id                      | String      | Yes      | Primary key                                                                                                                   |
-| requesterId             | String (FK) | Yes      | From auth session, never client body                                                                                          |
-| volunteerId             | String (FK) | No       | Null at creation; set later via assignment flow                                                                               |
+| id                      | Int     | Yes      | Primary key                                                                                                                   |
+| requesterId             | Int (FK) | Yes      | From auth session, never client body                                                                                          |
+| volunteerId             | Int (FK) | No       | Null at creation; set later via assignment flow                                                                               |
 | title                   | String      | Yes      | Max ~100 chars                                                                                                                |
 | category                | Enum        | Yes      | Grocery, Transportation, Household Chores, Yard Work, Pet Care, Tech Support, Companionship, Meal Prep, Medical Errand, Other |
 | urgency                 | Enum        | Yes      | Low, Medium, High                                                                                                             |
