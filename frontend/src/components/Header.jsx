@@ -36,7 +36,9 @@ const ROLE_SETTINGS = {
   admin: [
     { label: 'Profile', path: '/' },
     { label: 'Account', path: '/' },
-    { label: 'Admin Dashboard', path: '/' },
+    { label: 'Admin Dashboard', path: '/admin/dashboard' },
+    { label: 'Pending Volunteers', path: '/admin/volunteers' },
+    { label: 'User Management', path: '/admin/users' },
   ],
 };
 
