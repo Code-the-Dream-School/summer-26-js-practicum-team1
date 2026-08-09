@@ -1,15 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const mockAuth = require('../middleware/auth.middleware');
+const jwtMiddleware = require('../middleware/jwt.middleware');
+const csrfMiddleware = require('../middleware/csrf.middleware');
+const { adminAuth } = require('../middleware/adminAuth');
 
 const {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getUsers,
 } = require('../controllers/admin.controllers');
+
+router.use(jwtMiddleware, csrfMiddleware, adminAuth);
+
 router.get('/dashboard', getAdminDashboard);
 router.get('/volunteers/pending', getPendingVolunteers);
-router.put('/volunteers/:id/approve', mockAuth, approveVolunteer);
-router.put('/volunteers/:id/reject', mockAuth, rejectVolunteer);
+router.get('/users', getUsers);
+router.put('/volunteers/:id/approve', approveVolunteer);
+router.put('/volunteers/:id/reject', rejectVolunteer);
 module.exports = router;
