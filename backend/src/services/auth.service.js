@@ -1,6 +1,7 @@
 const { randomUUID } = require('crypto');
 const bcrypt = require('bcrypt');
 const prisma = require('../config/prisma');
+const ApiError = require('../utils/ApiError');
 
 const SALT_ROUNDS = 12;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -59,7 +60,54 @@ async function verifyCredentials({ email, password }) {
   return { outcome: 'success', user };
 }
 
+async function createRequester({
+  name,
+  email,
+  password,
+  dob,
+  gender,
+  phone,
+  profileImage,
+}) {
+  const existing = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+
+  if (existing) {
+    throw new ApiError(409, 'This email is already registered');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  try {
+    return await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        dob: new Date(dob),
+        gender,
+        phone: phone || null,
+        profileImage: profileImage || null,
+        role: 'REQUESTER',
+      },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+      },
+    });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new ApiError(409, 'This email is already registered');
+    }
+    throw err;
+  }
+}
+
 module.exports = {
+  createRequester,
   verifyCredentials,
   MAX_FAILED_ATTEMPTS,
   LOCK_DURATION_MS,

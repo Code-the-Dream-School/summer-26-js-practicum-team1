@@ -1,7 +1,7 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyCredentials } = require('../services/auth.service');
+const { verifyCredentials, createRequester } = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -82,4 +82,17 @@ const me = asyncHandler(async (req, res) => {
   return res.status(200).json(clientSession(req.user, req.auth.csrfToken));
 });
 
-module.exports = { logon, me };
+const register = asyncHandler(async (req, res) => {
+  const user = await createRequester({
+    ...req.body,
+    profileImage: req.file ? req.file.buffer : null,
+  });
+
+  return res.status(201).json({
+    id: user.id,
+    name: user.name,
+    role: user.role.toLowerCase(),
+  });
+});
+
+module.exports = { logon, me, register };

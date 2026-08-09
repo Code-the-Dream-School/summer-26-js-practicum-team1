@@ -3,6 +3,7 @@ import { API_URL } from '../utils/constants';
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 });
 
 export async function getHello() {
@@ -50,6 +51,7 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
+  //uncomment once registration is ready
   try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;

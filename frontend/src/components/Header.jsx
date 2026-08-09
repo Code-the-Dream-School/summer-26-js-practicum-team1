@@ -36,7 +36,9 @@ const ROLE_SETTINGS = {
   admin: [
     { label: 'Profile', path: '/' },
     { label: 'Account', path: '/' },
-    { label: 'Admin Dashboard', path: '/' },
+    { label: 'Admin Dashboard', path: '/admin/dashboard' },
+    { label: 'Pending Volunteers', path: '/admin/volunteers' },
+    { label: 'User Management', path: '/admin/users' },
   ],
 };
 
@@ -172,7 +174,7 @@ function Header() {
                   </MenuItem>
                   <MenuItem
                     component={Link}
-                    to="/"
+                    to="/signup"
                     onClick={handleCloseNavMenu}
                     sx={{
                       '&:hover': {
@@ -291,7 +293,7 @@ function Header() {
               </Button>
               <Button
                 component={Link}
-                to="/"
+                to="/signup"
                 variant="outlined"
                 color="secondary"
                 sx={{
