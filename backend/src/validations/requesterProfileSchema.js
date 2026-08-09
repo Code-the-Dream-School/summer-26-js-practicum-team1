@@ -1,13 +1,7 @@
 const Joi = require('joi');
 
 const updateRequesterProfileSchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100),
-
   phone: Joi.string().trim().max(20).allow('', null),
-
-  dob: Joi.date().iso(),
-
-  gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'),
 
   address: Joi.string().trim().max(255).allow('', null),
 
