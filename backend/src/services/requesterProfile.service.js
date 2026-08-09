@@ -33,40 +33,43 @@ const getProfile = async (userId) => {
 const updateProfile = async (userId, data) => {
   const { phone, address, city, bio, emergencyContact } = data;
 
-  const existingUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true },
-  });
-
-  if (!existingUser) {
-    throw new ApiError(404, 'User not found');
-  }
-
   return prisma.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id: userId },
-      data: {
-        phone,
-      },
-    });
+    if (phone !== undefined) {
+      await tx.user.update({
+        where: { id: userId },
+        data: { phone },
+      });
+    }
+
+    const profileData = {};
+
+    if (address !== undefined) {
+      profileData.address = address;
+    }
+
+    if (city !== undefined) {
+      profileData.city = city;
+    }
+
+    if (bio !== undefined) {
+      profileData.bio = bio;
+    }
+
+    if (emergencyContact !== undefined) {
+      profileData.emergencyContact = emergencyContact;
+    }
 
     await tx.requesterProfile.upsert({
       where: {
         userId,
       },
+
       create: {
         userId,
-        address,
-        city,
-        bio,
-        emergencyContact,
+        ...profileData,
       },
-      update: {
-        address,
-        city,
-        bio,
-        emergencyContact,
-      },
+
+      update: profileData,
     });
 
     return tx.user.findUnique({
