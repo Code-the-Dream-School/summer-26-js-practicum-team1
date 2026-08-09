@@ -1,7 +1,8 @@
 const prisma = require('../config/prisma');
+const ApiError = require('../utils/ApiError');
 
 const getProfile = async (userId) => {
-  return prisma.user.findUnique({
+  const profile = await prisma.user.findUnique({
     where: { id: userId },
     select: {
       id: true,
@@ -21,10 +22,25 @@ const getProfile = async (userId) => {
       },
     },
   });
+
+  if (!profile) {
+    throw new ApiError(404, 'User profile not found');
+  }
+
+  return profile;
 };
 
 const updateProfile = async (userId, data) => {
   const { phone, address, city, bio, emergencyContact } = data;
+
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!existingUser) {
+    throw new ApiError(404, 'User not found');
+  }
 
   return prisma.$transaction(async (tx) => {
     await tx.user.update({
