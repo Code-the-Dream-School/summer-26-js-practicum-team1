@@ -1,6 +1,5 @@
 const { randomUUID } = require('crypto');
 const bcrypt = require('bcrypt');
-const { VerificationStatus } = require('@prisma/client');
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
 
@@ -150,7 +149,7 @@ async function createVolunteerApplicant({
       await tx.volunteerProfile.create({
         data: {
           userId: user.id,
-          verificationStatus: VerificationStatus.PENDING,
+          verificationStatus: 'PENDING',
         },
       });
 
