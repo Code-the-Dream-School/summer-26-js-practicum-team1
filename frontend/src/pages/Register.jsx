@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../hooks/useAuth';
+import ProfileImageUpload from '../components/ProfileImageUpload';
 import {
   Box,
   TextField,
@@ -10,6 +11,7 @@ import {
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { useState } from 'react';
 
 const GENDER_OPTIONS = [
   {
@@ -41,16 +43,25 @@ function Register() {
   } = useForm();
 
   const { register: registerAccount, registerError, isRegistering } = useAuth();
-
+  const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
 
   const password = watch('password');
 
   const onSubmit = async (formData) => {
     try {
-      const userData = { ...formData };
+      const userData = new FormData();
+      userData.append('name', formData.name);
+      userData.append('email', formData.email);
+      userData.append('password', formData.password);
+      userData.append('dob', formData.dob);
+      userData.append('gender', formData.gender);
+      userData.append('phone', formData.phone || '');
+     
+      if (profileImage) {
+        userData.append('profileImage', profileImage);
+      }
 
-      delete userData.confirmPassword;
       const response = await registerAccount(userData);
 
       console.log(response);
@@ -205,10 +216,6 @@ function Register() {
             slotProps={{
               inputLabel: { shrink: true },
             }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-
             sx={{ mb: 2 }}
 
             {...register('dob', {
@@ -252,29 +259,37 @@ function Register() {
           </TextField>
 
           <TextField
-            label="Phone Number"
-            fullWidth
-            sx={{ mb: 3 }}
+  label="Phone Number"
+  fullWidth
+  sx={{ mb: 3 }}
+  {...register('phone', {
+    required: 'Phone number is required',
+    pattern: {
+      value: /^\d{11}$/,
+      message: 'Phone number must be exactly 11 digits',
+    },
+  })}
+  error={!!errors.phone}
+  helperText={errors.phone?.message}
+/>
+          
 
-            {...register('phone', {})}
+<ProfileImageUpload onFileChange={setProfileImage} />
 
-            error={!!errors.phone}
-            helperText={errors.phone?.message}
-          />
-
-          <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={isRegistering}
-            disableElevation
-            sx={{
-              py: 1.3,
-              fontSize: '1rem',
-            }}
-          >
-            {isRegistering ? 'Creating account...' : 'Register'}
-          </Button>
+<Button
+  type="submit"
+  variant="contained"
+  fullWidth
+  disabled={isRegistering}
+  disableElevation
+  sx={{
+    py: 1.3,
+    fontSize: '1rem',
+    mt: 3,
+  }}
+>
+  {isRegistering ? 'Creating account...' : 'Register'}
+</Button>
 
           <Typography
             variant="body2"
