@@ -48,7 +48,7 @@ router.post(
 //Requester Profile routes
 router.get('/profile', jwtMiddleware, requesterOnly, getProfile);
 
-router.put(
+router.patch(
   '/profile',
   jwtMiddleware,
   requesterOnly,

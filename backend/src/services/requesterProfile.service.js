@@ -112,7 +112,9 @@ const updateProfileImage = async (userId, imageBuffer, imageType) => {
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
-
+  if (!imageBuffer || !imageType) {
+    throw new ApiError(400, 'Profile image is required');
+  }
   await prisma.user.update({
     where: { id: userId },
     data: {

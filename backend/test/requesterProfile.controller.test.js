@@ -92,7 +92,7 @@ describe('GET /api/auth/profile', () => {
   });
 });
 
-describe('PUT /api/auth/profile', () => {
+describe('PATCH/api/auth/profile', () => {
   it('updates the requester profile', async () => {
     const updateData = {
       phone: '1234567890',
@@ -120,7 +120,7 @@ describe('PUT /api/auth/profile', () => {
 
     profileService.updateProfile.mockResolvedValue(updatedProfile);
 
-    const res = await request(app).put('/api/auth/profile').send(updateData);
+    const res = await request(app).patch('/api/auth/profile').send(updateData);
 
     expect(res.status).toBe(200);
 
@@ -132,7 +132,7 @@ describe('PUT /api/auth/profile', () => {
   });
 
   it('rejects invalid profile data', async () => {
-    const res = await request(app).put('/api/auth/profile').send({
+    const res = await request(app).patch('/api/auth/profile').send({
       phone: 1234,
     });
 
