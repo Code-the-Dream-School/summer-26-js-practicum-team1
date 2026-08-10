@@ -85,7 +85,7 @@ function ProfileImageUpload({ onFileChange }) {
   setOpen(false);
 
   try {
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (!navigator.mediaDevices?.getUserMedia) { //browser's getUserMedia() API to access the camera 
       setError('Camera access is not supported by this browser.');
       setOpen(true);
       return;
