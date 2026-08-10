@@ -20,14 +20,15 @@ const updateProfile = asyncHandler(async (req, res) => {
 const updateProfileImage = asyncHandler(async (req, res) => {
   const profileImage = await profileService.updateProfileImage(
     req.user.id,
-    req.file.buffer
+    req.file.buffer,
+    req.file.mimetype
   );
   return res.status(200).json({ data: profileImage });
 });
 
 const getProfileImage = asyncHandler(async (req, res) => {
   const profileImage = await profileService.getProfileImage(req.user.id);
-  res.set('Content-Type', 'image/jpeg');
+  res.set('Content-Type', profileImage.profileImageType);
   return res.status(200).send(profileImage.profileImage);
 });
 

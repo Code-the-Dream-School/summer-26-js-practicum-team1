@@ -103,7 +103,7 @@ const updateProfile = async (userId, data) => {
   });
 };
 
-const updateProfileImage = async (userId, imageBuffer) => {
+const updateProfileImage = async (userId, imageBuffer, imageType) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true },
@@ -117,6 +117,7 @@ const updateProfileImage = async (userId, imageBuffer) => {
     where: { id: userId },
     data: {
       profileImage: imageBuffer,
+      profileImageType: imageType,
     },
   });
 
@@ -130,6 +131,7 @@ const getProfileImage = async (userId) => {
     where: { id: userId },
     select: {
       profileImage: true,
+      profileImageType: true,
     },
   });
 

@@ -13,6 +13,8 @@ const {
 const {
   getProfile,
   updateProfile,
+  updateProfileImage,
+  getProfileImage,
 } = require('../controllers/requesterProfile.controller');
 const requesterOnly = require('../middleware/requesterProfileMiddleware');
 
@@ -43,6 +45,7 @@ router.post(
   register
 );
 
+//Requester Profile routes
 router.get('/profile', jwtMiddleware, requesterOnly, getProfile);
 
 router.put(
@@ -52,6 +55,16 @@ router.put(
   validate(updateRequesterProfileSchema),
   updateProfile
 );
+
+router.patch(
+  '/profile/image',
+  jwtMiddleware,
+  requesterOnly,
+  profileImageUpload,
+  updateProfileImage
+);
+
+router.get('/profile/image', jwtMiddleware, requesterOnly, getProfileImage);
 
 module.exports = router;
 module.exports.loginLimiter = loginLimiter;
