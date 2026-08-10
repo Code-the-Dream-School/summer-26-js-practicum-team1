@@ -106,8 +106,66 @@ async function createRequester({
   }
 }
 
+async function createVolunteerApplicant({
+  name,
+  email,
+  password,
+  dob,
+  gender,
+  phone,
+  profileImage,
+}) {
+  const existing = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  });
+
+  if (existing) {
+    throw new ApiError(409, 'This email is already registered');
+  }
+
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          name,
+          email,
+          passwordHash,
+          dob: new Date(dob),
+          gender,
+          phone: phone || null,
+          profileImage: profileImage || null,
+          role: 'REQUESTER',
+        },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+        },
+      });
+
+      await tx.volunteerProfile.create({
+        data: {
+          userId: user.id,
+          verificationStatus: 'PENDING',
+        },
+      });
+
+      return user;
+    });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new ApiError(409, 'This email is already registered');
+    }
+    throw err;
+  }
+}
+
 module.exports = {
   createRequester,
+  createVolunteerApplicant,
   verifyCredentials,
   MAX_FAILED_ATTEMPTS,
   LOCK_DURATION_MS,
