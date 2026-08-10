@@ -1,7 +1,7 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyCredentials, createRequester, createVolunteerApplicant } = require('../services/auth.service');
+const { verifyCredentials, createRequester } = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -83,26 +83,9 @@ const me = asyncHandler(async (req, res) => {
 });
 
 const register = asyncHandler(async (req, res) => {
-  const { accountType, ...fields } = req.body;
-  const profileImage = req.file ? req.file.buffer : null;
-
-  if (accountType === 'volunteer') {
-    const user = await createVolunteerApplicant({
-      ...fields,
-      profileImage,
-    });
-
-    return res.status(201).json({
-      id: user.id,
-      name: user.name,
-      role: user.role.toLowerCase(),
-      verificationStatus: 'pending',
-    });
-  }
-
   const user = await createRequester({
-    ...fields,
-    profileImage,
+    ...req.body,
+    profileImage: req.file ? req.file.buffer : null,
   });
 
   return res.status(201).json({

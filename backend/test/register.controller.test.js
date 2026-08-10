@@ -6,10 +6,6 @@ jest.mock('../src/config/prisma', () => ({
     create: jest.fn(),
     update: jest.fn(),
   },
-  volunteerProfile: {
-    create: jest.fn(),
-  },
-  $transaction: jest.fn(),
 }));
 
 const prisma = require('../src/config/prisma');
@@ -43,8 +39,6 @@ beforeEach(() => {
     name: validFields.name,
     role: 'REQUESTER',
   });
-  prisma.volunteerProfile.create.mockResolvedValue({ userId: 1 });
-  prisma.$transaction.mockImplementation(async (fn) => fn(prisma));
   jest.spyOn(console, 'error').mockImplementation(() => {});
   resetLimiters();
 });
@@ -98,44 +92,6 @@ describe('POST /api/auth/register', () => {
       message: 'This email is already registered',
     });
     expect(prisma.user.create).not.toHaveBeenCalled();
-  });
-
-  it('registers a volunteer applicant with pending verification', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({ ...validFields, accountType: 'volunteer' });
-
-    expect(res.status).toBe(201);
-    expect(res.body).toEqual({
-      id: 1,
-      name: validFields.name,
-      role: 'requester',
-      verificationStatus: 'pending',
-    });
-    expect(prisma.volunteerProfile.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          userId: 1,
-          verificationStatus: 'PENDING',
-        }),
-      })
-    );
-  });
-
-  it('rejects an invalid accountType', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({ ...validFields, accountType: 'admin' });
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('Validation failed');
-    expect(res.body.details).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ field: 'accountType' }),
-      ])
-    );
-    expect(prisma.user.create).not.toHaveBeenCalled();
-    expect(prisma.volunteerProfile.create).not.toHaveBeenCalled();
   });
 
   it('saves an optional profile image', async () => {
