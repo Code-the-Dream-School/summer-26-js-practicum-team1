@@ -17,7 +17,23 @@ const updateProfile = asyncHandler(async (req, res) => {
   });
 });
 
+const updateProfileImage = asyncHandler(async (req, res) => {
+  const profileImage = await profileService.updateProfileImage(
+    req.user.id,
+    req.file.buffer
+  );
+  return res.status(200).json({ data: profileImage });
+});
+
+const getProfileImage = asyncHandler(async (req, res) => {
+  const profileImage = await profileService.getProfileImage(req.user.id);
+  res.set('Content-Type', 'image/jpeg');
+  return res.status(200).send(profileImage.profileImage);
+});
+
 module.exports = {
   getProfile,
   updateProfile,
+  updateProfileImage,
+  getProfileImage,
 };
