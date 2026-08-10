@@ -76,6 +76,12 @@ const registerSchema = Joi.object({
       'string.max': 'Phone must be at most 20 characters',
       'string.pattern.base': 'Enter a valid phone number',
     }),
+  accountType: Joi.string()
+    .valid('requester', 'volunteer')
+    .default('requester')
+    .messages({
+      'any.only': 'Please select a valid account type',
+    }),
 }).unknown(false);
 
 module.exports = { registerSchema };
