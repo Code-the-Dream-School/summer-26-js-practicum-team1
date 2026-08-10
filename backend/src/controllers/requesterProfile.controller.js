@@ -29,7 +29,7 @@ const updateProfileImage = asyncHandler(async (req, res) => {
 const getProfileImage = asyncHandler(async (req, res) => {
   const profileImage = await profileService.getProfileImage(req.user.id);
   res.set('Content-Type', profileImage.profileImageType);
-  return res.status(200).send(profileImage.profileImage);
+  return res.status(200).send(Buffer.from(profileImage.profileImage));
 });
 
 module.exports = {
