@@ -49,9 +49,13 @@ RequesterProfile
 
 ### Api Endpoints
 
-- GET/api/users/profile
+- GET/api/auth/profile
 
-- PATCH/api/users/profile
+- PATCH/api/auth/profile
+
+- GET/api/auth/profile/image
+
+- PATCH/api/auth/profile/image
 
 ### GET Flow
 
@@ -89,15 +93,15 @@ RequesterProfile
 
 ### Example editable fields:
 
-Full Name
+Full Name (not editable)
 
 Email (not editable)
 
 Phone Number
 
-Date of Birth
+Date of Birth (not editable)
 
-Gender
+Gender (not editable)
 
 Profile Image (if supported)
 
