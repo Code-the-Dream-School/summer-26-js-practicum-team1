@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import ProfileSection from './ProfileSection';
 import { DAYS_OF_WEEK, SUPPORT_CATEGORIES } from '../../utils/volunteerPreferences';
 
@@ -168,7 +168,7 @@ function VolunteerPreferencesForm({
               onClick={() => removeSlot(index)}
               disabled={slots.length === 1}
             >
-              <DeleteOutlineIcon />
+              <DeleteOutlinedIcon />
             </IconButton>
           </Box>
         ))}
