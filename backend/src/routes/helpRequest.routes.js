@@ -4,7 +4,7 @@ const router = express.Router();
 
 const {
   createHelpRequest,
-} = require('../controllers/helpRequestController');
+} = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
 const validate = require('../middleware/validate.middleware');
