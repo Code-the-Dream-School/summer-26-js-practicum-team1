@@ -7,16 +7,6 @@ const validate = require('../middleware/validate.middleware');
 const profileImageUpload = require('../middleware/profileImageUpload');
 const { authSchema } = require('../validations/authSchema');
 const { registerSchema } = require('../validations/registerSchema');
-const {
-  updateRequesterProfileSchema,
-} = require('../validations/requesterProfileSchema');
-const {
-  getProfile,
-  updateProfile,
-  updateProfileImage,
-  getProfileImage,
-} = require('../controllers/requesterProfile.controller');
-const requesterOnly = require('../middleware/requesterProfileMiddleware');
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -44,27 +34,6 @@ router.post(
   validate(registerSchema),
   register
 );
-
-//Requester Profile routes
-router.get('/profile', jwtMiddleware, requesterOnly, getProfile);
-
-router.patch(
-  '/profile',
-  jwtMiddleware,
-  requesterOnly,
-  validate(updateRequesterProfileSchema),
-  updateProfile
-);
-
-router.patch(
-  '/profile/image',
-  jwtMiddleware,
-  requesterOnly,
-  profileImageUpload,
-  updateProfileImage
-);
-
-router.get('/profile/image', jwtMiddleware, requesterOnly, getProfileImage);
 
 module.exports = router;
 module.exports.loginLimiter = loginLimiter;
