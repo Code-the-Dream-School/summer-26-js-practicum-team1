@@ -4,6 +4,7 @@ const { notFound, errorHandler } = require('./middleware/error.middleware');
 const helloRoutes = require('./routes/hello.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
+const volunteerRoutes = require('./routes/volunteer.routes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ applyMiddleware(app);
 app.use('/api/hello', helloRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/volunteers', volunteerRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend API is running');
