@@ -49,4 +49,22 @@ export const getUsers = async () => {
   return data.data;
 };
 
+export const getVolunteerPreferencesById = async (userId) => {
+  const { data } = await adminApi.get(`/api/admin/volunteers/${userId}/preferences`);
+  return data.data;
+};
+
+export const updateVolunteerPreferencesById = async (userId, payload, csrfToken) => {
+  const { data } = await adminApi.put(
+    `/api/admin/volunteers/${userId}/preferences`,
+    payload,
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+    }
+  );
+  return data.data;
+};
+
 export default adminApi;
