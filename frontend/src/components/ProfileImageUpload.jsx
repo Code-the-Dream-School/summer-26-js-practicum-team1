@@ -64,9 +64,7 @@ function ProfileImageUpload({ onFileChange }) {
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography sx={{ mb: 1 }}>
-        Profile Picture
-      </Typography>
+      <Typography sx={{ mb: 1 }}>Profile Picture</Typography>
 
       <Button
         variant="outlined"
@@ -79,11 +77,7 @@ function ProfileImageUpload({ onFileChange }) {
       </Button>
 
       {error && (
-        <Alert
-          severity="error"
-          sx={{ mt: 2 }}
-          onClose={() => setError('')}
-        >
+        <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError('')}>
           {error}
         </Alert>
       )}
@@ -96,24 +90,15 @@ function ProfileImageUpload({ onFileChange }) {
         onChange={handleFileChange}
       />
 
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>
-          Add Profile Picture
-        </DialogTitle>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
+        <DialogTitle>Add Profile Picture</DialogTitle>
 
         <DialogContent>
           <Button
             fullWidth
             variant="outlined"
             startIcon={<UploadFileIcon />}
-            onClick={() =>
-              uploadInputRef.current?.click()
-            }
+            onClick={() => uploadInputRef.current?.click()}
             sx={{
               py: 1.5,
               textTransform: 'none',
@@ -124,9 +109,7 @@ function ProfileImageUpload({ onFileChange }) {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleClose}>
-            Cancel
-          </Button>
+          <Button onClick={handleClose}>Cancel</Button>
         </DialogActions>
       </Dialog>
     </Box>
