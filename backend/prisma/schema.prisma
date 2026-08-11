@@ -52,14 +52,39 @@ model User {
 model VolunteerProfile {
   userId             Int                @id
   bio                String?
+  availability       Json?
+  serviceArea        String?            @map("service_area") @db.VarChar(255)
   verificationStatus VerificationStatus @default(PENDING)
   createdAt          DateTime           @default(now())
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  verifications VolunteerVerification[]
+  verifications     VolunteerVerification[]
+  supportCategories UserSupportCategory[]
 
   @@index([verificationStatus])
+  @@index([serviceArea])
   @@map("volunteer_profiles")
+}
+
+model SupportCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?
+  volunteers  UserSupportCategory[]
+
+  @@map("support_categories")
+}
+
+model UserSupportCategory {
+  id                Int @id @default(autoincrement())
+  volunteerId       Int @map("volunteer_id")
+  supportCategoryId Int @map("support_category_id")
+
+  volunteer       VolunteerProfile @relation(fields: [volunteerId], references: [userId], onDelete: Cascade)
+  supportCategory SupportCategory  @relation(fields: [supportCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([volunteerId, supportCategoryId])
+  @@map("user_support_categories")
 }
 
 model VolunteerVerification {
