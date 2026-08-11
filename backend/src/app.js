@@ -11,7 +11,6 @@ applyMiddleware(app);
 
 app.use('/api/hello', helloRoutes);
 app.use('/api/admin', adminRoutes);
-
 app.use('/api/auth', authRoutes);
 app.use('/api/help-requests', helpRequestRoutes);
 app.get('/', (req, res) => {

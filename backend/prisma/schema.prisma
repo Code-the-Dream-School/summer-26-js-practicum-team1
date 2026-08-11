@@ -109,7 +109,6 @@ model HelpRequest {
   address      String
   latitude     Float
   longitude    Float
-  placeId      String?
   description  String?
   status       RequestStatus @default(PENDING)
   createdAt    DateTime @default(now())

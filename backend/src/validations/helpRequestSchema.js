@@ -76,10 +76,7 @@ const createHelpRequestSchema = Joi.object({
       'any.required': 'Longitude is required',
     }),
 
-  placeId: Joi.string()
-    .trim()
-    .allow('')
-    .optional(),
+  
 
   description: Joi.string()
     .trim()
