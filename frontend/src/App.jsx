@@ -7,6 +7,7 @@ import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+import RequesterProfile from './pages/RequesterProfile';
 
 function App() {
   return (
@@ -26,6 +27,11 @@ function App() {
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
+      </Route>
+      <Route element={<RequesterProtectedRoute />}>
+        {/* Requester Routes */}
+        {/* TODO: Move profile route inside requester dashboard once ready */}
+        <Route path="profile" element={<RequesterProfile />} />
       </Route>
     </Routes>
   );
