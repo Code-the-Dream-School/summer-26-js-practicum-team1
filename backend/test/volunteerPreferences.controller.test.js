@@ -73,6 +73,15 @@ describe('GET /api/volunteers/me/preferences', () => {
       ],
     });
   });
+
+  it('returns 403 when the user has no volunteer profile', async () => {
+    prisma.volunteerProfile.findUnique.mockResolvedValue(null);
+
+    const res = await request(app).get('/api/volunteers/me/preferences');
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: 'Forbidden' });
+  });
 });
 
 describe('PUT /api/volunteers/me/preferences', () => {
@@ -80,7 +89,7 @@ describe('PUT /api/volunteers/me/preferences', () => {
     let lookupCount = 0;
     prisma.volunteerProfile.findUnique.mockImplementation(() => {
       lookupCount += 1;
-      if (lookupCount === 1) {
+      if (lookupCount <= 2) {
         return Promise.resolve({ userId: 5 });
       }
       return Promise.resolve({ userId: 5, ...savedProfile });
@@ -97,6 +106,18 @@ describe('PUT /api/volunteers/me/preferences', () => {
       where: { volunteerId: 5 },
     });
     expect(prisma.userSupportCategory.createMany).toHaveBeenCalled();
+  });
+
+  it('returns 403 without a volunteer profile', async () => {
+    prisma.volunteerProfile.findUnique.mockResolvedValue(null);
+
+    const res = await request(app)
+      .put('/api/volunteers/me/preferences')
+      .set(CSRF_HEADER)
+      .send(validBody);
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: 'Forbidden' });
   });
 
   it('returns 400 for invalid interest category ids', async () => {
