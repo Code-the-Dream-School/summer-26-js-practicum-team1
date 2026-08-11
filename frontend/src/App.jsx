@@ -5,8 +5,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
+import AdminVolunteerPreferencesPage from './pages/admin/AdminVolunteerPreferencesPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -20,9 +23,16 @@ function App() {
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
+          <Route
+            path="admin/volunteers/:id/preferences"
+            element={<AdminVolunteerPreferencesPage />}
+          />
           <Route path="admin/users" element={<UsersList />} />
         </Route>
         <Route path="signup" element={<SignupPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
