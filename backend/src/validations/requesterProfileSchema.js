@@ -37,7 +37,7 @@ const updateRequesterProfileSchema = Joi.object({
     .allow('', null)
     .messages({
       'string.max': 'Phone must be at most 20 characters',
-      'string.pattern.base': 'Enter a valid phone number',
+      'string.pattern.base': 'Enter a valid emergency contact number',
     }),
 })
   .min(1)
