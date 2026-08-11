@@ -32,7 +32,7 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 - **Fallback provider:** not built for MVP; OpenCage noted as a future option if needed.
 - **Trust boundary:** `address`/`lat`/`long`/`placeId` are client-submitted and not re-verified server-side — accepted MVP risk.
 
-## API: POST /api/requests
+## API:POST: /api/help-requests
 
 1. Authenticate → 401 if not logged in.
 2. Authorize `REQUESTER` role → 403 otherwise.
