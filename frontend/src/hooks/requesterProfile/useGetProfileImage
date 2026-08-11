@@ -1,0 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
+import { getRequesterProfileImage } from '../../services/requesterProfileApi';
+
+export function useGetProfileImage() {
+  return useQuery({
+    queryKey: ['profileImage'],
+    queryFn: getRequesterProfileImage,
+  });
+}
