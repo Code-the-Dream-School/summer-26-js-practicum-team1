@@ -6,6 +6,8 @@ const api = axios.create({
   withCredentials: true,
 });
 
+export default api;
+
 export async function getHello() {
   const { data } = await api.get('/api/hello');
   return data.message;
