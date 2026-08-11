@@ -7,6 +7,7 @@ const {
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
+const csrfMiddleware = require('../middleware/csrf.middleware');
 const validate = require('../middleware/validate.middleware');
 
 const {
@@ -16,6 +17,7 @@ const {
 router.post(
   '/',
   jwtMiddleware,
+  csrfMiddleware,
   validate(createHelpRequestSchema),
   createHelpRequest
 );
