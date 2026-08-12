@@ -8,7 +8,6 @@ User story: As a volunteer, I want to register for the platform so I can become 
 
 ## Scope
 
-- Create a `users` row with `VOLUNTEER`
 - Fields from the Prisma `User` model
 - Client and server validation
 - Duplicate email -> 409
@@ -16,18 +15,17 @@ User story: As a volunteer, I want to register for the platform so I can become 
 - Optional profile image upload
 - `POST /api/auth/register`
 
-
+## Out of scopre
 - Login / logout
-- Volunteer signup
 - Profile completion
-- Email varification
+- Email verification
 - Password verification
 
 --- 
 
 ## Flow
 
-Form submit -> client validation -> `POST /api/auth/register` -> server validation (fields + optional image) -> check duplicate email -> hash password -> create user with role `VOLUNTEER` -> 201
+Form submit -> client validation -> `POST /api/auth/register` -> server validation (fields + optional image) -> check duplicate email -> hash password -> create requester user + pending VolunteerProfile -> 201
 
 ---
 
@@ -49,7 +47,7 @@ Form submit -> client validation -> `POST /api/auth/register` -> server validati
 
 | Field | Messages |
 |-------|----------|
-| name (First name + Last Name) | `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters` |
+| name (Full Name) | `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters` |
 | email | `Email is required`, `Enter a valid email address` |
 | password | `Password is required`, `Password must be at least 8 characters`, `Password must be at most 72 characters`, `Password must include uppercase, lowercase, and a number` |
 | dob | `Date of birth is required`, `Date of birth must be YYYY-MM-DD`, `Date of birth cannot be in the future`, `You must be at least 18 years old`, `Enter a valid date of birth` |
@@ -57,7 +55,6 @@ Form submit -> client validation -> `POST /api/auth/register` -> server validati
 | phone | `Phone must be at most 20 characters`, `Enter a valid phone number` |
 | profileImage | `Profile picture must be a JPEG or PNG image`, `Profile picture must be at most 2MB` |
 | email (duplicate) | `This email is already registered` |
-| Volunteer preferences | `Select at least one category` |
 
 ---
 
@@ -71,12 +68,13 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
 
 ```json
 {
-  "name": "Jane Doe",
-  "email": "jane@example.com",
+  "name": "Jhon Doe",
+  "email": "jhon@example.com",
   "password": "!Test123",
   "dob": "1990-05-15",
   "gender": "MALE",
   "phone": "+1-555-123-4567",
+  "accountType": "volunteer"
 }
 ```
 
@@ -85,12 +83,13 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
 ```json
 {
   "name": "Jhon Doe",
-  "email": "jane@example.com",
+  "email": "jhon@example.com",
   "password": "!Test123",
   "dob": "1990-05-15",
   "gender": "MALE",
   "phone": "555-123-4567",
-  "profileImage": "userImage.png"
+  "profileImage": "userImage.png",
+  "accountType": "volunteer"
 }
 ```
 
@@ -102,7 +101,7 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
   "data": {
     "id": 1,
     "name": "Jhon Doe",
-    "role": "volunteer",
+    "role": "requester",
     "verificationStatus": "pending"
   }
 }
