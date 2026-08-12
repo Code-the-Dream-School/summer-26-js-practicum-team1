@@ -11,19 +11,38 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
-import { useGetProfile } from '../hooks/useGetProfile';
-import { useGetRequesterProfileImage } from '../hooks/useGetRequesterProfileImage';
-import EditProfileDialog from '../../components/requesterProfile/EditProfileDialog';
+import { useGetProfile } from '../hooks/requesterProfile/useGetProfile';
+import { useGetProfileImage } from '../hooks/requesterProfile/useGetProfileImage';
+import EditProfileDialog from '../components/requesterProfile/EditProfileDialog';
 
 function RequesterProfile() {
   const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    phone: '',
+    address: '',
+    city: '',
+    bio: '',
+    emergencyContact: '',
+  });
+
+  const handleEdit = () => {
+    setEditData({
+      phone: profile.phone || '',
+      address: requesterProfile?.address || '',
+      city: requesterProfile?.city || '',
+      bio: requesterProfile?.bio || '',
+      emergencyContact: requesterProfile?.emergencyContact || '',
+    });
+
+    setEditOpen(true);
+  };
 
   const { data, isLoading, isError } = useGetProfile();
   const {
     data: profileImage,
     isLoading: imageLoading,
     isError: imageError,
-  } = useGetRequesterProfileImage();
+  } = useGetProfileImage();
 
   const formattedRole =
     profile.role.charAt(0) + profile.role.slice(1).toLowerCase();
@@ -69,10 +88,7 @@ function RequesterProfile() {
             >
               <Typography variant="h5">My Profile</Typography>
 
-              <IconButton
-                aria-label="Edit profile"
-                onClick={() => setEditOpen(true)}
-              >
+              <IconButton aria-label="Edit profile" onClick={handleEdit}>
                 <EditIcon />
               </IconButton>
             </Stack>
@@ -121,11 +137,13 @@ function RequesterProfile() {
         </CardContent>
       </Card>
 
-      <EditProfileDialog
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        profile={profile}
-      />
+      {editOpen && (
+        <EditProfileDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          formData={editData}
+        />
+      )}
     </Box>
   );
 }
