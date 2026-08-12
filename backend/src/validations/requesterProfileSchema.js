@@ -36,7 +36,7 @@ const updateRequesterProfileSchema = Joi.object({
     .pattern(/^[\d\s()+-]+$/)
     .allow('', null)
     .messages({
-      'string.max': 'Phone must be at most 20 characters',
+      'string.max': ' Emergency contact number must be at most 20 characters',
       'string.pattern.base': 'Enter a valid emergency contact number',
     }),
 })
