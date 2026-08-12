@@ -82,6 +82,28 @@ const me = asyncHandler(async (req, res) => {
   return res.status(200).json(clientSession(req.user, req.auth.csrfToken));
 });
 
+const logLogoutAttempt = (req, { outcome, userId = null }) => {
+  console.log(
+    JSON.stringify({
+      event: 'logout_attempt',
+      outcome,
+      userId,
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    })
+  );
+};
+
+const logoff = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+
+  res.clearCookie('jwt', COOKIE_FLAGS);
+
+  logLogoutAttempt(req, { outcome: 'success', userId });
+
+  return res.status(200).json({ success: true });
+});
+
 const register = asyncHandler(async (req, res) => {
   const { accountType, ...fields } = req.body;
   const profileImage = req.file ? req.file.buffer : null;
@@ -112,4 +134,4 @@ const register = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { logon, me, register };
+module.exports = { logon, logoff, me, register };
