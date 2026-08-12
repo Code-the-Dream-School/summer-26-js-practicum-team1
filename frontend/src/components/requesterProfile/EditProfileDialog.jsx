@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -7,15 +8,16 @@ import {
   DialogTitle,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material';
 
-import { useUpdateProfile } from '../../hooks/requesterProfile/useUpdateProfile';
+import { useUpdateProfile } from '../hooks/requesterProfile/useUpdateProfile';
 
 function EditProfileDialog({ open, onClose, formData }) {
   const updateProfile = useUpdateProfile();
 
   const [form, setForm] = useState(formData);
+
+  const [errors, setErrors] = useState({});
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -24,12 +26,41 @@ function EditProfileDialog({ open, onClose, formData }) {
       ...previous,
       [name]: value,
     }));
+
+    setErrors((previous) => ({
+      ...previous,
+      [name]: '',
+      general: '',
+    }));
   };
 
   const handleSubmit = () => {
+    setErrors({});
+
     updateProfile.mutate(form, {
       onSuccess: () => {
         onClose();
+      },
+
+      onError: (error) => {
+        const details = error?.response?.data?.details;
+
+        if (details) {
+          const fieldErrors = {};
+
+          details.forEach((detail) => {
+            fieldErrors[detail.field] = detail.message;
+          });
+
+          setErrors(fieldErrors);
+          return;
+        }
+
+        setErrors({
+          general:
+            error?.response?.data?.error ||
+            'Unable to update profile. Please try again.',
+        });
       },
     });
   };
@@ -40,16 +71,15 @@ function EditProfileDialog({ open, onClose, formData }) {
 
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          {updateProfile.isError && (
-            <Typography color="error">
-              Unable to update profile. Please check your information.
-            </Typography>
-          )}
+          {errors.general && <Alert severity="error">{errors.general}</Alert>}
+
           <TextField
             name="phone"
             label="Phone"
             value={form.phone}
             onChange={handleChange}
+            error={Boolean(errors.phone)}
+            helperText={errors.phone}
             fullWidth
           />
 
@@ -58,6 +88,8 @@ function EditProfileDialog({ open, onClose, formData }) {
             label="Address"
             value={form.address}
             onChange={handleChange}
+            error={Boolean(errors.address)}
+            helperText={errors.address}
             fullWidth
           />
 
@@ -66,6 +98,8 @@ function EditProfileDialog({ open, onClose, formData }) {
             label="City"
             value={form.city}
             onChange={handleChange}
+            error={Boolean(errors.city)}
+            helperText={errors.city}
             fullWidth
           />
 
@@ -74,6 +108,8 @@ function EditProfileDialog({ open, onClose, formData }) {
             label="Bio"
             value={form.bio}
             onChange={handleChange}
+            error={Boolean(errors.bio)}
+            helperText={errors.bio}
             multiline
             rows={4}
             fullWidth
@@ -84,6 +120,8 @@ function EditProfileDialog({ open, onClose, formData }) {
             label="Emergency Contact"
             value={form.emergencyContact}
             onChange={handleChange}
+            error={Boolean(errors.emergencyContact)}
+            helperText={errors.emergencyContact}
             fullWidth
           />
         </Stack>
