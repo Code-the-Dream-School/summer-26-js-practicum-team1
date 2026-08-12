@@ -7,6 +7,7 @@ import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+import VolunteerRegistrationPage from './pages/VolunteerRegistrationPage';
 
 function App() {
   return (
@@ -24,7 +25,10 @@ function App() {
         </Route>
         <Route path="signup" element={<SignupPage />} />
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+        <Route
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
+        />
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
       </Route>
     </Routes>
