@@ -44,7 +44,7 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 
 **Response shape:**
 
-```json
+
 // success (201)
 { "success": true, "data": { ...request fields... } }
 // error (400/401/403)

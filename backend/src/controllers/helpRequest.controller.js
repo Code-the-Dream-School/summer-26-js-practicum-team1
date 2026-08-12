@@ -4,7 +4,7 @@ const helpRequestService = require('../services/helpRequest.service');
 const createHelpRequest = asyncHandler(async (req, res) => {
   const helpRequest = await helpRequestService.createHelpRequest({
     requesterId: req.user.id,
-    requesterRole: req.user.role,
+
     data: req.body,
   });
 
