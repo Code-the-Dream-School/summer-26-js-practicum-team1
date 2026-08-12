@@ -49,13 +49,13 @@ RequesterProfile
 
 ### Api Endpoints
 
-- GET/api/auth/profile
+- GET/api/requester/profile
 
-- PATCH/api/auth/profile
+- PATCH/api/requester/profile
 
-- GET/api/auth/profile/image
+- GET/api/requester/profile/image
 
-- PATCH/api/auth/profile/image
+- PATCH/api/requester/profile/image
 
 ### GET Flow
 
