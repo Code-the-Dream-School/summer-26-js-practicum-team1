@@ -45,7 +45,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe('GET /api/auth/profile', () => {
+describe('GET /api/requester/profile', () => {
   it('gets the requester profile', async () => {
     const profile = {
       id: 1,
@@ -65,7 +65,7 @@ describe('GET /api/auth/profile', () => {
 
     profileService.getProfile.mockResolvedValue(profile);
 
-    const res = await request(app).get('/api/auth/profile');
+    const res = await request(app).get('/api/requester/profile');
 
     expect(res.status).toBe(200);
 
@@ -84,7 +84,7 @@ describe('GET /api/auth/profile', () => {
       })
     );
 
-    const res = await request(app).get('/api/auth/profile');
+    const res = await request(app).get('/api/requester/profile');
 
     expect(res.status).toBe(404);
 
@@ -92,7 +92,7 @@ describe('GET /api/auth/profile', () => {
   });
 });
 
-describe('PATCH/api/auth/profile', () => {
+describe('PATCH/api/requester/profile', () => {
   it('updates the requester profile', async () => {
     const updateData = {
       phone: '1234567890',
@@ -120,7 +120,9 @@ describe('PATCH/api/auth/profile', () => {
 
     profileService.updateProfile.mockResolvedValue(updatedProfile);
 
-    const res = await request(app).patch('/api/auth/profile').send(updateData);
+    const res = await request(app)
+      .patch('/api/requester/profile')
+      .send(updateData);
 
     expect(res.status).toBe(200);
 
@@ -132,7 +134,7 @@ describe('PATCH/api/auth/profile', () => {
   });
 
   it('rejects invalid profile data', async () => {
-    const res = await request(app).patch('/api/auth/profile').send({
+    const res = await request(app).patch('/api/requester/profile').send({
       phone: 1234,
     });
 
@@ -144,14 +146,14 @@ describe('PATCH/api/auth/profile', () => {
   });
 });
 
-describe('PATCH /api/auth/profile/image', () => {
+describe('PATCH /api/requester/profile/image', () => {
   it('updates the requester profile image', async () => {
     profileService.updateProfileImage.mockResolvedValue({
       id: 1,
     });
 
     const res = await request(app)
-      .patch('/api/auth/profile/image')
+      .patch('/api/requester/profile/image')
       .attach('profileImage', tinyPng, {
         filename: 'avatar.png',
         contentType: 'image/png',
@@ -177,9 +179,19 @@ describe('PATCH /api/auth/profile/image', () => {
     expect(imageBuffer.length).toBeGreaterThan(0);
   });
 
+  it('should return 400 when no profile image is provided', async () => {
+    const response = await request(app).patch('/api/requester/profile/image');
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      success: false,
+      message: 'Profile image file is required',
+    });
+  });
+
   it('rejects a non-image file', async () => {
     const res = await request(app)
-      .patch('/api/auth/profile/image')
+      .patch('/api/requester/profile/image')
       .attach('profileImage', Buffer.from('%PDF-1.4'), {
         filename: 'file.pdf',
         contentType: 'application/pdf',
@@ -204,7 +216,7 @@ describe('PATCH /api/auth/profile/image', () => {
     const largeImage = Buffer.alloc(2 * 1024 * 1024 + 1);
 
     const res = await request(app)
-      .patch('/api/auth/profile/image')
+      .patch('/api/requester/profile/image')
       .attach('profileImage', largeImage, {
         filename: 'large.jpg',
         contentType: 'image/jpeg',
@@ -226,7 +238,7 @@ describe('PATCH /api/auth/profile/image', () => {
   });
 });
 
-describe('GET /api/auth/profile/image', () => {
+describe('GET /api/requester/profile/image', () => {
   it('gets the requester profile image', async () => {
     const imageBuffer = Buffer.from('test image data');
 
@@ -235,7 +247,9 @@ describe('GET /api/auth/profile/image', () => {
       profileImageType: 'image/jpeg',
     });
 
-    const res = await request(app).get('/api/auth/profile/image').buffer(true);
+    const res = await request(app)
+      .get('/api/requester/profile/image')
+      .buffer(true);
 
     expect(res.status).toBe(200);
 
@@ -254,7 +268,9 @@ describe('GET /api/auth/profile/image', () => {
       profileImageType: 'image/png',
     });
 
-    const res = await request(app).get('/api/auth/profile/image').buffer(true);
+    const res = await request(app)
+      .get('/api/requester/profile/image')
+      .buffer(true);
 
     expect(res.status).toBe(200);
 
@@ -273,7 +289,7 @@ describe('GET /api/auth/profile/image', () => {
       })
     );
 
-    const res = await request(app).get('/api/auth/profile/image');
+    const res = await request(app).get('/api/requester/profile/image');
 
     expect(res.status).toBe(404);
 
