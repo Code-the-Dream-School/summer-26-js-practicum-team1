@@ -35,16 +35,13 @@ Form submit -> client validation -> `POST /api/auth/register` -> server validati
 
 | Field | API key | Required | Rules |
 |-------|---------|----------|-------|
-| First Name | `name` | yes | trim, 2–100 chars, letters / spaces / hyphens / apostrophes |
-| Last Name | `name` | yes | trim, 2–100 chars, letters / spaces / hyphens / apostrophes |
+| Full Name | `name` | yes | trim, 2–100 chars, letters / spaces / hyphens / apostrophes |
 | Email | `email` | yes | trim, lowercase, valid email, max 255, unique |
 | Phone | `phone` | no | max 20; digits, spaces, `+ - ( )`; empty → `null` |
 | Gender | `gender` | yes | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
 | Date of Birth | `dob` | yes | `YYYY-MM-DD`, not future, age 18–120 |
-| Address | `address` | yes | 
 | Profile picture | `profileImage` | no | JPEG or PNG only; max 2MB; stored as `profileImage` (`Bytes`); sent as multipart file |
 | Password | `password` | yes | 8–72 chars, pattern: (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/); stored as bcrypt hash |
-| Volunteer Preferences | `volunteerPreferences` | yes | array of strings; min 1 selected; each value must be one of the allowed categories; no duplicates |
 
 ---
 
@@ -79,9 +76,7 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
   "password": "!Test123",
   "dob": "1990-05-15",
   "gender": "MALE",
-  "phone": "555-123-4567",
-  "volunteerPreferences": ["Errands and transportation", "Technology support"],
-  "address": "123 Market St., #15, San Francisco, CA 94102"
+  "phone": "+1-555-123-4567",
 }
 ```
 
@@ -95,7 +90,6 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
   "dob": "1990-05-15",
   "gender": "MALE",
   "phone": "555-123-4567",
-  "volunteerPreferences": ["Errands and transportation", "Technology support"],
   "profileImage": "userImage.png"
 }
 ```
