@@ -39,7 +39,7 @@ Form submit -> client validation -> `POST /api/auth/register` -> server validati
 | Gender | `gender` | yes | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
 | Date of Birth | `dob` | yes | `YYYY-MM-DD`, not future, age 18–120 |
 | Profile picture | `profileImage` | no | JPEG or PNG only; max 2MB; stored as `profileImage` (`Bytes`); sent as multipart file |
-| Password | `password` | yes | 8–72 chars, pattern: (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).+$/); stored as bcrypt hash |
+| Password | `password` | yes | 8–72 chars, pattern: (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,72}$/); stored as bcrypt hash |
 
 ---
 
@@ -97,13 +97,10 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
 
 ```json
 {
-  "success": true,
-  "data": {
     "id": 1,
     "name": "Jhon Doe",
     "role": "requester",
     "verificationStatus": "pending"
-  }
 }
 ```
 
