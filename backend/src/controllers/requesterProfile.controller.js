@@ -1,5 +1,6 @@
 const profileService = require('../services/requesterProfile.service');
 const asyncHandler = require('../utils/asyncHandler');
+const ApiError = require('../utils/ApiError');
 
 const getProfile = asyncHandler(async (req, res) => {
   const profile = await profileService.getProfile(req.user.id);
@@ -18,6 +19,9 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const updateProfileImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, 'Profile image file is required');
+  }
   const profileImage = await profileService.updateProfileImage(
     req.user.id,
     req.file.buffer,
