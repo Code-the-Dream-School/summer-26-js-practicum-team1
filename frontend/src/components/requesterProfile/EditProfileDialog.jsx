@@ -10,7 +10,7 @@ import {
   TextField,
 } from '@mui/material';
 
-import { useUpdateProfile } from '../hooks/requesterProfile/useUpdateProfile';
+import { useUpdateProfile } from '../../hooks/requesterProfile/useUpdateProfile';
 
 function EditProfileDialog({ open, onClose, formData }) {
   const updateProfile = useUpdateProfile();
