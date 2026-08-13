@@ -8,6 +8,7 @@ import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
+import HelpRequest from './pages/helpRequest';
 function App() {
   return (
     <Routes>
@@ -17,6 +18,7 @@ function App() {
         <Route path="login" element={<Login />} />
         {/*requester routes*/}
         <Route path="/requester-dashboard" element={<RequesterDashboard />} />
+        <Route path="/helpRequest" element={<HelpRequest/>} />
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />

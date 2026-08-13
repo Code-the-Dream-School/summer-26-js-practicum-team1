@@ -23,7 +23,7 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import LogoutIcon from '@mui/icons-material/Logout';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-
+import { useNavigate } from 'react-router-dom';
 const mockPendingRequests = [  
   {
     id: 1,
@@ -208,7 +208,7 @@ function RequestCard({ request, accepted = false }) {
 
 export default function RequesterDashboard() {
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
-
+    const navigate = useNavigate();
   const profileMenuOpen = Boolean(profileMenuAnchor);
 
   const handleProfileClick = (event) => {
@@ -226,11 +226,11 @@ export default function RequesterDashboard() {
 
   const handleSignOut = () => {
     handleProfileClose();
-    console.log('Sign Out clicked');
+   navigate('/')
   };
 
   const handleNewRequest = () => {
-    console.log('New Help Request clicked');
+    navigate('/helpRequest');
   };
 
   return (
