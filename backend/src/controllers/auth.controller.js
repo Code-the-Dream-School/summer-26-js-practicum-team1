@@ -1,7 +1,7 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyCredentials, createRequester } = require('../services/auth.service');
+const { verifyCredentials, createRequester, createVolunteerApplicant } = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -82,10 +82,49 @@ const me = asyncHandler(async (req, res) => {
   return res.status(200).json(clientSession(req.user, req.auth.csrfToken));
 });
 
+const logLogoutAttempt = (req, { outcome, userId = null }) => {
+  console.log(
+    JSON.stringify({
+      event: 'logout_attempt',
+      outcome,
+      userId,
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    })
+  );
+};
+
+const logoff = asyncHandler(async (req, res) => {
+  const userId = req.user?.id;
+
+  res.clearCookie('jwt', COOKIE_FLAGS);
+
+  logLogoutAttempt(req, { outcome: 'success', userId });
+
+  return res.status(200).json({ success: true });
+});
+
 const register = asyncHandler(async (req, res) => {
+  const { accountType, ...fields } = req.body;
+  const profileImage = req.file ? req.file.buffer : null;
+
+  if (accountType === 'volunteer') {
+    const user = await createVolunteerApplicant({
+      ...fields,
+      profileImage,
+    });
+
+    return res.status(201).json({
+      id: user.id,
+      name: user.name,
+      role: user.role.toLowerCase(),
+      verificationStatus: 'pending',
+    });
+  }
+
   const user = await createRequester({
-    ...req.body,
-    profileImage: req.file ? req.file.buffer : null,
+    ...fields,
+    profileImage,
   });
 
   return res.status(201).json({
@@ -95,4 +134,4 @@ const register = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { logon, me, register };
+module.exports = { logon, logoff, me, register };
