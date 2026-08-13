@@ -11,6 +11,15 @@ const csrfMiddleware = require('../middleware/csrf.middleware');
 const {
   updateRequesterProfileSchema,
 } = require('../validations/requesterProfileSchema');
+const {
+  updatePreferencesSchema,
+} = require('../validations/volunteerPreferencesSchema');
+
+const volunteerOnly = require('../middleware/volunteerProfileMiddleware');
+const {
+  getPreferences,
+  updatePreferences,
+} = require('../controllers/volunteerPreferences.controller');
 
 const {
   getProfile,
@@ -38,6 +47,17 @@ router.patch(
   requesterOnly,
   profileImageUpload,
   updateProfileImage
+);
+
+router.get('/preferences', jwtMiddleware, volunteerOnly, getPreferences);
+
+router.put(
+  '/preferences',
+  jwtMiddleware,
+  csrfMiddleware,
+  volunteerOnly,
+  validate(updatePreferencesSchema),
+  updatePreferences
 );
 
 router.get('/image', jwtMiddleware, requesterOnly, getProfileImage);
