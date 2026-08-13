@@ -13,7 +13,7 @@ applyMiddleware(app);
 app.use('/api/hello', helloRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/requester/profile', requesterProfileRoutes);
+app.use('/api/profile', requesterProfileRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend API is running');
