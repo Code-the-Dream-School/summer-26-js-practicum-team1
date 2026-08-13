@@ -7,7 +7,7 @@ import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
-
+import RequesterDashboard from './pages/Requester/RequesterDashboard';
 function App() {
   return (
     <Routes>
@@ -15,7 +15,8 @@ function App() {
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
-
+        {/*requester routes*/}
+        <Route path="/requester-dashboard" element={<RequesterDashboard />} />
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
