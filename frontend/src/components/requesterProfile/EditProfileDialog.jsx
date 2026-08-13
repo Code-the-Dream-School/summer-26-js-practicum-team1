@@ -67,7 +67,9 @@ function EditProfileDialog({ open, onClose, formData }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Edit Profile</DialogTitle>
+      <DialogTitle variant="h5" sx={{ fontWeight: 700 }}>
+        Edit Profile
+      </DialogTitle>
 
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -128,7 +130,20 @@ function EditProfileDialog({ open, onClose, formData }) {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={updateProfile.isPending}>
+        <Button
+          onClick={onClose}
+          disabled={updateProfile.isPending}
+          sx={{
+            borderRadius: 1,
+            boxShadow: 3,
+            transition: '0.3s',
+
+            '&:hover': {
+              boxShadow: 8,
+              transform: 'translateY(-4px)',
+            },
+          }}
+        >
           Cancel
         </Button>
 
@@ -136,6 +151,16 @@ function EditProfileDialog({ open, onClose, formData }) {
           variant="contained"
           onClick={handleSubmit}
           disabled={updateProfile.isPending}
+          sx={{
+            borderRadius: 1,
+            boxShadow: 3,
+            transition: '0.3s',
+
+            '&:hover': {
+              boxShadow: 8,
+              transform: 'translateY(-4px)',
+            },
+          }}
         >
           {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
         </Button>

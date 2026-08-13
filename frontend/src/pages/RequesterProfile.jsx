@@ -104,50 +104,91 @@ function RequesterProfile() {
           boxShadow: 3,
         }}
       >
-        <CardContent>
+        <CardContent sx={{ ml: 5 }}>
           <Stack spacing={3}>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
-              <Typography variant="h5">My Profile</Typography>
+              <Typography variant="h3" sx={{ fontWeight: 700 }}>
+                {profile.name}
+              </Typography>
 
-              <IconButton aria-label="Edit profile" onClick={handleEdit}>
-                <EditIcon />
-              </IconButton>
-            </Stack>
-
-            <Divider />
-
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <Avatar
-                src={`${API_URL}/api/profile/image?v=${imageVersion}`}
+              <Button
+                aria-label="Edit profile"
+                onClick={handleEdit}
+                variant="contained"
                 sx={{
-                  width: 110,
-                  height: 110,
+                  borderRadius: 1,
+                  boxShadow: 3,
+                  transition: '0.3s',
+
+                  '&:hover': {
+                    boxShadow: 8,
+                    transform: 'translateY(-4px)',
+                  },
                 }}
               >
-                {profile.name?.charAt(0)}
-              </Avatar>
+                <>
+                  Edit Profile <EditIcon fontSize="small" sx={{ ml: 2 }} />
+                </>
+              </Button>
+            </Stack>
 
-              <Box>
-                <Typography variant="h6">{profile.name}</Typography>
+            <Divider sx={{ borderBottomWidth: 3 }} />
 
-                <Typography variant="body2" color="text.secondary">
-                  I am a {formattedRole}
-                </Typography>
+            <Stack
+              direction="row"
+              spacing={25}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
+              <Stack
+                direction="column"
+                spacing={3}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
+                <Avatar
+                  src={`${API_URL}/api/profile/image?v=${imageVersion}`}
+                  sx={{
+                    width: 130,
+                    height: 130,
+                  }}
+                >
+                  {profile.name?.charAt(0).toUpperCase()}
+                </Avatar>
 
                 <Button
                   component="label"
-                  variant="outlined"
-                  size="small"
-                  sx={{ mt: 1 }}
+                  variant="contained"
                   disabled={updateProfileImage.isPending}
+                  sx={{
+                    borderRadius: 1,
+                    boxShadow: 3,
+                    transition: '0.3s',
+
+                    '&:hover': {
+                      boxShadow: 8,
+                      transform: 'translateY(-4px)',
+                    },
+                  }}
                 >
-                  {updateProfileImage.isPending
-                    ? 'Uploading...'
-                    : 'Change Profile Image'}
+                  {updateProfileImage.isPending ? (
+                    <CircularProgress
+                      color="success"
+                      aria-label="Uploading Image"
+                    />
+                  ) : (
+                    <>
+                      Edit Image <EditIcon fontSize="small" sx={{ ml: 2 }} />
+                    </>
+                  )}
 
                   <input
                     type="file"
@@ -158,14 +199,22 @@ function RequesterProfile() {
                 </Button>
 
                 {updateProfileImage.isError && (
-                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="error">
                     Failed to update profile image.
                   </Typography>
                 )}
-              </Box>
+              </Stack>
+
+              <Typography
+                variant="h5"
+                color="text.secondary"
+                sx={{ fontWeight: 700 }}
+              >
+                I am a {formattedRole}
+              </Typography>
             </Stack>
 
-            <Stack spacing={2}>
+            <Stack spacing={4}>
               <ProfileField label="Name" value={profile.name} />
 
               <ProfileField label="Email" value={profile.email} />
@@ -201,11 +250,17 @@ function RequesterProfile() {
 function ProfileField({ label, value }) {
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="h9" color="text.primary" sx={{ fontWeight: 700 }}>
         {label}
       </Typography>
 
-      <Typography variant="body1">{value || 'Not provided'}</Typography>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ fontWeight: 200 }}
+      >
+        {value || 'Not provided'}
+      </Typography>
     </Box>
   );
 }
