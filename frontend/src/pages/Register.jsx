@@ -26,14 +26,29 @@ const GENDER_OPTIONS = [
     value: 'OTHER',
     label: 'Other',
   },
-  { value: 'PREFER_NOT_TO_SAY', label: 'Prefer not to say' },
+  {
+    value: 'PREFER_NOT_TO_SAY',
+    label: 'Prefer not to say',
+  },
 ];
+
 const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Something went wrong. Please try again',
   VALIDATION_FAILED: 'Please check your information and try again',
   REGISTER_FAILED: 'Registration failed. Please try again',
 };
+const textFieldSx = {
+  mb: 2,
 
+  '& .MuiOutlinedInput-root': {
+    backgroundColor: '#fff',
+    transition: 'background-color 0.2s ease',
+
+    '&:hover': {
+      backgroundColor: '#eaeef1ff',
+    },
+  },
+};
 function Register() {
   const {
     register,
@@ -42,7 +57,12 @@ function Register() {
     formState: { errors },
   } = useForm();
 
-  const { register: registerAccount, registerError, isRegistering } = useAuth();
+  const {
+    register: registerAccount,
+    registerError,
+    isRegistering,
+  } = useAuth();
+
   const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
 
@@ -51,6 +71,7 @@ function Register() {
   const onSubmit = async (formData) => {
     try {
       const userData = new FormData();
+
       userData.append('name', formData.name);
       userData.append('email', formData.email);
       userData.append('password', formData.password);
@@ -68,257 +89,313 @@ function Register() {
     } catch (error) {
       console.error('Registration failed:', error);
     }
+  };
 
-    const errorMessage =
-      registerError &&
-      (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
+  const errorMessage =
+    registerError &&
+    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
 
-    return (
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '55vh',
+        px: 2,
+      }}
+    >
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '55vh',
-          px: 2,
+          width: '100%',
+       maxWidth: { xs: 400, sm: 550, md: 600 },
+          bgcolor: 'background.paper',
+          borderRadius: '24px',
+          p: { xs: 3, sm: 4, md: 5 },
         }}
       >
         <Box
           sx={{
-            width: '100%',
-            maxWidth: { xs: 400, sm: 460, md: 500 },
-            bgcolor: 'background.paper',
-            borderRadius: '24px',
-            p: { xs: 3, sm: 4, md: 5 },
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 4,
           }}
         >
           <Box
+            component="img"
+            src={logo}
+            alt="Neighborhood Helper Logo"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 4,
+              width: 25,
+              height: 25,
             }}
-          >
-            <Box
-              component="img"
-              src={logo}
-              alt="Neighborhood Helper Logo"
-              sx={{
-                width: 25,
-                height: 25,
-              }}
-            />
-
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 700,
-              }}
-            >
-              Neighborhood Helper
-            </Typography>
-          </Box>
+          />
 
           <Typography
-            variant="h5"
+            variant="subtitle1"
             sx={{
               fontWeight: 700,
-              mb: 3,
             }}
           >
-            Create account
+            Neighborhood Helper
           </Typography>
+        </Box>
 
-          {errorMessage && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {errorMessage}
-            </Alert>
-          )}
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            mb: 3,
+          }}
+        >
+          Create account
+        </Typography>
 
-          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <TextField
-              label="Full Name"
-              fullWidth
-              sx={{ mb: 2 }}
+        {errorMessage && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
 
-              {...register('name', {
-                required: 'Full name is required',
-              })}
+       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+  <TextField
+    label="Full Name"
+    fullWidth
+    sx={textFieldSx}
+    {...register('name', {
+      required: 'Full name is required',
+    })}
+    error={!!errors.name}
+    helperText={errors.name?.message}
+  />
 
-              error={!!errors.name}
-              helperText={errors.name?.message}
-            />
-            <TextField
-              label="Email"
-              type="email"
-              fullWidth
-              sx={{ mb: 2 }}
+  <TextField
+    
+            label="Email"
+            type="email"
+            fullWidth
+             sx={textFieldSx}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: 'Enter a valid email address',
+              },
+            })}
+            error={!!errors.email}
+            helperText={errors.email?.message}
+          />
 
-              {...register('email', {
-                required: 'Email is required',
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+           sx={textFieldSx}
+            {...register('password', {
+              required: 'Password is required',
+              minLength: {
+                value: 8,
+                message: 'Password must be at least 8 characters',
+              },
+              pattern: {
+                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                message:
+                  'Password must include uppercase, lowercase, and a number',
+              },
+            })}
+            error={!!errors.password}
+            helperText={errors.password?.message}
+          />
 
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: 'Enter a valid email address',
-                },
-              })}
+          <TextField
+            label="Confirm Password"
+            type="password"
+            fullWidth
+            sx={textFieldSx}
+            {...register('confirmPassword', {
+              required: 'Confirm password is required',
+              validate: (value) =>
+                value === password || 'Passwords do not match',
+            })}
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword?.message}
+          />
 
-              error={!!errors.email}
-              helperText={errors.email?.message}
-            />
+          <TextField
+            label="Date of Birth"
+            type="date"
+            fullWidth
+            slotProps={{
+              inputLabel: { shrink: true },
+            }}
+           sx={textFieldSx}
+            {...register('dob', {
+              required: 'Date of birth is required',
+              validate: (value) => {
+                const today = new Date();
+                const birth = new Date(value);
 
-            <TextField
-              label="Password"
-              type="password"
-              fullWidth
-              sx={{ mb: 2 }}
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDifference =
+                  today.getMonth() - birth.getMonth();
 
-              {...register('password', {
-                required: 'Password is required',
+                if (
+                  monthDifference < 0 ||
+                  (monthDifference === 0 &&
+                    today.getDate() < birth.getDate())
+                ) {
+                  age -= 1;
+                }
 
-                minLength: {
-                  value: 8,
-                  message: 'Password must be at least 8 characters',
-                },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-                  message:
-                    'Password must include uppercase, lowercase, and a number',
-                },
-              })}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-            />
-            <TextField
-              label="Confirm Password"
-              type="password"
-              fullWidth
-              sx={{ mb: 2 }}
+                if (birth > today) {
+                  return 'Date of birth cannot be in the future';
+                }
 
-              {...register('confirmPassword', {
-                required: 'Confirm password is required',
+                if (age < 18) {
+                  return 'You must be at least 18 years old';
+                }
 
-                validate: (value) =>
-                  value === password || 'Passwords do not match',
-              })}
+                if (age > 120) {
+                  return 'Enter a valid date of birth';
+                }
 
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword?.message}
-            />
+                return true;
+              },
+            })}
+            error={!!errors.dob}
+            helperText={errors.dob?.message}
+          />
 
-            <TextField
-              label="Date of Birth"
-              type="date"
-              fullWidth
-              slotProps={{
-                inputLabel: { shrink: true },
+          <TextField
+            select
+            label="Gender"
+            fullWidth
+            defaultValue=""
+           sx={textFieldSx}
+            {...register('gender', {
+              required: 'Gender is required',
+            })}
+            error={!!errors.gender}
+            helperText={errors.gender?.message}
+          >
+            {GENDER_OPTIONS.map((gender) => (
+              <MenuItem key={gender.value} value={gender.value}>
+                {gender.label}
+              </MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            label="Phone Number"
+            type="tel"
+            fullWidth
+          sx={textFieldSx}
+            {...register('phone', {
+              required: 'Phone number is required',
+              validate: (value)=>{
+                const digits =value.replace(/\D/g,'');
+                if (digits.length<10){
+                  return 'Phone number must contain at least 10 digits';
+
+                }
+                 if (digits.length > 15) {
+        return 'Phone number cannot exceed 15 digits';
+      }
+
+      return true;
+    },
+  })}
+  slotProps={{
+    htmlInput: {
+      inputMode: 'tel',
+      onInput: (e) => {
+        
+        e.target.value = e.target.value
+          .replace(/[^0-9()\-\s]/g, '');
+
+    
+        const digits = e.target.value.replace(/\D/g, '');
+
+        if (digits.length > 15) {
+          let count = 0;
+
+          e.target.value = e.target.value
+            .split('')
+            .filter((char) => {
+              if (/\d/.test(char)) {
+                count++;
+                return count <= 15;
+              }
+              return true;
+            })
+            .join('');
+        }
+      },
+    },
+  }}
+  error={!!errors.phone}
+  helperText={errors.phone?.message}
+/>
+
+          <ProfileImageUpload onFileChange={setProfileImage} />
+
+        <Button
+  type="submit"
+  variant="contained"
+  fullWidth
+  disabled={isRegistering}
+  disableElevation
+  sx={{
+    py: 1.3,
+    fontSize: '1rem',
+    backgroundColor: '#1B741B',
+    transition: 'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
+
+    '&:hover': {
+      backgroundColor: '#385d38ff ',
+      transform: 'translateY(-4px) scale(1.02)',
+      boxShadow: '0 8px 20px rgba(27, 116, 27, 0.4)',
+    },
+
+    '&:active': {
+      transform: 'translateY(-1px) scale(1)',
+      boxShadow: '0 3px 8px rgba(185, 226, 185, 0.3)',
+    },
+  }}
+>
+  {isRegistering ? 'Creating account...' : 'Register'}
+</Button>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              textAlign: 'center',
+              mt: 3,
+            }}
+          >
+            Already have an account?{' '}
+            <Link
+              to="/login"
+              style={{
+                color: 'inherit',
+                fontWeight: 600,
               }}
-              sx={{ mb: 2 }}
-
-              {...register('dob', {
-                required: 'Date of birth is required',
-                validate: (value) => {
-                  const today = new Date();
-                  const birth = new Date(value);
-                  let age = today.getFullYear() - birth.getFullYear();
-                  const m = today.getMonth() - birth.getMonth();
-                  if (m < 0 || (m === 0 && today.getDate() < birth.getDate()))
-                    age -= 1;
-                  if (birth > today)
-                    return 'Date of birth cannot be in the future';
-                  if (age < 18) return 'You must be at least 18 years old';
-                  if (age > 120) return 'Enter a valid date of birth';
-                  return true;
-                },
-              })}
-              error={!!errors.dob}
-              helperText={errors.dob?.message}
-            />
-            <TextField
-              select
-              label="Gender"
-              fullWidth
-              defaultValue=""
-              sx={{ mb: 2 }}
-
-              {...register('gender', {
-                required: 'Gender is required',
-              })}
-
-              error={!!errors.gender}
-              helperText={errors.gender?.message}
             >
-              {GENDER_OPTIONS.map((gender) => (
-                <MenuItem key={gender.value} value={gender.value}>
-                  {gender.label}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              label="Phone Number"
-              fullWidth
-              sx={{ mb: 3 }}
-              {...register('phone', {
-                required: 'Phone number is required',
-                pattern: {
-                  value: /^\d{11}$/,
-                  message: 'Phone number must be exactly 11 digits',
-                },
-              })}
-              error={!!errors.phone}
-              helperText={errors.phone?.message}
-            />
-
-            <ProfileImageUpload onFileChange={setProfileImage} />
-
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={isRegistering}
-              disableElevation
-              sx={{
-                py: 1.3,
-                fontSize: '1rem',
-                mt: 3,
-              }}
-            >
-              {isRegistering ? 'Creating account...' : 'Register'}
-            </Button>
-
-            <Typography
-              variant="body2"
-              color="text.secondary"
-
-              sx={{
-                textAlign: 'center',
-                mt: 3,
-              }}
-            >
-              Already have an account?{' '}
-              <Link
-                to="/login"
-                style={{
-                  color: 'inherit',
-                  fontWeight: 600,
+              <Box
+                component="span"
+                sx={{
+                  color: 'primary.main',
                 }}
               >
-                <Box
-                  component="span"
-                  sx={{
-                    color: 'primary.main',
-                  }}
-                >
-                  Login
-                </Box>
-              </Link>
-            </Typography>
-          </Box>
+                Login
+              </Box>
+            </Link>
+          </Typography>
         </Box>
       </Box>
-    );
-  };
+    </Box>
+  );
 }
+
 export default Register;

@@ -63,8 +63,15 @@ function ProfileImageUpload({ onFileChange }) {
   };
 
   return (
-    <Box sx={{ mt: 2 }}>
-      <Typography sx={{ mb: 1 }}>Profile Picture</Typography>
+    <Box
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 3,
+    mb: 1,
+  }}
+>
+      <Typography>Profile Picture</Typography>
 
       <Button
         variant="outlined"
