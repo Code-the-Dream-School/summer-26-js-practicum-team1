@@ -24,18 +24,18 @@ const PAGES = [
 
 const ROLE_SETTINGS = {
   requester: [
-    { label: 'Profile', path: '/' },
-    { label: 'Account', path: '/' },
+    { label: 'Profile', path: '/profile' },
+    { label: 'Account', path: '/profile' },
     { label: 'My Requests', path: '/' },
   ],
   volunteer: [
-    { label: 'Profile', path: '/' },
-    { label: 'Account', path: '/' },
+    { label: 'Profile', path: '/profile' },
+    { label: 'Account', path: '/profile' },
     { label: 'My Offers', path: '/' },
   ],
   admin: [
-    { label: 'Profile', path: '/' },
-    { label: 'Account', path: '/' },
+    { label: 'Profile', path: '/profile' },
+    { label: 'Account', path: '/profile' },
     { label: 'Admin Dashboard', path: '/admin/dashboard' },
     { label: 'Pending Volunteers', path: '/admin/volunteers' },
     { label: 'User Management', path: '/admin/users' },
