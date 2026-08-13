@@ -122,7 +122,7 @@ function RequesterProfile() {
 
             <Stack direction="row" alignItems="center" spacing={2}>
               <Avatar
-                src={`${API_URL}/api/auth/profile/image?v=${imageVersion}`}
+                src={`${API_URL}/api/profile/image?v=${imageVersion}`}
                 sx={{
                   width: 110,
                   height: 110,

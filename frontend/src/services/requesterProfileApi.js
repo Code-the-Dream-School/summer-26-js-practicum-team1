@@ -7,12 +7,12 @@ const requesterProfileApi = axios.create({
 });
 
 export const getRequesterProfile = async () => {
-  const { data } = await requesterProfileApi.get('/api/auth/profile');
+  const { data } = await requesterProfileApi.get('/api/profile');
   return data;
 };
 
 export const getRequesterProfileImage = async () => {
-  const { data } = await requesterProfileApi.get('/api/auth/profile/image', {
+  const { data } = await requesterProfileApi.get('/api/profile/image', {
     responseType: 'blob',
   });
   return data;
@@ -20,7 +20,7 @@ export const getRequesterProfileImage = async () => {
 
 export const updateRequesterProfile = async (profileData, csrfToken) => {
   const { data } = await requesterProfileApi.patch(
-    '/api/auth/profile',
+    '/api/profile',
     profileData,
     {
       headers: {
@@ -37,7 +37,7 @@ export const updateRequesterProfileImage = async (imageFile, csrfToken) => {
   formData.append('profileImage', imageFile);
 
   const { data } = await requesterProfileApi.patch(
-    '/api/auth/profile/image',
+    '/api/profile/image',
     formData,
     {
       headers: {
