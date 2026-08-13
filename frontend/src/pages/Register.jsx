@@ -93,7 +93,8 @@ function Register() {
 
   const errorMessage =
     registerError &&
-    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
+    (ERROR_MESSAGES[registerError.message] ?? 
+      ERROR_MESSAGES.REGISTER_FAILED);
 
   return (
     <Box
