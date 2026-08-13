@@ -16,9 +16,17 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import GoogleIcon from '@mui/icons-material/Google';
 import { useState } from 'react';
+
+const ERROR_MESSAGES = {
+  EMAIL_TAKEN: 'This email is already registered',
+  VALIDATION_ERROR: 'Please check the fields and try again',
+  NETWORK_ERROR: 'Something went wrong. Please try again',
+  REGISTER_FAILED: 'Something went wrong. Please try again',
+};
 
 function VolunteerRegistrationForm() {
   const {
@@ -29,8 +37,38 @@ function VolunteerRegistrationForm() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = () => {
-    // Intentionally not wired yet.
+  const {
+    register: registerVolunteer,
+    registerError,
+    isRegistering,
+  } = useAuth();
+  const navigate = useNavigate();
+
+  const serverErrorMessage =
+    registerError &&
+    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
+
+  const onSubmit = async (formData) => {
+    const { confirmPassword: _confirmPassword, dob, phone, ...rest } = formData;
+    const payload = {
+      ...rest,
+      dob: dob.format('YYYY-MM-DD'),
+      ...(phone ? { phone } : {}),
+      accountType: 'volunteer',
+    };
+
+    try {
+      await registerVolunteer(payload);
+      navigate('/login', {
+        state: {
+          message:
+            'Account created. Your volunteer application is pending approval.',
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      // no navigation — stay on this page, registerError drives the Alert below
+    }
   };
 
   const [showPassword, setShowPassword] = useState(false);
@@ -75,49 +113,54 @@ function VolunteerRegistrationForm() {
       >
         Gender
       </Typography>
-      <RadioGroup row>
-        <FormControlLabel
-          label="Male"
-          control={
-            <Radio
-              value="MALE"
-              {...register('gender', { required: 'Please select a gender' })}
-            />
-          }
-        />
-        <FormControlLabel
-          label="Female"
-          control={
-            <Radio
-              value="FEMALE"
-              {...register('gender', { required: 'Please select a gender' })}
-            />
-          }
-        />
-        <FormControlLabel
-          label="Other"
-          control={
-            <Radio
-              value="OTHER"
-              {...register('gender', { required: 'Please select a gender' })}
-            />
-          }
-        />
-        <FormControlLabel
-          label="Prefer not to say"
-          control={
-            <Radio
-              value="PREFER_NOT_TO_SAY"
-              {...register('gender', { required: 'Please select a gender' })}
-            />
-          }
-        />
-      </RadioGroup>
-      {errors.gender && (
-        <FormHelperText error id="gender-error" sx={{ mb: 2 }}>
-          {errors.gender.message}
-        </FormHelperText>
-      )}
+      <Controller
+        name="gender"
+        control={control}
+        rules={{ required: 'Please select a gender' }}
+        render={({ field }) => (
+          <>
+            <RadioGroup row {...field}>
+              <FormControlLabel
+                label="Male"
+                control={
+                  <Radio
+                    value="MALE"                    
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Female"
+                control={
+                  <Radio
+                    value="FEMALE"                    
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Other"
+                control={
+                  <Radio
+                    value="OTHER"                  
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Prefer not to say"
+                control={
+                  <Radio
+                    value="PREFER_NOT_TO_SAY"                    
+                  />
+                }
+              />
+            </RadioGroup>
+            {errors.gender && (
+              <FormHelperText error id="gender-error" sx={{ mb: 2 }}>
+                {errors.gender.message}
+              </FormHelperText>
+            )}
+          </>
+        )}
+      />
 
       <Box
         sx={{
@@ -168,7 +211,7 @@ function VolunteerRegistrationForm() {
             Phone Number
           </Typography>
           <TextField
-          placeholder='+1-123-456-7890'
+            placeholder="+1-123-456-7890"
             fullWidth
             autoComplete="tel"
             {...register('phone', {
@@ -309,12 +352,26 @@ function VolunteerRegistrationForm() {
         </Box>
       </Box>
 
+      {Object.keys(errors).length > 0 && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Please fix the errors above.
+        </Alert>
+      )}
+
+      {serverErrorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {serverErrorMessage}
+        </Alert>
+      )}
+
       <Button
         type="submit"
         variant="contained"
         color="primary"
         fullWidth
         disableElevation
+        disabled={isRegistering}
+        loading={isRegistering}
         sx={{ mt: 3, py: 1.3, fontSize: '1rem' }}
       >
         Create volunteer account
@@ -357,12 +414,6 @@ function VolunteerRegistrationForm() {
           </Box>
         </Link>
       </Typography>
-
-      {Object.keys(errors).length > 0 && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Please fix the errors above.
-        </Alert>
-      )}
     </Box>
   );
 }

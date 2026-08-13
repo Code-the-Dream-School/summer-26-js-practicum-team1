@@ -59,3 +59,15 @@ export async function getMe() {
     return null;
   }
 }
+
+export async function register(payload) {
+  try {
+    const { data } = await api.post('/api/auth/register', payload);
+    return data;
+  } catch (err) {
+    if (!err.response) throw new Error('NETWORK_ERROR');
+    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+    if (err.response.status === 400) throw new Error('VALIDATION_ERROR');
+    throw new Error('REGISTER_FAILED');
+  }
+}
