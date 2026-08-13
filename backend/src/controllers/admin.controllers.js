@@ -1,4 +1,5 @@
 const adminService = require('../services/admin.service');
+const preferencesService = require('../services/volunteerPreferences.service');
 const asyncHandler = require('../utils/asyncHandler');
 const { VerificationStatus } = require('@prisma/client');
 
@@ -63,10 +64,47 @@ async function getUsers(req, res, next) {
   }
 }
 
+function parseUserId(req, res) {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid user id',
+    });
+    return null;
+  }
+  return userId;
+}
+
+const getUserPreferences = asyncHandler(async (req, res) => {
+  const userId = parseUserId(req, res);
+  if (userId == null) {
+    return undefined;
+  }
+
+  const preferences = await preferencesService.getPreferences(userId);
+  return res.status(200).json({ success: true, data: preferences });
+});
+
+const updateUserPreferences = asyncHandler(async (req, res) => {
+  const userId = parseUserId(req, res);
+  if (userId == null) {
+    return undefined;
+  }
+
+  const preferences = await preferencesService.updatePreferences(
+    userId,
+    req.body
+  );
+  return res.status(200).json({ success: true, data: preferences });
+});
+
 module.exports = {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
   getUsers,
+  getUserPreferences,
+  updateUserPreferences,
 };
