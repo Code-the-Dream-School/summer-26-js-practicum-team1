@@ -8,7 +8,7 @@ import {
 } from '../../services/adminApi';
 import VolunteerPreferencesForm from '../../components/profile/VolunteerPreferencesForm';
 
-function AdminUserDetailPage() {
+function AdminUserPreferencesPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -66,7 +66,7 @@ function AdminUserDetailPage() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          User #{id}
+          Volunteer preferences
         </Typography>
         <Button variant="outlined" onClick={() => navigate('/admin/users')}>
           Back to users
@@ -74,7 +74,7 @@ function AdminUserDetailPage() {
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Volunteer preferences
+        User #{id}
       </Typography>
 
       {saveMutation.isError && (
@@ -85,9 +85,10 @@ function AdminUserDetailPage() {
       )}
 
       <VolunteerPreferencesForm
-        key={JSON.stringify(preferences)}
+        key={id}
         initialPreferences={preferences}
         isSaving={saveMutation.isPending}
+        onCancel={() => navigate('/admin/users')}
         onSave={async (payload) => {
           await saveMutation.mutateAsync(payload);
           navigate('/admin/users');
@@ -97,4 +98,4 @@ function AdminUserDetailPage() {
   );
 }
 
-export default AdminUserDetailPage;
+export default AdminUserPreferencesPage;

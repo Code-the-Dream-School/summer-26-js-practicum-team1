@@ -13,8 +13,7 @@ function ProfileSummary({ user }) {
     <Box
       sx={{
         display: 'flex',
-        flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: { xs: 'flex-start', sm: 'center' },
+        alignItems: 'center',
         justifyContent: 'space-between',
         gap: 2,
         pb: 2,
@@ -31,17 +30,10 @@ function ProfileSummary({ user }) {
             {user.name}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {user.phone || 'Phone not provided'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {user.email || 'Email not provided'}
+            {roleLabel}
           </Typography>
         </Box>
       </Box>
-
-      <Typography variant="body2" sx={{ fontWeight: 600, color: '#8C8164' }}>
-        I am a {roleLabel}
-      </Typography>
     </Box>
   );
 }

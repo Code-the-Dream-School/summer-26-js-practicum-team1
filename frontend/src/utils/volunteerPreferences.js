@@ -1,3 +1,5 @@
+// Temporary until we expose support categories from the API.
+// IDs must match rows created by backend `npm run db:seed` (#39).
 export const SUPPORT_CATEGORIES = [
   { id: 1, name: 'Groceries' },
   { id: 2, name: 'Errands' },

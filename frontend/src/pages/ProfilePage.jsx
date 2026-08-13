@@ -4,7 +4,6 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { useAuth } from '../hooks/useAuth';
 import { useVolunteerPreferences } from '../hooks/useVolunteerPreferences';
 import ProfileSummary from '../components/profile/ProfileSummary';
-import RequesterProfileSections from '../components/profile/RequesterProfileSections';
 import VolunteerPreferencesForm from '../components/profile/VolunteerPreferencesForm';
 import ProfileSection from '../components/profile/ProfileSection';
 import { DAYS_OF_WEEK } from '../utils/volunteerPreferences';
@@ -106,8 +105,6 @@ function ProfilePage() {
 
       <ProfileSummary user={user} />
 
-      {user.role === 'requester' && <RequesterProfileSections />}
-
       {isVolunteer && (
         <>
           {isLoading && (
@@ -118,8 +115,8 @@ function ProfilePage() {
 
           {isError && !isEditing && (
             <Alert severity="info" sx={{ mt: 3 }}>
-              Volunteer preferences are not available yet. Use edit to set them
-              up once your volunteer profile is ready.
+              Could not load preferences yet. Tap edit to try saving once your
+              volunteer profile is ready.
             </Alert>
           )}
 
@@ -128,13 +125,15 @@ function ProfilePage() {
               key={preferences ? 'loaded' : 'empty'}
               initialPreferences={preferences}
               isSaving={isSaving}
+              onCancel={() => setIsEditing(false)}
               onSave={async (payload) => {
                 await savePreferences(payload);
                 setIsEditing(false);
               }}
             />
           ) : (
-            !isLoading && <VolunteerPreferencesView preferences={preferences} />
+            !isLoading &&
+            !isError && <VolunteerPreferencesView preferences={preferences} />
           )}
         </>
       )}

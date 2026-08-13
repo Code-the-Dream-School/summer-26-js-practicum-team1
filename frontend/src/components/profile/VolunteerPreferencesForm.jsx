@@ -21,7 +21,12 @@ import {
 
 const emptySlot = { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' };
 
-function VolunteerPreferencesForm({ initialPreferences, isSaving, onSave }) {
+function VolunteerPreferencesForm({
+  initialPreferences,
+  isSaving,
+  onSave,
+  onCancel,
+}) {
   const [serviceArea, setServiceArea] = useState(
     () => initialPreferences?.serviceArea ?? ''
   );
@@ -183,15 +188,27 @@ function VolunteerPreferencesForm({ initialPreferences, isSaving, onSave }) {
         </Button>
       </ProfileSection>
 
-      <Button
-        type="button"
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={isSaving}
-        sx={{ mt: 3, borderRadius: '999px', px: 4 }}
-      >
-        {isSaving ? 'Saving...' : 'Save preferences'}
-      </Button>
+      <Box sx={{ mt: 3, display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <Button
+          type="button"
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={isSaving}
+          sx={{ borderRadius: '999px', px: 4 }}
+        >
+          {isSaving ? 'Saving...' : 'Save preferences'}
+        </Button>
+        {onCancel && (
+          <Button
+            type="button"
+            variant="text"
+            onClick={onCancel}
+            disabled={isSaving}
+          >
+            Cancel
+          </Button>
+        )}
+      </Box>
     </Box>
   );
 }
