@@ -67,7 +67,16 @@ function EditProfileDialog({ open, onClose, formData }) {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle variant="h5" sx={{ fontWeight: 700 }}>
+      <DialogTitle
+        variant="h5"
+        sx={{
+          fontWeight: 700,
+          fontSize: {
+            xs: '2rem',
+            sm: '2.5rem',
+          },
+        }}
+      >
         Edit Profile
       </DialogTitle>
 

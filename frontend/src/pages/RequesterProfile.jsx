@@ -93,15 +93,18 @@ function RequesterProfile() {
   return (
     <Box
       sx={{
+        width: '100%',
         maxWidth: 800,
         mx: 'auto',
-        p: 3,
+        px: { xs: 2, sm: 3 },
+        py: { xs: 2, sm: 3 },
       }}
     >
       <Card
         sx={{
-          borderRadius: 3,
+          borderRadius: { xs: 2, sm: 3 },
           boxShadow: 3,
+          width: '100%',
         }}
       >
         <CardContent sx={{ ml: 5 }}>
@@ -111,9 +114,22 @@ function RequesterProfile() {
               sx={{
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                gap: 1,
               }}
             >
-              <Typography variant="h3" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontSize: {
+                    xs: '2rem',
+                    sm: '2.5rem',
+                  },
+                  fontWeight: 700,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {profile.name}
               </Typography>
 
@@ -141,10 +157,10 @@ function RequesterProfile() {
             <Divider sx={{ borderBottomWidth: 3 }} />
 
             <Stack
-              direction="row"
-              spacing={25}
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={{ xs: 2, sm: 3 }}
               sx={{
-                alignItems: 'center',
+                alignItems: { xs: 'center', sm: 'center' },
               }}
             >
               <Stack
