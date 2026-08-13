@@ -57,11 +57,7 @@ function Register() {
     formState: { errors },
   } = useForm();
 
-  const {
-    register: registerAccount,
-    registerError,
-    isRegistering,
-  } = useAuth();
+  const { register: registerAccount, registerError, isRegistering } = useAuth();
 
   const [profileImage, setProfileImage] = useState(null);
   const navigate = useNavigate();
@@ -93,8 +89,7 @@ function Register() {
 
   const errorMessage =
     registerError &&
-    (ERROR_MESSAGES[registerError.message] ?? 
-      ERROR_MESSAGES.REGISTER_FAILED);
+    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
 
   return (
     <Box
@@ -109,7 +104,7 @@ function Register() {
       <Box
         sx={{
           width: '100%',
-       maxWidth: { xs: 400, sm: 550, md: 600 },
+          maxWidth: { xs: 400, sm: 550, md: 600 },
           bgcolor: 'background.paper',
           borderRadius: '24px',
           p: { xs: 3, sm: 4, md: 5 },
@@ -159,24 +154,23 @@ function Register() {
           </Alert>
         )}
 
-       <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-  <TextField
-    label="Full Name"
-    fullWidth
-    sx={textFieldSx}
-    {...register('name', {
-      required: 'Full name is required',
-    })}
-    error={!!errors.name}
-    helperText={errors.name?.message}
-  />
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <TextField
+            label="Full Name"
+            fullWidth
+            sx={textFieldSx}
+            {...register('name', {
+              required: 'Full name is required',
+            })}
+            error={!!errors.name}
+            helperText={errors.name?.message}
+          />
 
-  <TextField
-    
+          <TextField
             label="Email"
             type="email"
             fullWidth
-             sx={textFieldSx}
+            sx={textFieldSx}
             {...register('email', {
               required: 'Email is required',
               pattern: {
@@ -192,7 +186,7 @@ function Register() {
             label="Password"
             type="password"
             fullWidth
-           sx={textFieldSx}
+            sx={textFieldSx}
             {...register('password', {
               required: 'Password is required',
               minLength: {
@@ -230,7 +224,7 @@ function Register() {
             slotProps={{
               inputLabel: { shrink: true },
             }}
-           sx={textFieldSx}
+            sx={textFieldSx}
             {...register('dob', {
               required: 'Date of birth is required',
               validate: (value) => {
@@ -238,13 +232,11 @@ function Register() {
                 const birth = new Date(value);
 
                 let age = today.getFullYear() - birth.getFullYear();
-                const monthDifference =
-                  today.getMonth() - birth.getMonth();
+                const monthDifference = today.getMonth() - birth.getMonth();
 
                 if (
                   monthDifference < 0 ||
-                  (monthDifference === 0 &&
-                    today.getDate() < birth.getDate())
+                  (monthDifference === 0 && today.getDate() < birth.getDate())
                 ) {
                   age -= 1;
                 }
@@ -273,7 +265,7 @@ function Register() {
             label="Gender"
             fullWidth
             defaultValue=""
-           sx={textFieldSx}
+            sx={textFieldSx}
             {...register('gender', {
               required: 'Gender is required',
             })}
@@ -291,82 +283,79 @@ function Register() {
             label="Phone Number"
             type="tel"
             fullWidth
-          sx={textFieldSx}
+            sx={textFieldSx}
             {...register('phone', {
               required: 'Phone number is required',
-              validate: (value)=>{
-                const digits =value.replace(/\D/g,'');
-                if (digits.length<10){
+              validate: (value) => {
+                const digits = value.replace(/\D/g, '');
+                if (digits.length < 10) {
                   return 'Phone number must contain at least 10 digits';
-
                 }
-                 if (digits.length > 15) {
-        return 'Phone number cannot exceed 15 digits';
-      }
+                if (digits.length > 15) {
+                  return 'Phone number cannot exceed 15 digits';
+                }
 
-      return true;
-    },
-  })}
-  slotProps={{
-    htmlInput: {
-      inputMode: 'tel',
-      onInput: (e) => {
-        
-        e.target.value = e.target.value
-          .replace(/[^0-9()\-\s]/g, '');
+                return true;
+              },
+            })}
+            slotProps={{
+              htmlInput: {
+                inputMode: 'tel',
+                onInput: (e) => {
+                  e.target.value = e.target.value.replace(/[^0-9()\-\s]/g, '');
 
-    
-        const digits = e.target.value.replace(/\D/g, '');
+                  const digits = e.target.value.replace(/\D/g, '');
 
-        if (digits.length > 15) {
-          let count = 0;
+                  if (digits.length > 15) {
+                    let count = 0;
 
-          e.target.value = e.target.value
-            .split('')
-            .filter((char) => {
-              if (/\d/.test(char)) {
-                count++;
-                return count <= 15;
-              }
-              return true;
-            })
-            .join('');
-        }
-      },
-    },
-  }}
-  error={!!errors.phone}
-  helperText={errors.phone?.message}
-/>
+                    e.target.value = e.target.value
+                      .split('')
+                      .filter((char) => {
+                        if (/\d/.test(char)) {
+                          count++;
+                          return count <= 15;
+                        }
+                        return true;
+                      })
+                      .join('');
+                  }
+                },
+              },
+            }}
+            error={!!errors.phone}
+            helperText={errors.phone?.message}
+          />
 
           <ProfileImageUpload onFileChange={setProfileImage} />
 
-        <Button
-  type="submit"
-  variant="contained"
-  fullWidth
-  disabled={isRegistering}
-  disableElevation
-  sx={{
-    py: 1.3,
-    fontSize: '1rem',
-    backgroundColor: '#1B741B',
-    transition: 'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            disabled={isRegistering}
+            disableElevation
+            sx={{
+              py: 1.3,
+              fontSize: '1rem',
+              backgroundColor: '#1B741B',
+              transition:
+                'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
 
-    '&:hover': {
-      backgroundColor: '#385d38ff ',
-      transform: 'translateY(-4px) scale(1.02)',
-      boxShadow: '0 8px 20px rgba(27, 116, 27, 0.4)',
-    },
+              '&:hover': {
+                backgroundColor: '#385d38ff ',
+                transform: 'translateY(-4px) scale(1.02)',
+                boxShadow: '0 8px 20px rgba(27, 116, 27, 0.4)',
+              },
 
-    '&:active': {
-      transform: 'translateY(-1px) scale(1)',
-      boxShadow: '0 3px 8px rgba(185, 226, 185, 0.3)',
-    },
-  }}
->
-  {isRegistering ? 'Creating account...' : 'Register'}
-</Button>
+              '&:active': {
+                transform: 'translateY(-1px) scale(1)',
+                boxShadow: '0 3px 8px rgba(185, 226, 185, 0.3)',
+              },
+            }}
+          >
+            {isRegistering ? 'Creating account...' : 'Register'}
+          </Button>
           <Typography
             variant="body2"
             color="text.secondary"
