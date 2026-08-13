@@ -28,11 +28,11 @@ function App() {
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
-      </Route>
-      <Route element={<RequesterProtectedRoute />}>
-        {/* Requester Routes */}
-        {/* TODO: Move profile route inside requester dashboard once ready */}
-        <Route path="profile" element={<RequesterProfile />} />
+        <Route element={<RequesterProtectedRoute />}>
+          {/* Requester Routes */}
+          {/* TODO: Move profile route inside requester dashboard once ready */}
+          <Route path="profile" element={<RequesterProfile />} />
+        </Route>
       </Route>
     </Routes>
   );

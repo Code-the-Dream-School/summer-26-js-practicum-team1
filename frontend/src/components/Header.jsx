@@ -24,7 +24,7 @@ const PAGES = [
 
 const ROLE_SETTINGS = {
   requester: [
-    { label: 'Profile', path: '/' },
+    { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
     { label: 'My Requests', path: '/' },
   ],

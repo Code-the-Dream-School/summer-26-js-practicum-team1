@@ -69,8 +69,8 @@ function RequesterProfile() {
 
   const requesterProfile = profile.requesterProfile;
 
-  //const formattedRole =
-  //profile.role.charAt(0) + profile.role.slice(1).toLowerCase();
+  const formattedRole =
+    profile.role.charAt(0) + profile.role.slice(1).toLowerCase();
 
   const handleEdit = () => {
     setEditData({
@@ -166,7 +166,7 @@ function RequesterProfile() {
                   }}
                 >
                   <>
-                    Edit Profile <EditIcon fontSize="small" sx={{ ml: 2 }} />
+                    <EditIcon fontSize="small" sx={{ mr: 2 }} /> Profile
                   </>
                 </Button>
               </Stack>
@@ -221,7 +221,7 @@ function RequesterProfile() {
                       />
                     ) : (
                       <>
-                        Edit Image <EditIcon fontSize="small" sx={{ ml: 2 }} />
+                        <EditIcon fontSize="small" sx={{ mr: 2 }} /> Avatar
                       </>
                     )}
 
@@ -255,7 +255,7 @@ function RequesterProfile() {
                 </Box>
 
                 <Chip
-                  label="REQUESTER"
+                  label={formattedRole}
                   icon={<DoneIcon />}
                   color="warning"
                   sx={{
@@ -321,10 +321,13 @@ function ProfileField({ icon, label, value }) {
 
         <Typography
           variant="body1"
-          color="text.secondary"
-          sx={{ fontWeight: 400 }}
+          sx={{
+            color: 'text.secondary',
+            opacity: value ? 1 : 0.6,
+            fontStyle: value ? 'normal' : 'italic',
+          }}
         >
-          {value || 'Not provided'}
+          {value?.trim() || 'Click Edit to add your information'}
         </Typography>
       </Box>
     </Stack>
