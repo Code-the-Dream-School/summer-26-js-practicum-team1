@@ -15,11 +15,7 @@ function HomePage() {
         Neighborhood Helper
       </Typography>
       <HelloMessage />
-      <Box
-        component="form"
-        onSubmit={handleSubmit(() => {})}
-        sx={{ mt: 2 }}
-      >
+      <Box component="form" onSubmit={handleSubmit(() => {})} sx={{ mt: 2 }}>
         <TextField
           label="Name"
           {...register('name', { required: 'Required' })}
