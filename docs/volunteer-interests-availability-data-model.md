@@ -150,6 +150,7 @@ Self routes sit under `/api/profile` (shared profile area). Admin UI uses `/admi
 
 | Method | Path | Who |
 |--------|------|-----|
+| `GET` | `/api/profile/support-categories` | any logged-in user (JWT) |
 | `GET` | `/api/profile/preferences` | owner (JWT) |
 | `PUT` | `/api/profile/preferences` | owner (JWT + CSRF) |
 | `GET` | `/api/admin/users/:id/preferences` | admin (JWT + CSRF + ADMIN) |
