@@ -1,109 +1,92 @@
 # Volunteer Interests & Availability — Data Model
 
-HELPER-29 · parent HELPER-23 · related HELPER-30 (UI), HELPER-31 (API), HELPER-32 (auth)
+HELPER-29 · parent HELPER-23 · HELPER-30 (UI) · HELPER-31 (API) · HELPER-32 (auth)
 
-User story: as a volunteer, I want to add my interests and availability, so I receive suitable volunteer opportunities.
-
-Based on the Neighborhood Helper MVP ER diagram.
+**Story:** As a volunteer, I want to add my interests and availability so I get suitable opportunities.
 
 ---
 
-## Scope
+## 1. Scope
 
-**In**
-
-- How volunteer interests and availability are stored
-- `SUPPORT_CATEGORIES` + join rows for interests
-- `availability` and `service_area` on `VOLUNTEER_PROFILES`
-- Who is allowed to edit these fields
-
-**Out**
-
-- API (HELPER-31)
-- Auth wiring (HELPER-32)
-- Preferences UI (HELPER-30)
-- Matching logic
-- Help-request tables
+| In | Out |
+|----|-----|
+| Storage for interests, availability, service area | Matching engine |
+| Who can read/write | Help-request tables / browse UI |
+| API path contract for HELPER-31/32 | Building the endpoints/UI (those tickets) |
 
 ---
 
-## ERD pieces we use
+## 2. Architecture
 
 ```text
-USERS
-  └── VOLUNTEER_PROFILES
-        ├── availability
-        ├── service_area
-        ├── verification_status
-        └── USER_SUPPORT_CATEGORIES ──► SUPPORT_CATEGORIES
+┌─────────────┐       1:1        ┌──────────────────────┐
+│    User     │─────────────────▶│  VolunteerProfile    │
+└─────────────┘                  │  - availability      │
+                                 │  - service_area      │
+                                 │  - verification_…    │
+                                 └──────────┬───────────┘
+                                            │ M:N
+                                            ▼
+                                 ┌──────────────────────┐
+                                 │ UserSupportCategory  │
+                                 └──────────┬───────────┘
+                                            │
+                                            ▼
+                                 ┌──────────────────────┐
+                                 │  SupportCategory     │
+                                 │  (shared tag list)   │
+                                 └──────────────────────┘
 ```
 
-| Need | Where it lives |
-|------|----------------|
-| Interests list | `SUPPORT_CATEGORIES` |
-| Selected interests | `USER_SUPPORT_CATEGORIES` |
-| Availability | `VOLUNTEER_PROFILES.availability` |
-| Area for location filter | `VOLUNTEER_PROFILES.service_area` |
-| Request location (later) | `HELP_REQUESTS.location` |
+| Concern | Table / column |
+|---------|----------------|
+| Tag catalog | `support_categories` |
+| Volunteer’s selected tags | `user_support_categories` |
+| Weekly time slots | `volunteer_profiles.availability` (JSON) |
+| Location hint | `volunteer_profiles.service_area` |
 
-The ERD draws `USER_SUPPORT_CATEGORIES` off requester profiles (`requester_id`). HELPER-23 is volunteer preferences, so we use the same join pattern with `volunteer_id` → `volunteer_profiles.user_id`. Requester-side prefs can stay a follow-up if needed.
-
----
-
-## Interests
-
-`SUPPORT_CATEGORIES` is the shared tag list (`id`, `name`, `description`). Admins can manage it later.
-
-MVP seed ideas: Groceries, Errands, Transport, Tech help, Companionship, Home help, Other.
-
-A volunteer’s picks are rows in `USER_SUPPORT_CATEGORIES`:
-
-- `volunteer_id` → `volunteer_profiles.user_id`
-- `support_category_id` → `support_categories.id`
-- unique on `(volunteer_id, support_category_id)`
-
-Updates replace the whole set in one go (delete old rows, insert the new selection).
+Join key: `volunteer_id` → `volunteer_profiles.user_id` (volunteer-only for MVP).
 
 ---
 
-## Availability
+## 3. Fields
 
-ERD keeps this as one column on the volunteer profile. For MVP we store JSON there so we still get days / times / frequency without a new table.
+### Interests
 
-Example:
+- Catalog: `id`, `name`, `description` (admin-managed later)
+- MVP seeds: Groceries, Errands, Transport, Tech help, Companionship, Home help, Other
+- Unique `(volunteer_id, support_category_id)`
+- Save = replace set (delete + insert)
+
+### Availability (JSON on profile)
 
 ```json
 {
   "frequency": "WEEKLY",
   "slots": [
-    { "dayOfWeek": "MON", "startTime": "09:00", "endTime": "12:00" },
-    { "dayOfWeek": "FRI", "startTime": "14:00", "endTime": "18:00" }
+    { "dayOfWeek": "MON", "startTime": "09:00", "endTime": "12:00" }
   ]
 }
 ```
 
-Rules for later validation:
+| Rule | MVP |
+|------|-----|
+| `frequency` | `WEEKLY` only |
+| `dayOfWeek` | `MON` … `SUN` |
+| time | `HH:mm`, end > start |
+| overlap | not on same day |
+| max slots | ~14 |
+| timezone | local wall-clock (later) |
 
-- `frequency` is `WEEKLY` only for MVP
-- `dayOfWeek` is `MON` … `SUN`
-- times are `HH:mm`, end after start
-- no overlapping slots on the same day
-- cap around 14 slots
-- times are local community wall-clock (timezone later)
+PUT replaces the whole blob.
 
-PUT replaces the whole JSON blob.
+### Service area
 
----
-
-## Service area
-
-`service_area` on `VOLUNTEER_PROFILES` — optional free text for MVP (city, neighborhood, or zip-style string, max 255).
-
-Used later to filter help requests by `HELP_REQUESTS.location`. Exact match rules are not part of this ticket.
+Optional string, max 255 (city / neighborhood / zip-style). Used later for request location filter — matching rules out of scope here.
 
 ---
 
-## Prisma sketch
+## 4. Prisma sketch
 
 ```prisma
 model VolunteerProfile {
@@ -144,29 +127,42 @@ model UserSupportCategory {
 }
 ```
 
-Keep existing `created_at` / verification fields. Do not add separate availability or interest tables.
+No separate availability/interest tables. Keep existing verification fields.
 
 ---
 
-## Who can edit
+## 5. Access control
 
-- Owner can read/write their own prefs (`req.user.id` = profile `user_id`)
-- `ADMIN` can edit too
-- Matching reads happen in backend services, not via a public “edit anyone” API
+| Actor | Access |
+|-------|--------|
+| Volunteer (owner) | Read/write own prefs |
+| Admin | Read/write any volunteer’s prefs |
+| Others | No direct prefs write API |
 
----
-
-## API (for HELPER-31, not built here)
-
-- `GET /api/volunteers/me/preferences`
-- `PUT /api/volunteers/me/preferences` — body includes `serviceArea`, `availability`, and selected category ids
-
-Same flat response style as login/register: resource on success, `{ error, details? }` on validation errors.
+Owner check: `req.user.id` === profile `user_id`.  
+Pending volunteers (have `VolunteerProfile`) can save prefs.
 
 ---
 
-## Open points
+## 6. API contract
 
-1. Stick with `volunteer_id` on the join, or one table that also covers requesters as in the ERD drawing?
-2. Are empty interests / availability allowed before a volunteer accepts requests?
-3. Keep `service_area` free text, or lock it to a fixed city/zip list later?
+Self routes sit under `/api/profile` (shared profile area). Admin UI uses `/admin/users/:id` with a prefs section when the user is a volunteer.
+
+| Method | Path | Who |
+|--------|------|-----|
+| `GET` | `/api/profile/preferences` | owner (JWT) |
+| `PUT` | `/api/profile/preferences` | owner (JWT + CSRF) |
+| `GET` | `/api/admin/users/:id/preferences` | admin (JWT + CSRF + ADMIN) |
+| `PUT` | `/api/admin/users/:id/preferences` | admin (JWT + CSRF + ADMIN) |
+
+**PUT body:** `{ serviceArea?, availability?, interestIds: number[] }`
+
+**Success:** prefs resource. **Validation fail:** `{ error, details? }` (admin may use `{ success, data }` if that matches existing admin style).
+
+---
+
+## 7. MVP decisions
+
+1. Volunteer-only join table  
+2. Empty interests / availability allowed  
+3. Free-text `service_area`  
