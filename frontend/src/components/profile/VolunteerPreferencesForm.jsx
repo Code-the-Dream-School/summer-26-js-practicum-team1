@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -14,10 +15,8 @@ import {
 } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import ProfileSection from './ProfileSection';
-import {
-  DAYS_OF_WEEK,
-  SUPPORT_CATEGORIES,
-} from '../../utils/volunteerPreferences';
+import { DAYS_OF_WEEK } from '../../utils/volunteerPreferences';
+import { useSupportCategories } from '../../hooks/useSupportCategories';
 
 const emptySlot = { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' };
 
@@ -27,6 +26,12 @@ function VolunteerPreferencesForm({
   onSave,
   onCancel,
 }) {
+  const {
+    data: categories = [],
+    isLoading: isLoadingCategories,
+    isError: isCategoriesError,
+  } = useSupportCategories();
+
   const [serviceArea, setServiceArea] = useState(
     () => initialPreferences?.serviceArea ?? ''
   );
@@ -103,18 +108,28 @@ function VolunteerPreferencesForm({
       </ProfileSection>
 
       <ProfileSection title="Interests">
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {SUPPORT_CATEGORIES.map((category) => (
-            <Chip
-              key={category.id}
-              label={category.name}
-              clickable
-              color={interestIds.includes(category.id) ? 'primary' : 'default'}
-              variant={interestIds.includes(category.id) ? 'filled' : 'outlined'}
-              onClick={() => toggleInterest(category.id)}
-            />
-          ))}
-        </Box>
+        {isLoadingCategories && <CircularProgress size={24} />}
+        {isCategoriesError && (
+          <Alert severity="error">Could not load interest categories.</Alert>
+        )}
+        {!isLoadingCategories && !isCategoriesError && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {categories.map((category) => (
+              <Chip
+                key={category.id}
+                label={category.name}
+                clickable
+                color={
+                  interestIds.includes(category.id) ? 'primary' : 'default'
+                }
+                variant={
+                  interestIds.includes(category.id) ? 'filled' : 'outlined'
+                }
+                onClick={() => toggleInterest(category.id)}
+              />
+            ))}
+          </Box>
+        )}
       </ProfileSection>
 
       <ProfileSection title="Availability">
@@ -193,7 +208,7 @@ function VolunteerPreferencesForm({
           type="button"
           variant="contained"
           onClick={handleSubmit}
-          disabled={isSaving}
+          disabled={isSaving || isLoadingCategories || isCategoriesError}
           sx={{ borderRadius: '999px', px: 4 }}
         >
           {isSaving ? 'Saving...' : 'Save preferences'}
