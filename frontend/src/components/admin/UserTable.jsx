@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
 
 import {
   Table,
@@ -18,7 +17,6 @@ import {
   Select,
   MenuItem,
   Stack,
-  Button,
 } from '@mui/material';
 
 import { useUsers } from '../../hooks/admin/useUsers';
@@ -178,7 +176,6 @@ function UserTable() {
                 'PHONE',
                 'GENDER',
                 'DATE OF BIRTH',
-                'ACTIONS',
               ].map((title) => (
                 <TableCell
                   key={title}
@@ -200,7 +197,7 @@ function UserTable() {
           >
             {currentUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={6} align="center">
                   No users found
                 </TableCell>
               </TableRow>
@@ -246,21 +243,6 @@ function UserTable() {
                       month: 'short',
                       day: 'numeric',
                     }) || 'N/A'}
-                  </TableCell>
-
-                  <TableCell>
-                    {user.role === 'VOLUNTEER' ? (
-                      <Button
-                        component={RouterLink}
-                        to={`/admin/users/${user.id}`}
-                        size="small"
-                        variant="outlined"
-                      >
-                        Edit prefs
-                      </Button>
-                    ) : (
-                      '—'
-                    )}
                   </TableCell>
                 </TableRow>
               ))
