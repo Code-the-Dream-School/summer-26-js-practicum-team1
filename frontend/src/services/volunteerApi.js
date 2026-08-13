@@ -11,3 +11,8 @@ export async function updateVolunteerPreferences(payload, csrfToken) {
   });
   return data.data;
 }
+
+export async function getSupportCategories() {
+  const { data } = await api.get('/api/profile/support-categories');
+  return data.data;
+}
