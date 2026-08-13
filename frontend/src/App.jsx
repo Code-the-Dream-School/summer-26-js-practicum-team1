@@ -5,6 +5,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import UsersList from './pages/admin/UsersList';
+import AdminUserPreferencesPage from './pages/admin/AdminUserPreferencesPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import ProfilePage from './pages/ProfilePage';
@@ -23,6 +24,10 @@ function App() {
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
+          <Route
+            path="admin/users/:id"
+            element={<AdminUserPreferencesPage />}
+          />
         </Route>
         <Route path="signup" element={<SignupPage />} />
         <Route element={<ProtectedRoute />}>
