@@ -101,6 +101,35 @@ describe('PUT /api/profile/preferences', () => {
     expect(res.status).toBe(400);
     expect(preferencesService.updatePreferences).not.toHaveBeenCalled();
   });
+
+  it('rejects slots where endTime is not after startTime', async () => {
+    const res = await request(app).put('/api/profile/preferences').send({
+      interestIds: [1],
+      availability: {
+        frequency: 'WEEKLY',
+        slots: [{ dayOfWeek: 'MON', startTime: '12:00', endTime: '09:00' }],
+      },
+    });
+
+    expect(res.status).toBe(400);
+    expect(preferencesService.updatePreferences).not.toHaveBeenCalled();
+  });
+
+  it('rejects overlapping slots on the same day', async () => {
+    const res = await request(app).put('/api/profile/preferences').send({
+      interestIds: [1],
+      availability: {
+        frequency: 'WEEKLY',
+        slots: [
+          { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' },
+          { dayOfWeek: 'MON', startTime: '11:00', endTime: '14:00' },
+        ],
+      },
+    });
+
+    expect(res.status).toBe(400);
+    expect(preferencesService.updatePreferences).not.toHaveBeenCalled();
+  });
 });
 
 describe('GET /api/profile/support-categories', () => {
