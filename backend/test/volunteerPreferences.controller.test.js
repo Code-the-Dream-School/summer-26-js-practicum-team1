@@ -23,6 +23,7 @@ jest.mock('../src/middleware/csrf.middleware', () => {
 jest.mock('../src/services/volunteerPreferences.service', () => ({
   getPreferences: jest.fn(),
   updatePreferences: jest.fn(),
+  listSupportCategories: jest.fn(),
 }));
 
 const preferencesService = require('../src/services/volunteerPreferences.service');
@@ -99,5 +100,22 @@ describe('PUT /api/profile/preferences', () => {
 
     expect(res.status).toBe(400);
     expect(preferencesService.updatePreferences).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/profile/support-categories', () => {
+  it('returns support categories', async () => {
+    const categories = [
+      { id: 1, name: 'Groceries' },
+      { id: 2, name: 'Errands' },
+    ];
+
+    preferencesService.listSupportCategories.mockResolvedValue(categories);
+
+    const res = await request(app).get('/api/profile/support-categories');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ data: categories });
+    expect(preferencesService.listSupportCategories).toHaveBeenCalled();
   });
 });

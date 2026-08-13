@@ -94,4 +94,11 @@ const updatePreferences = async (userId, data) => {
   return getPreferences(userId);
 };
 
-module.exports = { getPreferences, updatePreferences };
+const listSupportCategories = async () => {
+  return prisma.supportCategory.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  });
+};
+
+module.exports = { getPreferences, updatePreferences, listSupportCategories };

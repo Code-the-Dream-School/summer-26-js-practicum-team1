@@ -19,6 +19,7 @@ const volunteerOnly = require('../middleware/volunteerProfileMiddleware');
 const {
   getPreferences,
   updatePreferences,
+  listSupportCategories,
 } = require('../controllers/volunteerPreferences.controller');
 
 const {
@@ -49,6 +50,10 @@ router.patch(
   updateProfileImage
 );
 
+router.get('/image', jwtMiddleware, requesterOnly, getProfileImage);
+
+router.get('/support-categories', jwtMiddleware, listSupportCategories);
+
 router.get('/preferences', jwtMiddleware, volunteerOnly, getPreferences);
 
 router.put(
@@ -59,7 +64,5 @@ router.put(
   validate(updatePreferencesSchema),
   updatePreferences
 );
-
-router.get('/image', jwtMiddleware, requesterOnly, getProfileImage);
 
 module.exports = router;

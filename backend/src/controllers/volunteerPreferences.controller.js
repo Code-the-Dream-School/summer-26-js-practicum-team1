@@ -20,4 +20,16 @@ const updatePreferences = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { getPreferences, updatePreferences };
+const listSupportCategories = asyncHandler(async (_req, res) => {
+  const categories = await preferencesService.listSupportCategories();
+
+  return res.status(200).json({
+    data: categories,
+  });
+});
+
+module.exports = {
+  getPreferences,
+  updatePreferences,
+  listSupportCategories,
+};
