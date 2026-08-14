@@ -76,7 +76,9 @@ describe('GET /api/profile/preferences', () => {
 describe('PUT /api/profile/preferences', () => {
   it('updates volunteer preferences', async () => {
     const body = {
-      serviceArea: 'San Jose',
+      serviceArea: 'San Jose, CA',
+      serviceLatitude: 37.3382,
+      serviceLongitude: -121.8863,
       availability: {
         frequency: 'WEEKLY',
         slots: [{ dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' }],
@@ -91,6 +93,16 @@ describe('PUT /api/profile/preferences', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ data: samplePreferences });
     expect(preferencesService.updatePreferences).toHaveBeenCalledWith(1, body);
+  });
+
+  it('rejects serviceArea without coordinates', async () => {
+    const res = await request(app).put('/api/profile/preferences').send({
+      serviceArea: 'San Jose',
+      interestIds: [1],
+    });
+
+    expect(res.status).toBe(400);
+    expect(preferencesService.updatePreferences).not.toHaveBeenCalled();
   });
 
   it('rejects invalid preferences payload', async () => {
