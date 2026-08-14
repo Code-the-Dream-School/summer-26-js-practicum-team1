@@ -9,6 +9,7 @@ import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequesterProfile from './pages/RequesterProfile';
+import RequestorRegistration from './pages/Register';
 
 function App() {
   return (
@@ -33,6 +34,10 @@ function App() {
           {/* TODO: Move profile route inside requester dashboard once ready */}
           <Route path="profile" element={<RequesterProfile />} />
         </Route>
+        <Route
+          path="requesterRegistration"
+          element={<RequestorRegistration />}
+        />
       </Route>
     </Routes>
   );

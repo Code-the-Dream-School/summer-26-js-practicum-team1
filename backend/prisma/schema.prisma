@@ -26,6 +26,29 @@ enum VerificationStatus {
   APPROVED
   REJECTED
 }
+enum Category {
+  GROCERY
+  TRANSPORTATION
+  HOUSEHOLD_CHORES
+  YARD_WORK
+  PET_CARE
+  TECH_SUPPORT
+  COMPANIONSHIP
+  MEAL_PREP
+  MEDICAL_ERRAND
+  OTHER
+}
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
 
 // USERS
 
@@ -47,7 +70,7 @@ model User {
   volunteerProfile       VolunteerProfile?
   requesterProfile       RequesterProfile?
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
-
+   helpRequests HelpRequest[]
   @@map("users")
 }
 
@@ -77,6 +100,23 @@ model VolunteerVerification {
 
   @@map("volunteer_verifications")
 }
+model HelpRequest {
+  id           Int      @id @default(autoincrement())
+  requesterId  Int
+  volunteerId  Int?
+  title        String   @db.VarChar(100)
+  category     Category
+  urgency      Urgency
+  scheduledAt  DateTime
+  address      String
+  latitude     Float
+  longitude    Float
+  description  String?
+  status       RequestStatus @default(PENDING)
+  createdAt    DateTime @default(now())
+  completedAt  DateTime?
+
+  requester User @relation(fields: [requesterId], references: [id])
 
 model RequesterProfile {
   userId           Int     @id
