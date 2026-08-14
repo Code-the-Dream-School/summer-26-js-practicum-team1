@@ -116,7 +116,7 @@ function EditProfileDialog({ open, onClose, formData }) {
 
           <TextField
             name="bio"
-            label="Bio"
+            label="About Me"
             value={form.bio}
             onChange={handleChange}
             error={Boolean(errors.bio)}
