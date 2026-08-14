@@ -1,4 +1,10 @@
-import api from './api';
+import axios from 'axios';
+import { API_URL } from '../utils/constants';
+
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 export async function getVolunteerPreferences() {
   const { data } = await api.get('/api/profile/preferences');
