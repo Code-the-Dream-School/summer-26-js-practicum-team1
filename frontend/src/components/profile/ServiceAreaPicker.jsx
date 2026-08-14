@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import ClearIcon from '@mui/icons-material/Clear';
-import { hasGeoapifyKey, searchServiceAreas } from '../../services/geoapify';
+import { hasGeoapifyKey, searchPlaces } from '../../services/geoapify';
 
 function ServiceAreaPicker({ value, onChange }) {
   const [inputValue, setInputValue] = useState('');
@@ -38,7 +38,7 @@ function ServiceAreaPicker({ value, onChange }) {
 
     const timer = setTimeout(async () => {
       try {
-        const results = await searchServiceAreas(query);
+        const results = await searchPlaces(query);
         if (!cancelled) {
           setOptions(results);
         }

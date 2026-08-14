@@ -9,10 +9,10 @@ export function hasGeoapifyKey() {
 }
 
 /**
- * Search places for volunteer service area.
+ * Shared Geoapify autocomplete helper (profile service area, help-request address, etc.).
  * Returns stable labeled results with coordinates (not free-text).
  */
-export async function searchServiceAreas(query) {
+export async function searchPlaces(query) {
   const apiKey = getApiKey();
   const text = query?.trim();
 
