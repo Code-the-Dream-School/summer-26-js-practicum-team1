@@ -15,10 +15,26 @@ import {
 } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import ProfileSection from './ProfileSection';
+import ServiceAreaPicker from './ServiceAreaPicker';
 import { DAYS_OF_WEEK } from '../../utils/volunteerPreferences';
 import { useSupportCategories } from '../../hooks/useSupportCategories';
 
 const emptySlot = { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' };
+
+function toServiceLocation(preferences) {
+  if (
+    preferences?.serviceArea &&
+    preferences?.serviceLatitude != null &&
+    preferences?.serviceLongitude != null
+  ) {
+    return {
+      label: preferences.serviceArea,
+      latitude: preferences.serviceLatitude,
+      longitude: preferences.serviceLongitude,
+    };
+  }
+  return null;
+}
 
 function VolunteerPreferencesForm({
   initialPreferences,
@@ -32,8 +48,8 @@ function VolunteerPreferencesForm({
     isError: isCategoriesError,
   } = useSupportCategories();
 
-  const [serviceArea, setServiceArea] = useState(
-    () => initialPreferences?.serviceArea ?? ''
+  const [serviceLocation, setServiceLocation] = useState(() =>
+    toServiceLocation(initialPreferences)
   );
   const [interestIds, setInterestIds] = useState(
     () => initialPreferences?.interests?.map((item) => item.id) ?? []
@@ -76,7 +92,9 @@ function VolunteerPreferencesForm({
     setError('');
     try {
       await onSave({
-        serviceArea: serviceArea.trim() || null,
+        serviceArea: serviceLocation?.label ?? null,
+        serviceLatitude: serviceLocation?.latitude ?? null,
+        serviceLongitude: serviceLocation?.longitude ?? null,
         interestIds,
         availability: {
           frequency: 'WEEKLY',
@@ -97,13 +115,10 @@ function VolunteerPreferencesForm({
         </Alert>
       )}
 
-      <ProfileSection title="Service Area">
-        <TextField
-          fullWidth
-          label="Where do you want to volunteer?"
-          placeholder="Boston, MA or your neighborhood"
-          value={serviceArea}
-          onChange={(event) => setServiceArea(event.target.value)}
+      <ProfileSection title="Service area">
+        <ServiceAreaPicker
+          value={serviceLocation}
+          onChange={setServiceLocation}
         />
       </ProfileSection>
 
