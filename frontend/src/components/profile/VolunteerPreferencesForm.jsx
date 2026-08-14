@@ -22,18 +22,17 @@ import { useSupportCategories } from '../../hooks/useSupportCategories';
 const emptySlot = { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' };
 
 function toServiceLocation(preferences) {
-  if (
-    preferences?.serviceArea &&
-    preferences?.serviceLatitude != null &&
-    preferences?.serviceLongitude != null
-  ) {
-    return {
-      label: preferences.serviceArea,
-      latitude: preferences.serviceLatitude,
-      longitude: preferences.serviceLongitude,
-    };
+  if (!preferences?.serviceArea) {
+    return null;
   }
-  return null;
+
+  // Keep legacy label-only areas visible in edit; picker prompts to re-select
+  // until coordinates exist (API requires area + lat + lng together).
+  return {
+    label: preferences.serviceArea,
+    latitude: preferences.serviceLatitude ?? null,
+    longitude: preferences.serviceLongitude ?? null,
+  };
 }
 
 function VolunteerPreferencesForm({
@@ -90,6 +89,16 @@ function VolunteerPreferencesForm({
 
   const handleSubmit = async () => {
     setError('');
+
+    const hasLabel = Boolean(serviceLocation?.label);
+    const hasCoords =
+      serviceLocation?.latitude != null && serviceLocation?.longitude != null;
+
+    if (hasLabel && !hasCoords) {
+      setError('Please pick your service area again from search to confirm it.');
+      return;
+    }
+
     try {
       await onSave({
         serviceArea: serviceLocation?.label ?? null,
