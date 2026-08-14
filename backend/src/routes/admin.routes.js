@@ -2,16 +2,23 @@ const express = require('express');
 const router = express.Router();
 const jwtMiddleware = require('../middleware/jwt.middleware');
 const csrfMiddleware = require('../middleware/csrf.middleware');
+const validate = require('../middleware/validate.middleware');
 const { adminAuth } = require('../middleware/adminAuth');
+const {
+  updateVolunteerProfileSchema,
+} = require('../validations/volunteerProfileSchema');
 
 const {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getUsers,
+  getUser,
+  getUserVolunteer,
+  updateUserVolunteer,
   getAdminRequesterProfile,
   getAdminUserProfileImage,
-  getUsers,
 } = require('../controllers/admin.controllers');
 
 router.use(jwtMiddleware, csrfMiddleware, adminAuth);
@@ -19,8 +26,15 @@ router.use(jwtMiddleware, csrfMiddleware, adminAuth);
 router.get('/dashboard', getAdminDashboard);
 router.get('/volunteers/pending', getPendingVolunteers);
 router.get('/users', getUsers);
+router.get('/users/:id/volunteer', getUserVolunteer);
+router.get('/users/:id/profile/image', getAdminUserProfileImage);
+router.get('/users/:id', getUser);
+router.put(
+  '/users/:id/volunteer',
+  validate(updateVolunteerProfileSchema),
+  updateUserVolunteer
+);
 router.put('/volunteers/:id/approve', approveVolunteer);
 router.put('/volunteers/:id/reject', rejectVolunteer);
 router.get('/requesters/:id/profile', getAdminRequesterProfile);
-router.get('/users/:id/profile/image', getAdminUserProfileImage);
 module.exports = router;

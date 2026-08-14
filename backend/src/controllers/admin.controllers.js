@@ -1,4 +1,5 @@
 const adminService = require('../services/admin.service');
+const volunteerProfileService = require('../services/volunteerProfile.service');
 const requesterProfileService = require('../services/requesterProfile.service');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
@@ -65,6 +66,51 @@ async function getUsers(req, res, next) {
   }
 }
 
+function parseUserId(req, res) {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid user id',
+    });
+    return null;
+  }
+  return userId;
+}
+
+const getUser = asyncHandler(async (req, res) => {
+  const userId = parseUserId(req, res);
+  if (userId == null) {
+    return undefined;
+  }
+
+  const user = await adminService.getUserById(userId);
+  return res.status(200).json({ success: true, data: user });
+});
+
+const getUserVolunteer = asyncHandler(async (req, res) => {
+  const userId = parseUserId(req, res);
+  if (userId == null) {
+    return undefined;
+  }
+
+  const volunteer = await volunteerProfileService.getVolunteerProfile(userId);
+  return res.status(200).json({ success: true, data: volunteer });
+});
+
+const updateUserVolunteer = asyncHandler(async (req, res) => {
+  const userId = parseUserId(req, res);
+  if (userId == null) {
+    return undefined;
+  }
+
+  const volunteer = await volunteerProfileService.updateVolunteerProfile(
+    userId,
+    req.body
+  );
+  return res.status(200).json({ success: true, data: volunteer });
+});
+
 const getAdminRequesterProfile = asyncHandler(async (req, res) => {
   const userId = Number(req.params.id);
 
@@ -88,12 +134,16 @@ const getAdminUserProfileImage = asyncHandler(async (req, res) => {
   res.set('Content-Type', profileImage.profileImageType);
   return res.status(200).send(Buffer.from(profileImage.profileImage));
 });
+
 module.exports = {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getUsers,
+  getUser,
+  getUserVolunteer,
+  updateUserVolunteer,
   getAdminRequesterProfile,
   getAdminUserProfileImage,
-  getUsers,
 };
