@@ -17,10 +17,23 @@ function VolunteerPreferencesView({ preferences }) {
 
   return (
     <>
-      <ProfileSection title="Service Area">
-        <Typography variant="body2" color="text.secondary">
-          {preferences?.serviceArea || 'Not provided yet.'}
-        </Typography>
+      <ProfileSection title="Service area">
+        {preferences?.serviceArea ? (
+          <Box>
+            <Typography variant="body2">{preferences.serviceArea}</Typography>
+            {preferences.serviceLatitude != null &&
+              preferences.serviceLongitude != null && (
+                <Typography variant="caption" color="text.secondary">
+                  {preferences.serviceLatitude.toFixed(5)},{' '}
+                  {preferences.serviceLongitude.toFixed(5)}
+                </Typography>
+              )}
+          </Box>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No service area selected yet.
+          </Typography>
+        )}
       </ProfileSection>
 
       <ProfileSection title="Interests">
