@@ -23,6 +23,7 @@ import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ContactPhoneOutlinedIcon from '@mui/icons-material/ContactPhoneOutlined';
 import DoneIcon from '@mui/icons-material/Done';
+import CakeIcon from '@mui/icons-material/Cake';
 
 import { useGetProfile } from '../hooks/requesterProfile/useGetProfile';
 import { useUpdateProfileImage } from '../hooks/requesterProfile/useUpdateProfileImage';
@@ -271,6 +272,15 @@ function RequesterProfile() {
                   icon={<DescriptionOutlinedIcon />}
                   label="About Me"
                   value={requesterProfile?.bio}
+                />
+                <ProfileField
+                  icon={<CakeIcon />}
+                  label="Date of Birth"
+                  value={
+                    profile.dob
+                      ? new Date(profile.dob).toLocaleDateString()
+                      : ''
+                  }
                 />
                 <ProfileField
                   icon={<HomeOutlinedIcon />}
