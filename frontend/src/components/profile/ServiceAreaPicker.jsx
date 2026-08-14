@@ -68,6 +68,8 @@ function ServiceAreaPicker({ value, onChange }) {
         longitude: value.longitude,
       }
     : null;
+  const hasCoords =
+    selected?.latitude != null && selected?.longitude != null;
 
   if (!keyConfigured) {
     return (
@@ -81,11 +83,10 @@ function ServiceAreaPicker({ value, onChange }) {
   return (
     <Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        Search and select a place. We store coordinates so matching stays
-        reliable.
+        Search and select a place from the suggestions.
       </Typography>
 
-      {selected ? (
+      {selected && hasCoords ? (
         <Box
           sx={{
             display: 'flex',
@@ -103,9 +104,6 @@ function ServiceAreaPicker({ value, onChange }) {
             <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
               {selected.label}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {selected.latitude.toFixed(5)}, {selected.longitude.toFixed(5)}
-            </Typography>
           </Box>
           <IconButton
             aria-label="Clear service area"
@@ -120,6 +118,13 @@ function ServiceAreaPicker({ value, onChange }) {
           </IconButton>
         </Box>
       ) : (
+        <>
+          {selected && !hasCoords && (
+            <Alert severity="info" sx={{ mb: 1.5 }}>
+              Current area: <strong>{selected.label}</strong>. Pick it again
+              from search to confirm the place.
+            </Alert>
+          )}
         <Autocomplete
           options={options}
           loading={isSearching}
@@ -154,12 +159,7 @@ function ServiceAreaPicker({ value, onChange }) {
           }
           renderOption={(props, option) => (
             <li {...props} key={`${option.latitude}-${option.longitude}-${option.label}`}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', py: 0.5 }}>
-                <Typography variant="body2">{option.label}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {option.latitude.toFixed(4)}, {option.longitude.toFixed(4)}
-                </Typography>
-              </Box>
+              <Typography variant="body2">{option.label}</Typography>
             </li>
           )}
           renderInput={(params) => (
@@ -190,6 +190,7 @@ function ServiceAreaPicker({ value, onChange }) {
             />
           )}
         />
+        </>
       )}
 
       {searchError && (
@@ -198,7 +199,7 @@ function ServiceAreaPicker({ value, onChange }) {
         </Alert>
       )}
 
-      {!selected && (
+      {(!selected || !hasCoords) && (
         <Box sx={{ mt: 1.5 }}>
           <Chip
             size="small"
