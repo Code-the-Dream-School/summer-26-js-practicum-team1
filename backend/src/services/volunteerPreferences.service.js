@@ -6,6 +6,8 @@ const getPreferences = async (userId) => {
     where: { userId },
     select: {
       serviceArea: true,
+      serviceLatitude: true,
+      serviceLongitude: true,
       availability: true,
       supportCategories: {
         select: {
@@ -23,6 +25,8 @@ const getPreferences = async (userId) => {
 
   return {
     serviceArea: profile.serviceArea,
+    serviceLatitude: profile.serviceLatitude,
+    serviceLongitude: profile.serviceLongitude,
     availability: profile.availability,
     interests: profile.supportCategories.map((row) => row.supportCategory),
   };
@@ -38,7 +42,13 @@ const updatePreferences = async (userId, data) => {
     throw new ApiError(404, 'Volunteer profile not found');
   }
 
-  const { serviceArea, availability, interestIds } = data;
+  const {
+    serviceArea,
+    serviceLatitude,
+    serviceLongitude,
+    availability,
+    interestIds,
+  } = data;
 
   if (interestIds !== undefined) {
     const uniqueIds = [...new Set(interestIds)];
@@ -60,6 +70,14 @@ const updatePreferences = async (userId, data) => {
 
     if (serviceArea !== undefined) {
       profileData.serviceArea = serviceArea === '' ? null : serviceArea;
+    }
+
+    if (serviceLatitude !== undefined) {
+      profileData.serviceLatitude = serviceLatitude;
+    }
+
+    if (serviceLongitude !== undefined) {
+      profileData.serviceLongitude = serviceLongitude;
     }
 
     if (availability !== undefined) {
