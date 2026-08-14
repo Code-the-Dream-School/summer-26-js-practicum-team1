@@ -60,4 +60,30 @@ describe('registerSchema', () => {
 
     expect(error).toBeDefined();
   });
+
+  it('defaults accountType to requester', () => {
+    const { error, value } = registerSchema.validate(validBody);
+
+    expect(error).toBeUndefined();
+    expect(value.accountType).toBe('requester');
+  });
+
+  it('accepts volunteer accountType', () => {
+    const { error, value } = registerSchema.validate({
+      ...validBody,
+      accountType: 'volunteer',
+    });
+
+    expect(error).toBeUndefined();
+    expect(value.accountType).toBe('volunteer');
+  });
+
+  it('rejects an invalid accountType', () => {
+    const { error } = registerSchema.validate({
+      ...validBody,
+      accountType: 'admin',
+    });
+
+    expect(error).toBeDefined();
+  });
 });
