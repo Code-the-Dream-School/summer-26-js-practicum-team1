@@ -15,6 +15,9 @@ export function useAuth() {
     mutationFn: ({ email, password }) => login(email, password),
     onSuccess: (data) => queryClient.setQueryData(['me'], data),
   });
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+  });
 
   const logoutMutation = useMutation({
     mutationFn: () => {
@@ -33,7 +36,9 @@ export function useAuth() {
     isCheckingSession,
     login: loginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
+    register: registerMutation.mutateAsync,
     loginError: loginMutation.error,
+    registerError: registerMutation.error,
     isLoggingIn: loginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
     register: registerMutation.mutateAsync,
