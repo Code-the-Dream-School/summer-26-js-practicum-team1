@@ -23,7 +23,6 @@ export async function searchServiceAreas(query) {
   const params = new URLSearchParams({
     text,
     limit: '6',
-    format: 'json',
     apiKey,
   });
 
@@ -36,17 +35,15 @@ export async function searchServiceAreas(query) {
   }
 
   const data = await response.json();
-  const results = data.results || data.features || [];
+  const results = data.features || [];
 
   return results
-    .map((item) => {
-      // autocomplete JSON format uses flat results[]; geojson uses features[]
-      const props = item.properties || item;
-      const lat = props.lat ?? props.latitude;
-      const lon = props.lon ?? props.longitude ?? props.lng;
+    .map((feature) => {
+      const props = feature.properties || {};
+      const lat = props.lat;
+      const lon = props.lon;
       const label =
         props.formatted ||
-        props.address_line1 ||
         [props.city, props.state, props.country].filter(Boolean).join(', ');
 
       if (lat == null || lon == null || !label) {
@@ -57,7 +54,7 @@ export async function searchServiceAreas(query) {
         label,
         latitude: Number(lat),
         longitude: Number(lon),
-        placeId: props.place_id || props.placeId || null,
+        placeId: props.place_id || null,
       };
     })
     .filter(Boolean);
