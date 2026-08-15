@@ -31,7 +31,11 @@ export async function login(email, password) {
 }
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post('/api/auth/register', userData);
+    const { data } = await api.post(
+      '/api/auth/register',
+      userData,
+      { withCredentials: true }
+    );
 
     return data;
   } catch (err) {
@@ -40,15 +44,42 @@ export async function registerUser(userData) {
     }
 
     if (err.response.status === 400) {
-      const validationError = new Error('VALIDATION_FAILED');
-      validationError.details = err.response.data.details;
-      throw validationError;
+      throw new Error('VALIDATION_FAILED');
     }
 
-    throw new Error('REGISTER_FAILED');
+    throw new Error('REGISTRATION_FAILED');
   }
 }
+export async function createHelpRequest(data, csrfToken) {
+  try {
+    const { data: responseData } = await api.post(
+      '/api/requests',
+      data,
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
 
+    return responseData;
+  } catch (err) {
+    console.error('========== HELP REQUEST ERROR ==========');
+    console.error('Error:', err);
+    console.error('Message:', err.message);
+    console.error('Status:', err.response?.status);
+    console.error('Status Text:', err.response?.statusText);
+    console.error('Response Data:', err.response?.data);
+    console.error('Response Headers:', err.response?.headers);
+    console.error('Request URL:', err.config?.url);
+    console.error('Request Method:', err.config?.method);
+    console.error('Request Data:', err.config?.data);
+    console.error('========================================');
+
+    throw err;
+  }
+}
 export async function logout(csrfToken) {
   try {
     await api.post(
