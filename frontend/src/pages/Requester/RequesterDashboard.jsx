@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   AppBar,
@@ -16,6 +15,8 @@ import {
   Typography,
 } from '@mui/material';
 
+import { useNavigate } from 'react-router-dom';
+
 import AddIcon from '@mui/icons-material/Add';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
@@ -24,11 +25,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
-const mockPendingRequests = [  
+const mockPendingRequests = [
   {
     id: 1,
     title: 'Grocery Shopping',
-    description: 'Need help picking up groceries from the store.',
+    description:
+      'Need help picking up groceries from the store.',
     category: 'Grocery',
     urgency: 'Medium',
     date: 'Aug 12, 2026',
@@ -37,7 +39,8 @@ const mockPendingRequests = [
   {
     id: 2,
     title: 'Pharmacy Pickup',
-    description: 'Need someone to pick up my prescription.',
+    description:
+      'Need someone to pick up my prescription.',
     category: 'Errands',
     urgency: 'High',
     date: 'Aug 14, 2026',
@@ -45,18 +48,18 @@ const mockPendingRequests = [
   },
 ];
 
-const mockAcceptedRequests = [ 
+const mockAcceptedRequests = [
   {
     id: 3,
     title: 'Transportation',
-    description: 'Need a ride to my appointment.',
+    description:
+      'Need a ride to my appointment.',
     category: 'Transportation',
     urgency: 'High',
     date: 'Aug 15, 2026',
     address: '789 Pine Street',
     volunteer: {
       name: 'John Smith',
-      
     },
   },
 ];
@@ -79,7 +82,10 @@ function RequestCard({ request, accepted = false }) {
             mb: 1,
           }}
         >
-          <Typography variant="h6" fontWeight={600}>
+          <Typography
+            variant="h6"
+            fontWeight={600}
+          >
             {request.title}
           </Typography>
 
@@ -88,8 +94,12 @@ function RequestCard({ request, accepted = false }) {
             size="small"
             sx={{
               fontWeight: 600,
-              backgroundColor: accepted ? '#DCFCE7' : '#FEF3C7',
-              color: accepted ? '#166534' : '#92400E',
+              backgroundColor: accepted
+                ? '#DCFCE7'
+                : '#FEF3C7',
+              color: accepted
+                ? '#166534'
+                : '#92400E',
             }}
           />
         </Box>
@@ -110,28 +120,48 @@ function RequestCard({ request, accepted = false }) {
             mb: accepted ? 2 : 0,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
             <CalendarMonthOutlinedIcon
               fontSize="small"
               color="action"
             />
+
             <Typography variant="body2">
               {request.date}
             </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
             <LocationOnOutlinedIcon
               fontSize="small"
               color="action"
             />
+
             <Typography variant="body2">
               {request.address}
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            mt: 1,
+          }}
+        >
           <Chip
             label={`Category: ${request.category}`}
             size="small"
@@ -179,8 +209,6 @@ function RequestCard({ request, accepted = false }) {
                   <Typography fontWeight={600}>
                     {request.volunteer.name}
                   </Typography>
-
-                  
                 </Box>
               </Box>
             </Box>
@@ -195,7 +223,13 @@ function RequestCard({ request, accepted = false }) {
           }}
         >
           <Button
-            endIcon={<ArrowForwardIosIcon sx={{ fontSize: '14px !important' }} />}
+            endIcon={
+              <ArrowForwardIosIcon
+                sx={{
+                  fontSize: '14px !important',
+                }}
+              />
+            }
             size="small"
           >
             View Details
@@ -207,7 +241,10 @@ function RequestCard({ request, accepted = false }) {
 }
 
 export default function RequesterDashboard() {
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
+  const navigate = useNavigate();
+
+  const [profileMenuAnchor, setProfileMenuAnchor] =
+    useState(null);
 
   const profileMenuOpen = Boolean(profileMenuAnchor);
 
@@ -229,8 +266,14 @@ export default function RequesterDashboard() {
     console.log('Sign Out clicked');
   };
 
+  /*
+   * Navigate to the New Help Request page.
+   *
+   * Make sure this route matches the route
+   * you have defined in App.jsx.
+   */
   const handleNewRequest = () => {
-    console.log('New Help Request clicked');
+    navigate('/helpRequest');
   };
 
   return (
@@ -291,7 +334,7 @@ export default function RequesterDashboard() {
         </Toolbar>
       </AppBar>
 
-      
+      {/* Profile Menu */}
       <Menu
         anchorEl={profileMenuAnchor}
         open={profileMenuOpen}
@@ -314,17 +357,23 @@ export default function RequesterDashboard() {
         <Divider />
 
         <MenuItem onClick={handleEditProfile}>
-          <EditOutlinedIcon sx={{ mr: 1.5 }} fontSize="small" />
+          <EditOutlinedIcon
+            sx={{ mr: 1.5 }}
+            fontSize="small"
+          />
           Edit Profile
         </MenuItem>
 
         <MenuItem onClick={handleSignOut}>
-          <LogoutIcon sx={{ mr: 1.5 }} fontSize="small" />
+          <LogoutIcon
+            sx={{ mr: 1.5 }}
+            fontSize="small"
+          />
           Sign Out
         </MenuItem>
       </Menu>
 
-    
+      {/* Page Content */}
       <Box
         sx={{
           maxWidth: '1000px',
@@ -333,9 +382,13 @@ export default function RequesterDashboard() {
           py: 5,
         }}
       >
-      
+        {/* Welcome Section */}
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            gutterBottom
+          >
             Welcome back, Archana! 👋
           </Typography>
 
@@ -375,10 +428,12 @@ export default function RequesterDashboard() {
             mb: 5,
           }}
         >
+          {/* Pending */}
           <Card
             sx={{
               borderRadius: 3,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              boxShadow:
+                '0 2px 8px rgba(0,0,0,0.06)',
             }}
           >
             <CardContent>
@@ -389,16 +444,21 @@ export default function RequesterDashboard() {
                 Pending Requests
               </Typography>
 
-              <Typography variant="h3" fontWeight={700}>
+              <Typography
+                variant="h3"
+                fontWeight={700}
+              >
                 {mockPendingRequests.length}
               </Typography>
             </CardContent>
           </Card>
 
+          {/* Accepted */}
           <Card
             sx={{
               borderRadius: 3,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              boxShadow:
+                '0 2px 8px rgba(0,0,0,0.06)',
             }}
           >
             <CardContent>
@@ -409,7 +469,10 @@ export default function RequesterDashboard() {
                 Accepted Requests
               </Typography>
 
-              <Typography variant="h3" fontWeight={700}>
+              <Typography
+                variant="h3"
+                fontWeight={700}
+              >
                 {mockAcceptedRequests.length}
               </Typography>
             </CardContent>
@@ -418,7 +481,11 @@ export default function RequesterDashboard() {
 
         {/* Pending Requests */}
         <Box sx={{ mb: 5 }}>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ mb: 2 }}
+          >
             Pending Requests
           </Typography>
 
@@ -432,7 +499,11 @@ export default function RequesterDashboard() {
 
         {/* Accepted Requests */}
         <Box>
-          <Typography variant="h5" fontWeight={700} sx={{ mb: 2 }}>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ mb: 2 }}
+          >
             Accepted Requests
           </Typography>
 
@@ -448,4 +519,3 @@ export default function RequesterDashboard() {
     </Box>
   );
 }
-
