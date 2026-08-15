@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
-
+import NewhelpRequest from './pages/Requester/helpReqest'
 function App() {
   return (
     <Routes>
@@ -18,7 +18,9 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         {/*requester routes*/}
+        <Route path="requesterRegistration"element={<RequestorRegistration />}/>
         <Route path="/requester-dashboard" element={<RequesterDashboard />} />
+        <Route path="/helpRequest" element={<NewhelpRequest/>}/>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
@@ -28,10 +30,7 @@ function App() {
         <Route path="signup" element={<SignupPage />} />
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        <Route
-          path="requesterRegistration"
-          element={<RequestorRegistration />}
-        />
+        
       </Route>
     </Routes>
   );
