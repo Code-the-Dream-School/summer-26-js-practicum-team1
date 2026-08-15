@@ -27,10 +27,6 @@ export function useAuth() {
     onSuccess: () => queryClient.setQueryData(['me'], null),
   });
 
-  const registerMutation = useMutation({
-    mutationFn: (payload) => register(payload),
-  });
-
   return {
     user,
     isCheckingSession,
