@@ -33,7 +33,6 @@ function VolunteerRegistrationForm() {
     register,
     control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
 
@@ -73,7 +72,6 @@ function VolunteerRegistrationForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const passwordValue = watch('password');
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -321,8 +319,8 @@ function VolunteerRegistrationForm() {
             autoComplete="new-password"
             {...register('confirmPassword', {
               required: 'Please confirm your password',
-              validate: (value) =>
-                value === passwordValue || 'Passwords do not match',
+              validate: (value, formValues) =>
+                value === formValues.password || 'Passwords do not match',
             })}
             error={!!errors.confirmPassword}
             helperText={errors.confirmPassword?.message}
