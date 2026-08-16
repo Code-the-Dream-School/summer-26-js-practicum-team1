@@ -117,6 +117,7 @@ model HelpRequest {
   completedAt  DateTime?
 
   requester User @relation(fields: [requesterId], references: [id])
+}
 
 model RequesterProfile {
   userId           Int     @id
