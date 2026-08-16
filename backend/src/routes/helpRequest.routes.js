@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
   createHelpRequest,
+  getHelpRequests,
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
@@ -22,6 +23,14 @@ router.post(
   requireRole('REQUESTER'),
   validate(createHelpRequestSchema),
   createHelpRequest
+);
+
+router.get(
+  '/',
+  jwtMiddleware,
+  csrfMiddleware,
+  requireRole('REQUESTER'),
+  getHelpRequests
 );
 
 module.exports = router;
