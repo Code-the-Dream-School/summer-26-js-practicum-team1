@@ -1,4 +1,8 @@
 const ApiError = require('../src/utils/ApiError');
+
+jest.mock('../src/services/requesterProfile.service');
+jest.mock('../src/services/admin.service');
+
 jest.mock('../src/middleware/jwt.middleware', () => {
   return (req, res, next) => {
     req.user = {
@@ -23,11 +27,37 @@ jest.mock('../src/middleware/adminAuth', () => ({
   adminAuth: (req, res, next) => next(),
 }));
 
-jest.mock('../src/services/admin.service');
-
 const request = require('supertest');
 const app = require('../src/app');
+
 const adminService = require('../src/services/admin.service');
+const requesterProfileService = require('../src/services/requesterProfile.service');
+
+const {
+  getAdminUserProfileImage,
+} = require('../src/controllers/admin.controllers');
+
+app.get(
+  '/api/admin/users/:id/profile/image',
+  (req, res, next) => {
+    req.user = {
+      id: 99,
+      role: 'ADMIN',
+    };
+
+    next();
+  },
+  getAdminUserProfileImage
+);
+
+app.use((err, req, res) => {
+  const status = err.status || 500;
+
+  res.status(status).json({
+    success: false,
+    message: err.message,
+  });
+});
 
 describe('GET /api/admin/dashboard', () => {
   it('should return dashboard statistics', async () => {
@@ -53,7 +83,7 @@ describe('GET /api/admin/dashboard', () => {
   });
 });
 
-describe('GET/api/admin/volunteers/pending', () => {
+describe('GET /api/admin/volunteers/pending', () => {
   it('should return pending volunteers list', async () => {
     adminService.getPendingVolunteers.mockResolvedValue({
       volunteers: [],
@@ -71,6 +101,7 @@ describe('GET/api/admin/volunteers/pending', () => {
 
     expect(res.body.success).toBe(true);
   });
+
   it('should return empty volunteer list', async () => {
     adminService.getPendingVolunteers.mockResolvedValue({
       volunteers: [],
@@ -139,6 +170,7 @@ describe('PUT /api/admin/volunteers/:id/reject', () => {
 
     expect(res.status).toBe(200);
   });
+
   it('should fail with invalid id', async () => {
     const res = await request(app).put('/api/admin/volunteers/abc/reject');
 
@@ -162,10 +194,6 @@ describe('GET /api/admin/requesters/:id/profile', () => {
       emergencyContact: '555-987-6543',
     },
   };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
 
   it('should return requester profile with status 200', async () => {
     adminService.getRequesterProfileById.mockResolvedValue(mockProfile);
@@ -194,6 +222,7 @@ describe('GET /api/admin/requesters/:id/profile', () => {
     );
 
     expect(response.status).toBe(404);
+
     expect(response.body.message).toBe('Requester profile not found');
   });
 
@@ -203,12 +232,70 @@ describe('GET /api/admin/requesters/:id/profile', () => {
     );
 
     expect(response.status).toBe(400);
+
     expect(response.body.message).toBe('Invalid requester ID');
 
     expect(adminService.getRequesterProfileById).not.toHaveBeenCalled();
   });
 });
 
-afterEach(async () => {
+describe('GET /api/admin/users/:id/profile/image', () => {
+  it('should return the profile image for an admin', async () => {
+    const imageBuffer = Buffer.from('fake-png-image-data');
+
+    requesterProfileService.getProfileImage.mockResolvedValue({
+      profileImage: imageBuffer,
+      profileImageType: 'image/png',
+    });
+
+    const response = await request(app).get(
+      '/api/admin/users/12/profile/image'
+    );
+
+    expect(response.status).toBe(200);
+
+    expect(response.headers['content-type']).toMatch(/image\/png/);
+
+    expect(requesterProfileService.getProfileImage).toHaveBeenCalledWith(12);
+  });
+
+  it('should return 400 for an invalid user ID', async () => {
+    const response = await request(app).get(
+      '/api/admin/users/abc/profile/image'
+    );
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe('Invalid user ID');
+
+    expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
+  });
+
+  it('should return 400 for a non-positive user ID', async () => {
+    const response = await request(app).get('/api/admin/users/0/profile/image');
+
+    expect(response.status).toBe(400);
+
+    expect(response.body.message).toBe('Invalid user ID');
+
+    expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
+  });
+
+  it('should return 404 when the profile image is not found', async () => {
+    requesterProfileService.getProfileImage.mockRejectedValue(
+      new ApiError(404, 'Profile picture not found')
+    );
+
+    const response = await request(app).get(
+      '/api/admin/users/12/profile/image'
+    );
+
+    expect(response.status).toBe(404);
+
+    expect(response.body.message).toBe('Profile picture not found');
+  });
+});
+
+afterEach(() => {
   jest.clearAllMocks();
 });
