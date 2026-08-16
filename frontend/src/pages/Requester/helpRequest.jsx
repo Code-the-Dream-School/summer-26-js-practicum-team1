@@ -1,4 +1,7 @@
-import { searchPlaces } from '../../services/geoapify';
+import {
+  searchPlaces,
+  reverseGeocode,
+} from '../../services/geoapify';
 import { useState } from 'react';
 import {
   AppBar,
@@ -38,7 +41,7 @@ const urgencies = [
   { label: 'High', value: 'HIGH' },
 ];
 
-function NewRequest() {
+function NewHelpRequest() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -80,10 +83,6 @@ function NewRequest() {
 
   const profileMenuOpen = Boolean(profileMenuAnchor);
 
-  // --------------------------------------------------
-  // Profile menu
-  // --------------------------------------------------
-
   const handleProfileClick = (event) => {
     setProfileMenuAnchor(event.currentTarget);
   };
@@ -91,10 +90,6 @@ function NewRequest() {
   const handleProfileClose = () => {
     setProfileMenuAnchor(null);
   };
-
-  // --------------------------------------------------
-  // General form field change
-  // --------------------------------------------------
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -111,10 +106,6 @@ function NewRequest() {
       [name]: '',
     }));
   };
-
-  // --------------------------------------------------
-  // Address search
-  // --------------------------------------------------
 
   const handleAddressChange = async (event) => {
     const value = event.target.value;
@@ -162,10 +153,6 @@ function NewRequest() {
     }
   };
 
-  // --------------------------------------------------
-  // Select address from Geoapify
-  // --------------------------------------------------
-
   const handleSelectAddress = (location) => {
     setFormData((previous) => ({
       ...previous,
@@ -185,10 +172,6 @@ function NewRequest() {
       address: '',
     }));
   };
-
-  // --------------------------------------------------
-  // Get current GPS location
-  // --------------------------------------------------
 
   const handleGetCurrentAddress = () => {
     if (!navigator.geolocation) {
@@ -217,27 +200,7 @@ function NewRequest() {
         }));
 
         try {
-          const apiKey = import.meta.env.VITE_GEOAPIFY_API_KEY;
-
-          if (!apiKey) {
-            setFormData((previous) => ({
-              ...previous,
-              address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-            }));
-
-            setIsGettingLocation(false);
-            return;
-          }
-
-          const response = await fetch(
-            `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`
-          );
-
-          if (!response.ok) {
-            throw new Error('Unable to find address');
-          }
-
-          const data = await response.json();
+          const data = await reverseGeocode(latitude, longitude);
 
           const currentAddress =
             data.features?.[0]?.properties?.formatted;
@@ -274,10 +237,6 @@ function NewRequest() {
     );
   };
 
-  // --------------------------------------------------
-  // Submit help request
-  // --------------------------------------------------
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -285,10 +244,6 @@ function NewRequest() {
     setSuccess('');
     setFieldErrors({});
     setLocationSuggestions([]);
-
-    // -----------------------------------------------
-    // Frontend validation
-    // -----------------------------------------------
 
     const errors = {};
 
@@ -337,10 +292,6 @@ function NewRequest() {
       return;
     }
 
-    // -----------------------------------------------
-    // Date and time validation
-    // -----------------------------------------------
-
     const scheduledAt = new Date(
       `${formData.date}T${formData.time}`
     );
@@ -369,10 +320,6 @@ function NewRequest() {
       return;
     }
 
-    // -----------------------------------------------
-    // Request payload
-    // -----------------------------------------------
-
     const request = {
       title: formData.title.trim(),
       category: formData.category,
@@ -384,22 +331,16 @@ function NewRequest() {
       description: formData.description.trim(),
     };
 
-    // -----------------------------------------------
-    // Send request to backend
-    // -----------------------------------------------
-
     try {
       await createHelpRequest({
         data: request,
         csrfToken: user?.csrfToken,
       });
 
-      // Only show success after backend succeeds
       setSuccess(
         'Your help request has been submitted successfully! Our volunteers will review your request, and someone will be in touch with you soon.'
       );
 
-      // Clear form
       setFormData({
         title: '',
         category: '',
@@ -410,16 +351,13 @@ function NewRequest() {
         address: '',
       });
 
-      // Clear coordinates
       setCoordinates({
         latitude: null,
         longitude: null,
       });
 
-      // Clear field errors
       setFieldErrors({});
 
-      // Give requester time to read success message
       setTimeout(() => {
         navigate('/requester-dashboard');
       }, 3000);
@@ -428,10 +366,6 @@ function NewRequest() {
         'Create help request error:',
         submitError
       );
-
-      // ---------------------------------------------
-      // 400 - Validation error
-      // ---------------------------------------------
 
       if (submitError.response?.status === 400) {
         const serverDetails =
@@ -462,10 +396,6 @@ function NewRequest() {
         return;
       }
 
-      // ---------------------------------------------
-      // 401 - Not authenticated
-      // ---------------------------------------------
-
       if (submitError.response?.status === 401) {
         setError(
           'Your session has expired. Please sign in again before submitting a help request.'
@@ -473,10 +403,6 @@ function NewRequest() {
 
         return;
       }
-
-      // ---------------------------------------------
-      // 403 - CSRF / permission
-      // ---------------------------------------------
 
       if (submitError.response?.status === 403) {
         setError(
@@ -486,10 +412,6 @@ function NewRequest() {
         return;
       }
 
-      // ---------------------------------------------
-      // 409 - Conflict
-      // ---------------------------------------------
-
       if (submitError.response?.status === 409) {
         setError(
           'This help request could not be created because it conflicts with an existing request.'
@@ -497,10 +419,6 @@ function NewRequest() {
 
         return;
       }
-
-      // ---------------------------------------------
-      // 500+ - Server error
-      // ---------------------------------------------
 
       if (submitError.response?.status >= 500) {
         setError(
@@ -510,10 +428,6 @@ function NewRequest() {
         return;
       }
 
-      // ---------------------------------------------
-      // Network error
-      // ---------------------------------------------
-
       if (!submitError.response) {
         setError(
           'We could not connect to the server. Please check your internet connection and try again.'
@@ -521,10 +435,6 @@ function NewRequest() {
 
         return;
       }
-
-      // ---------------------------------------------
-      // Fallback
-      // ---------------------------------------------
 
       setError(
         'We could not create your help request. Please check your information and try again.'
@@ -539,7 +449,6 @@ function NewRequest() {
         backgroundColor: '#F7FAF7',
       }}
     >
-      {/* Header */}
       <AppBar
         position="static"
         elevation={0}
@@ -583,20 +492,19 @@ function NewRequest() {
                 backgroundColor: '#2E7D32',
               }}
             >
-              A
+              {user?.name?.charAt(0).toUpperCase() || 'R'}
             </Avatar>
 
             <Typography
               variant="body2"
               fontWeight={600}
             >
-              Archana
+              {user?.name || 'Requester'}
             </Typography>
           </Button>
         </Toolbar>
       </AppBar>
 
-      {/* Profile menu */}
       <Menu
         anchorEl={profileMenuAnchor}
         open={profileMenuOpen}
@@ -638,7 +546,6 @@ function NewRequest() {
         </MenuItem>
       </Menu>
 
-      {/* Page */}
       <Box
         sx={{
           maxWidth: '760px',
@@ -653,7 +560,6 @@ function NewRequest() {
           },
         }}
       >
-        {/* Page heading */}
         <Box
           sx={{
             textAlign: 'center',
@@ -681,7 +587,6 @@ function NewRequest() {
           </Typography>
         </Box>
 
-        {/* Main form card */}
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -701,7 +606,6 @@ function NewRequest() {
               '0 4px 16px rgba(46, 125, 50, 0.08)',
           }}
         >
-          {/* General error */}
           {error && (
             <Alert
               severity="error"
@@ -714,7 +618,6 @@ function NewRequest() {
             </Alert>
           )}
 
-          {/* Success */}
           {success && (
             <Alert
               severity="success"
@@ -727,7 +630,6 @@ function NewRequest() {
             </Alert>
           )}
 
-          {/* What do you need? */}
           <Typography
             variant="h6"
             fontWeight={600}
@@ -739,7 +641,6 @@ function NewRequest() {
             What do you need help with?
           </Typography>
 
-          {/* Title */}
           <TextField
             fullWidth
             required
@@ -764,7 +665,6 @@ function NewRequest() {
             }}
           />
 
-          {/* Category + Urgency */}
           <Box
             sx={{
               display: 'grid',
@@ -776,7 +676,6 @@ function NewRequest() {
               mb: 4,
             }}
           >
-            {/* Category */}
             <TextField
               select
               fullWidth
@@ -806,7 +705,6 @@ function NewRequest() {
               ))}
             </TextField>
 
-            {/* Urgency */}
             <TextField
               select
               fullWidth
@@ -837,7 +735,6 @@ function NewRequest() {
             </TextField>
           </Box>
 
-          {/* When */}
           <Typography
             variant="h6"
             fontWeight={600}
@@ -849,7 +746,6 @@ function NewRequest() {
             📅 When do you need help?
           </Typography>
 
-          {/* Date + Time */}
           <Box
             sx={{
               display: 'grid',
@@ -861,7 +757,6 @@ function NewRequest() {
               mb: 4,
             }}
           >
-            {/* Date */}
             <Box>
               <Typography
                 component="label"
@@ -900,7 +795,6 @@ function NewRequest() {
               />
             </Box>
 
-            {/* Time */}
             <Box>
               <Typography
                 component="label"
@@ -940,7 +834,6 @@ function NewRequest() {
             </Box>
           </Box>
 
-          {/* Description */}
           <Typography
             variant="h6"
             fontWeight={600}
@@ -974,7 +867,6 @@ function NewRequest() {
             }}
           />
 
-          {/* Location */}
           <Typography
             variant="h6"
             fontWeight={600}
@@ -1019,7 +911,6 @@ function NewRequest() {
               }}
             />
 
-            {/* Location suggestions */}
             {locationSuggestions.length > 0 && (
               <Box
                 sx={{
@@ -1069,7 +960,6 @@ function NewRequest() {
               </Box>
             )}
 
-            {/* Searching */}
             {isSearchingLocation && (
               <Typography
                 variant="caption"
@@ -1083,7 +973,6 @@ function NewRequest() {
               </Typography>
             )}
 
-            {/* Current location */}
             <Button
               type="button"
               startIcon={<MyLocationIcon />}
@@ -1104,7 +993,6 @@ function NewRequest() {
                 : 'Use my current location'}
             </Button>
 
-            {/* Coordinates captured */}
             {coordinates.latitude !== null &&
               coordinates.longitude !== null && (
                 <Box
@@ -1129,7 +1017,6 @@ function NewRequest() {
               )}
           </Box>
 
-          {/* Buttons */}
           <Box
             sx={{
               display: 'flex',
@@ -1138,7 +1025,6 @@ function NewRequest() {
               pt: 1,
             }}
           >
-            {/* Cancel */}
             <Button
               type="button"
               variant="outlined"
@@ -1162,7 +1048,6 @@ function NewRequest() {
               Cancel
             </Button>
 
-            {/* Submit */}
             <Button
               type="submit"
               variant="contained"
@@ -1190,4 +1075,4 @@ function NewRequest() {
   );
 }
 
-export default NewRequest;
+export default NewHelpRequest;

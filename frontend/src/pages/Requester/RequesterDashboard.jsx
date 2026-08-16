@@ -329,12 +329,12 @@ export default function RequesterDashboard() {
             fontWeight={600}
             sx={{ ml: 0.5 }}
           >
-            Archana
+           user?.name
           </Typography>
         </Toolbar>
       </AppBar>
 
-      {/* Profile Menu */}
+      
       <Menu
         anchorEl={profileMenuAnchor}
         open={profileMenuOpen}
@@ -350,7 +350,7 @@ export default function RequesterDashboard() {
       >
         <MenuItem disabled>
           <Typography fontWeight={600}>
-            Archana
+           user?.name
           </Typography>
         </MenuItem>
 
@@ -389,7 +389,7 @@ export default function RequesterDashboard() {
             fontWeight={700}
             gutterBottom
           >
-            Welcome back, Archana! 👋
+            Welcome back, user?.name! 👋
           </Typography>
 
           <Typography color="text.secondary">
