@@ -1,5 +1,6 @@
 const adminService = require('../services/admin.service');
 const asyncHandler = require('../utils/asyncHandler');
+const ApiError = require('../utils/ApiError');
 const { VerificationStatus } = require('@prisma/client');
 
 const getAdminDashboard = asyncHandler(async (req, res) => {
@@ -65,6 +66,10 @@ async function getUsers(req, res, next) {
 
 const getAdminRequesterProfile = asyncHandler(async (req, res) => {
   const userId = Number(req.params.id);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new ApiError(400, 'Invalid requester ID');
+  }
 
   const profile = await adminService.getRequesterProfileById(userId);
 

@@ -1,3 +1,4 @@
+const ApiError = require('../src/utils/ApiError');
 jest.mock('../src/middleware/jwt.middleware', () => {
   return (req, res, next) => {
     req.user = {
@@ -142,6 +143,69 @@ describe('PUT /api/admin/volunteers/:id/reject', () => {
     const res = await request(app).put('/api/admin/volunteers/abc/reject');
 
     expect(res.status).toBe(400);
+  });
+});
+
+describe('GET /api/admin/requesters/:id/profile', () => {
+  const mockProfile = {
+    id: 12,
+    name: 'Test Requester',
+    email: 'requester@test.com',
+    phone: '555-123-4567',
+    dob: '1990-01-01T00:00:00.000Z',
+    gender: 'FEMALE',
+    role: 'REQUESTER',
+    requesterProfile: {
+      address: '123 Main St',
+      city: 'San Jose',
+      bio: 'Test bio',
+      emergencyContact: '555-987-6543',
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return requester profile with status 200', async () => {
+    adminService.getRequesterProfileById.mockResolvedValue(mockProfile);
+
+    const response = await request(app).get('/api/admin/requesters/12/profile');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockProfile);
+  });
+
+  it('should pass the requester ID as a number to the service', async () => {
+    adminService.getRequesterProfileById.mockResolvedValue(mockProfile);
+
+    await request(app).get('/api/admin/requesters/12/profile');
+
+    expect(adminService.getRequesterProfileById).toHaveBeenCalledWith(12);
+  });
+
+  it('should return 404 when requester profile is not found', async () => {
+    adminService.getRequesterProfileById.mockRejectedValue(
+      new ApiError(404, 'Requester profile not found')
+    );
+
+    const response = await request(app).get(
+      '/api/admin/requesters/999/profile'
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.body.message).toBe('Requester profile not found');
+  });
+
+  it('should return 400 for an invalid requester ID', async () => {
+    const response = await request(app).get(
+      '/api/admin/requesters/abc/profile'
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.body.message).toBe('Invalid requester ID');
+
+    expect(adminService.getRequesterProfileById).not.toHaveBeenCalled();
   });
 });
 
