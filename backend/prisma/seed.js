@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const bcrypt = require('bcrypt');
 const {
   PrismaClient,
   Role,
@@ -26,12 +27,15 @@ async function main() {
   await prisma.requesterProfile.deleteMany();
   await prisma.user.deleteMany();
 
+  const saltRounds = 10;
+  const dummyHash = await bcrypt.hash('password123', saltRounds);
+
   const users = await Promise.all([
     prisma.user.create({
       data: {
         email: 'alice.requester@example.com',
         name: 'Alice Johnson',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.REQUESTER,
         phone: '415-555-0101',
         dob: new Date('1985-04-12'),
@@ -43,7 +47,7 @@ async function main() {
       data: {
         email: 'bob.requester@example.com',
         name: 'Bob Martinez',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.REQUESTER,
         phone: '415-555-0102',
         dob: new Date('1978-09-23'),
@@ -55,7 +59,7 @@ async function main() {
       data: {
         email: 'carol.requester@example.com',
         name: 'Carol Williams',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.REQUESTER,
         phone: '415-555-0103',
         dob: new Date('1990-01-15'),
@@ -67,7 +71,7 @@ async function main() {
       data: {
         email: 'david.requester@example.com',
         name: 'David Lee',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.REQUESTER,
         phone: '415-555-0104',
         dob: new Date('1969-07-08'),
@@ -79,7 +83,7 @@ async function main() {
       data: {
         email: 'emma.volunteer@example.com',
         name: 'Emma Garcia',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.VOLUNTEER,
         phone: '415-555-0105',
         dob: new Date('1995-03-20'),
@@ -91,7 +95,7 @@ async function main() {
       data: {
         email: 'frank.volunteer@example.com',
         name: 'Frank Brown',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.VOLUNTEER,
         phone: '415-555-0106',
         dob: new Date('1988-11-02'),
@@ -103,7 +107,7 @@ async function main() {
       data: {
         email: 'grace.volunteer@example.com',
         name: 'Grace Wilson',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.VOLUNTEER,
         phone: '415-555-0107',
         dob: new Date('1992-06-17'),
@@ -115,7 +119,7 @@ async function main() {
       data: {
         email: 'henry.volunteer@example.com',
         name: 'Henry Davis',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.VOLUNTEER,
         phone: '415-555-0108',
         dob: new Date('1983-12-30'),
@@ -127,7 +131,7 @@ async function main() {
       data: {
         email: 'admin@example.com',
         name: 'Admin User',
-        passwordHash: 'dummy-hash',
+        passwordHash: dummyHash,
         role: Role.ADMIN,
         phone: '415-555-0109',
         dob: new Date('1980-05-25'),
