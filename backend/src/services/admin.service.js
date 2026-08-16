@@ -137,9 +137,42 @@ async function getUsers(page = 1, limit = 20) {
     },
   };
 }
+
+const getRequesterProfileById = async (userId) => {
+  const profile = await prisma.user.findFirst({
+    where: {
+      id: userId,
+      role: 'REQUESTER',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      dob: true,
+      gender: true,
+      role: true,
+      requesterProfile: {
+        select: {
+          address: true,
+          city: true,
+          bio: true,
+          emergencyContact: true,
+        },
+      },
+    },
+  });
+
+  if (!profile) {
+    throw new ApiError(404, 'Requester profile not found');
+  }
+
+  return profile;
+};
 module.exports = {
   getDashboardStats,
   getPendingVolunteers,
   reviewVolunteer,
   getUsers,
+  getRequesterProfileById,
 };

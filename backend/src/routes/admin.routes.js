@@ -9,6 +9,7 @@ const {
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getAdminRequesterProfile,
   getUsers,
 } = require('../controllers/admin.controllers');
 
@@ -19,4 +20,5 @@ router.get('/volunteers/pending', getPendingVolunteers);
 router.get('/users', getUsers);
 router.put('/volunteers/:id/approve', approveVolunteer);
 router.put('/volunteers/:id/reject', rejectVolunteer);
+router.get('/requesters/:id/profile', getAdminRequesterProfile);
 module.exports = router;

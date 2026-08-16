@@ -63,10 +63,18 @@ async function getUsers(req, res, next) {
   }
 }
 
+const getAdminRequesterProfile = asyncHandler(async (req, res) => {
+  const userId = Number(req.params.id);
+
+  const profile = await adminService.getRequesterProfileById(userId);
+
+  res.status(200).json(profile);
+});
 module.exports = {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getAdminRequesterProfile,
   getUsers,
 };
