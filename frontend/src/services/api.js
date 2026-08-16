@@ -65,18 +65,8 @@ export async function createHelpRequest(data, csrfToken) {
 
     return responseData;
   } catch (err) {
-    console.error('========== HELP REQUEST ERROR ==========');
-    console.error('Error:', err);
-    console.error('Message:', err.message);
-    console.error('Status:', err.response?.status);
-    console.error('Status Text:', err.response?.statusText);
-    console.error('Response Data:', err.response?.data);
-    console.error('Response Headers:', err.response?.headers);
-    console.error('Request URL:', err.config?.url);
-    console.error('Request Method:', err.config?.method);
-    console.error('Request Data:', err.config?.data);
-    console.error('========================================');
 
+    console.error('Error:', err);
     throw err;
   }
 }
@@ -101,7 +91,7 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
-  //uncomment once registration is ready
+  
   try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;
