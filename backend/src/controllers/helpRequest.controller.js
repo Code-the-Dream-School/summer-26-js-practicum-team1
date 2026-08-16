@@ -11,4 +11,12 @@ const createHelpRequest = asyncHandler(async (req, res) => {
   return res.status(201).json({ success: true, data: helpRequest });
 });
 
-module.exports = { createHelpRequest };
+const getHelpRequests = asyncHandler(async (req, res) => {
+  const helpRequests = await helpRequestService.getHelpRequests({
+    user: req.user,
+    query: req.query,
+  });
+  return res.status(200).json({ success: true, data: helpRequests });
+});
+
+module.exports = { createHelpRequest, getHelpRequests };
