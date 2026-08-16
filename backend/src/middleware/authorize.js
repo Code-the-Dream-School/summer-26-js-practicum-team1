@@ -22,7 +22,8 @@ const requireRole = (roles) => {
 const requireApprovedIfVolunteer = (req, res, next) => {
   if (
     req.user.role === 'VOLUNTEER' &&
-    req.user.verificationStatus !== VerificationStatus.APPROVED
+    req.user.volunteerProfile?.verificationStatus !==
+      VerificationStatus.APPROVED
   ) {
     return res.status(403).json({ error: 'Volunteer account not approved' });
   }
