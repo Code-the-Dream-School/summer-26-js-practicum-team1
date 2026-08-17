@@ -162,33 +162,39 @@ function ServiceAreaPicker({ value, onChange }) {
               <Typography variant="body2">{option.label}</Typography>
             </li>
           )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Search city, neighborhood, or zip"
-              placeholder="Start typing a place…"
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <>
-                    <PlaceOutlinedIcon
-                      fontSize="small"
-                      sx={{ ml: 1, mr: 0.5, color: 'text.secondary' }}
-                    />
-                    {params.InputProps.startAdornment}
-                  </>
-                ),
-                endAdornment: (
-                  <>
-                    {isSearching ? (
-                      <CircularProgress color="inherit" size={18} />
-                    ) : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              }}
-            />
-          )}
+          renderInput={(params) => {
+            const inputSlotProps = params.slotProps?.input ?? {};
+            return (
+              <TextField
+                {...params}
+                label="Search city, neighborhood, or zip"
+                placeholder="Start typing a place…"
+                slotProps={{
+                  ...params.slotProps,
+                  input: {
+                    ...inputSlotProps,
+                    startAdornment: (
+                      <>
+                        <PlaceOutlinedIcon
+                          fontSize="small"
+                          sx={{ ml: 1, mr: 0.5, color: 'text.secondary' }}
+                        />
+                        {inputSlotProps.startAdornment}
+                      </>
+                    ),
+                    endAdornment: (
+                      <>
+                        {isSearching ? (
+                          <CircularProgress color="inherit" size={18} />
+                        ) : null}
+                        {inputSlotProps.endAdornment}
+                      </>
+                    ),
+                  },
+                }}
+              />
+            );
+          }}
         />
         </>
       )}
