@@ -3,7 +3,6 @@ import {
   Alert,
   Avatar,
   Box,
-  Button,
   Card,
   CardContent,
   CircularProgress,
@@ -23,6 +22,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ContactPhoneOutlinedIcon from '@mui/icons-material/ContactPhoneOutlined';
 import DoneIcon from '@mui/icons-material/Done';
 import CakeIcon from '@mui/icons-material/Cake';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 
 import { useGetProfile } from '../hooks/requesterProfile/useGetProfile';
 import { useUpdateProfileImage } from '../hooks/requesterProfile/useUpdateProfileImage';
@@ -40,8 +40,8 @@ function RequesterProfile() {
     bio: '',
     emergencyContact: '',
   });
-  const { data: profileImage } = useGetProfileImage();
 
+  const { data: profileImage } = useGetProfileImage();
   const { data, isLoading, isError } = useGetProfile();
   const updateProfileImage = useUpdateProfileImage();
 
@@ -103,10 +103,16 @@ function RequesterProfile() {
       <Typography
         variant="h5"
         align="center"
-        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
+        sx={{
+          margin: 3,
+          marginLeft: 0,
+          fontWeight: 700,
+          mb: 3,
+        }}
       >
         MY PROFILE
       </Typography>
+
       <Box
         sx={{
           width: '100%',
@@ -123,7 +129,11 @@ function RequesterProfile() {
             width: '100%',
           }}
         >
-          <CardContent sx={{ ml: 5 }}>
+          <CardContent
+            sx={{
+              ml: { xs: 0, sm: 5 },
+            }}
+          >
             <Stack spacing={3}>
               <Stack
                 direction="row"
@@ -148,91 +158,99 @@ function RequesterProfile() {
                   {profile.name}
                 </Typography>
 
-                <Button
+                <IconButton
                   aria-label="Edit profile"
                   onClick={handleEdit}
-                  variant="contained"
                   sx={{
-                    borderRadius: 1,
-                    boxShadow: 3,
+                    boxShadow: 2,
                     transition: '0.3s',
 
                     '&:hover': {
-                      boxShadow: 8,
-                      transform: 'translateY(-4px)',
+                      boxShadow: 5,
+                      transform: 'translateY(-2px)',
                     },
                   }}
                 >
-                  <>
-                    <EditIcon fontSize="small" sx={{ mr: 2 }} /> Profile
-                  </>
-                </Button>
+                  <EditIcon />
+                </IconButton>
               </Stack>
 
               <Divider sx={{ borderBottomWidth: 3 }} />
 
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={{ xs: 2, sm: 3, lg: 10 }}
+                spacing={{ xs: 3, sm: 3, md: 5, lg: 6 }}
                 sx={{
-                  alignItems: { xs: 'center', sm: 'center' },
+                  alignItems: {
+                    xs: 'center',
+                    sm: 'center',
+                  },
                 }}
               >
                 <Stack
                   direction="column"
-                  spacing={3}
+                  spacing={2}
                   sx={{
                     alignItems: 'center',
                   }}
                 >
-                  <Avatar
-                    src={profileImage || undefined}
+                  <Box
                     sx={{
-                      width: 130,
-                      height: 130,
+                      position: 'relative',
+                      display: 'inline-flex',
                     }}
                   >
-                    <Typography variant="h3">
+                    <Avatar
+                      src={profileImage || undefined}
+                      sx={{
+                        width: 130,
+                        height: 130,
+                        fontSize: '3rem',
+                      }}
+                    >
                       {profile.name?.charAt(0).toUpperCase()}
-                    </Typography>
-                  </Avatar>
+                    </Avatar>
 
-                  <Button
-                    component="label"
-                    variant="contained"
-                    disabled={updateProfileImage.isPending}
-                    sx={{
-                      borderRadius: 1,
-                      boxShadow: 3,
-                      transition: '0.3s',
+                    <IconButton
+                      component="label"
+                      aria-label="Change profile picture"
+                      disabled={updateProfileImage.isPending}
+                      sx={{
+                        position: 'absolute',
+                        bottom: 1,
+                        left: 4,
+                        width: 28,
+                        height: 28,
+                        bgcolor: 'background.paper',
+                        boxShadow: 3,
+                        border: 1,
+                        borderColor: 'divider',
+                        transition: '0.3s',
 
-                      '&:hover': {
-                        boxShadow: 8,
-                        transform: 'translateY(-4px)',
-                      },
-                    }}
-                  >
-                    {updateProfileImage.isPending ? (
-                      <CircularProgress
-                        color="success"
-                        aria-label="Uploading Image"
+                        '&:hover': {
+                          bgcolor: 'grey.100',
+                          boxShadow: 5,
+                          transform: 'scale(1.05)',
+                        },
+                      }}
+                    >
+                      {updateProfileImage.isPending ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <PhotoCameraOutlinedIcon fontSize="small" />
+                      )}
+
+                      <input
+                        type="file"
+                        hidden
+                        accept="image/jpeg,image/png"
+                        onChange={handleImageChange}
                       />
-                    ) : (
-                      <>
-                        <EditIcon fontSize="small" sx={{ mr: 2 }} /> Avatar
-                      </>
-                    )}
-
-                    <input
-                      type="file"
-                      hidden
-                      accept="image/jpeg,image/png"
-                      onChange={handleImageChange}
-                    />
-                  </Button>
+                    </IconButton>
+                  </Box>
 
                   {updateProfileImage.isError && (
-                    <Typography variant="body2" color="error">
+                    <Typography variant="body2" color="error" align="center">
                       Failed to update profile image.
                     </Typography>
                   )}
@@ -269,6 +287,7 @@ function RequesterProfile() {
                   label="About Me"
                   value={requesterProfile?.bio}
                 />
+
                 <ProfileField
                   icon={<CakeIcon />}
                   label="Date of Birth"
@@ -278,6 +297,7 @@ function RequesterProfile() {
                       : ''
                   }
                 />
+
                 <ProfileField
                   icon={<HomeOutlinedIcon />}
                   label="Address"
