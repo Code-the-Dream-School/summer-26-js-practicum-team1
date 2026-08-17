@@ -43,9 +43,11 @@ export async function registerUser(userData) {
       throw new Error('NETWORK_ERROR');
     }
 
-    if (err.response.status === 400) {
-      throw new Error('VALIDATION_FAILED');
-    }
+    if (err.response?.status === 400 && err.response?.data?.details) {
+  const validationError = new Error('VALIDATION_FAILED');
+  validationError.details = err.response.data.details;
+  throw validationError;
+}
 
     throw new Error('REGISTRATION_FAILED');
   }

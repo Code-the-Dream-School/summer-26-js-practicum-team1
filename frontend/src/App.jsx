@@ -18,7 +18,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         {/*requester routes*/}
-        <Route path="requesterRegistration"element={<RequestorRegistration />}/>
+        <Route path="requesterRegistration" element={<RequestorRegistration />}/>
         <Route path="/requester-dashboard" element={<RequesterDashboard />} />
         <Route path="/helpRequest" element={<NewhelpRequest/>}/>
         {/* Admin routes */}

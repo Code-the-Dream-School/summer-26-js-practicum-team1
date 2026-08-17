@@ -530,7 +530,7 @@ function NewHelpRequest() {
         <MenuItem
           onClick={() => {
             handleProfileClose();
-            console.log('Edit Profile');
+          
           }}
         >
           Edit Profile
@@ -539,7 +539,7 @@ function NewHelpRequest() {
         <MenuItem
           onClick={() => {
             handleProfileClose();
-            console.log('Sign Out');
+           
           }}
         >
           Sign Out

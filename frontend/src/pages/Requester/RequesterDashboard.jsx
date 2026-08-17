@@ -31,8 +31,7 @@ import { getMe, getHelpRequests, logout } from '../../services/api';
 
 const SIDEBAR_WIDTH = 232;
 
-// Urgency drives the card's left accent border so a person scanning the
-// grid can triage at a glance without opening each card.
+
 const URGENCY_STYLES = {
   HIGH: { border: '#E24B4A', bg: '#FCEBEB', text: '#791F1F' },
   MEDIUM: { border: '#EF9F27', bg: '#FAEEDA', text: '#633806' },
@@ -272,7 +271,7 @@ export default function RequesterDashboard() {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
-      {/* Slim top bar: notifications + profile only, nav lives in the sidebar */}
+      
       <Box
         sx={{
           display: 'flex',
@@ -322,7 +321,7 @@ export default function RequesterDashboard() {
       </Menu>
 
       <Box sx={{ display: 'flex', maxWidth: '1200px', mx: 'auto' }}>
-        {/* Sidebar */}
+        
         <Box
           sx={{
             width: SIDEBAR_WIDTH,
@@ -383,7 +382,7 @@ export default function RequesterDashboard() {
           </Box>
         </Box>
 
-        {/* Main content */}
+        
         <Box sx={{ flexGrow: 1, minWidth: 0, px: 3, py: 4 }}>
           <Box   sx={{ mb: 3 }}>
             <Typography variant="h5" fontWeight={700} gutterBottom>

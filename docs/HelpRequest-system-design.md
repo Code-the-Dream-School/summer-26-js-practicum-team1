@@ -41,7 +41,7 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 5. Return created object.
  Get authenticated requester's requests
 
-GET /api/requests/my
+GET /api/requests/
 
 1. Authenticate → 401 if not logged in.
 2. Authorize REQUESTER role → 403 otherwise.
