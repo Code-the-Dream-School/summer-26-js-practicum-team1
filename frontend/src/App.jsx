@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
-import NewhelpRequest from './pages/Requester/helpReqest'
+import NewhelpRequest from './pages/Requester/helpRequest'
 function App() {
   return (
     <Routes>

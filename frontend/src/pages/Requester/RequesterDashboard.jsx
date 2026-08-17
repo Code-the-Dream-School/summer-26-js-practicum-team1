@@ -1,17 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  AppBar,
   Avatar,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Divider,
   IconButton,
   Menu,
   MenuItem,
-  Toolbar,
+  Select,
   Typography,
 } from '@mui/material';
 
@@ -24,212 +24,124 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import LogoutIcon from '@mui/icons-material/Logout';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined';
 
-const mockPendingRequests = [
-  {
-    id: 1,
-    title: 'Grocery Shopping',
-    description:
-      'Need help picking up groceries from the store.',
-    category: 'Grocery',
-    urgency: 'Medium',
-    date: 'Aug 12, 2026',
-    address: '123 Main Street',
-  },
-  {
-    id: 2,
-    title: 'Pharmacy Pickup',
-    description:
-      'Need someone to pick up my prescription.',
-    category: 'Errands',
-    urgency: 'High',
-    date: 'Aug 14, 2026',
-    address: '456 Oak Avenue',
-  },
-];
+import { getMe, getHelpRequests, logout } from '../../services/api';
 
-const mockAcceptedRequests = [
-  {
-    id: 3,
-    title: 'Transportation',
-    description:
-      'Need a ride to my appointment.',
-    category: 'Transportation',
-    urgency: 'High',
-    date: 'Aug 15, 2026',
-    address: '789 Pine Street',
-    volunteer: {
-      name: 'John Smith',
-    },
-  },
-];
+const SIDEBAR_WIDTH = 232;
 
-function RequestCard({ request, accepted = false }) {
+// Urgency drives the card's left accent border so a person scanning the
+// grid can triage at a glance without opening each card.
+const URGENCY_STYLES = {
+  HIGH: { border: '#E24B4A', bg: '#FCEBEB', text: '#791F1F' },
+  MEDIUM: { border: '#EF9F27', bg: '#FAEEDA', text: '#633806' },
+  LOW: { border: '#639922', bg: '#EAF3DE', text: '#27500A' },
+};
+
+function getUrgencyStyle(urgency) {
+  return URGENCY_STYLES[urgency] || URGENCY_STYLES.LOW;
+}
+
+function RequestCard({ request }) {
+  const accepted = request.status === 'ACCEPTED';
+  const urgencyStyle = getUrgencyStyle(request.urgency);
+
   return (
     <Card
       sx={{
-        mb: 2,
         borderRadius: 3,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
+        borderLeft: `4px solid ${urgencyStyle.border}`,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
+            gap: 1,
             mb: 1,
           }}
         >
-          <Typography
-            variant="h6"
-            fontWeight={600}
-          >
+          <Typography variant="subtitle1" fontWeight={600}>
             {request.title}
           </Typography>
 
           <Chip
-            label={accepted ? 'ACCEPTED' : 'PENDING'}
+            label={accepted ? 'Accepted' : 'Pending'}
             size="small"
             sx={{
               fontWeight: 600,
-              backgroundColor: accepted
-                ? '#DCFCE7'
-                : '#FEF3C7',
-              color: accepted
-                ? '#166534'
-                : '#92400E',
+              flexShrink: 0,
+              backgroundColor: accepted ? '#DCFCE7' : '#FEF3C7',
+              color: accepted ? '#166534' : '#92400E',
             }}
           />
         </Box>
 
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ mb: 2 }}
-        >
-          {request.description}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          {request.description || 'No description provided.'}
         </Typography>
 
-        <Box
-          sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 2,
-            mb: accepted ? 2 : 0,
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-            }}
-          >
-            <CalendarMonthOutlinedIcon
-              fontSize="small"
-              color="action"
-            />
-
-            <Typography variant="body2">
-              {request.date}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} color="action" />
+            <Typography variant="caption" color="text.secondary">
+              {request.scheduledAt
+                ? new Date(request.scheduledAt).toLocaleString()
+                : 'Date not available'}
             </Typography>
           </Box>
 
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-            }}
-          >
-            <LocationOnOutlinedIcon
-              fontSize="small"
-              color="action"
-            />
-
-            <Typography variant="body2">
-              {request.address}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <LocationOnOutlinedIcon sx={{ fontSize: 16 }} color="action" />
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {request.address || 'Address not available'}
             </Typography>
           </Box>
         </Box>
 
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 1,
-            mt: 1,
-          }}
-        >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Chip label={request.category} size="small" variant="outlined" />
           <Chip
-            label={`Category: ${request.category}`}
+            label={request.urgency}
             size="small"
-            variant="outlined"
-          />
-
-          <Chip
-            label={`Urgency: ${request.urgency}`}
-            size="small"
-            variant="outlined"
+            sx={{
+              backgroundColor: urgencyStyle.bg,
+              color: urgencyStyle.text,
+              fontWeight: 600,
+            }}
           />
         </Box>
 
         {accepted && request.volunteer && (
           <>
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 1.5 }} />
 
-            <Typography
-              variant="subtitle2"
-              fontWeight={600}
-              sx={{ mb: 1.5 }}
-            >
-              Volunteer
-            </Typography>
-
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                }}
-              >
-                <Avatar>
-                  {request.volunteer.name.charAt(0)}
-                </Avatar>
-
-                <Box>
-                  <Typography fontWeight={600}>
-                    {request.volunteer.name}
-                  </Typography>
-                </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+              <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>
+                {request.volunteer.name?.charAt(0)}
+              </Avatar>
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">
+                  Volunteer
+                </Typography>
+                <Typography variant="body2" fontWeight={600}>
+                  {request.volunteer.name}
+                </Typography>
               </Box>
             </Box>
           </>
         )}
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            mt: 2,
-          }}
-        >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto', pt: 1.5 }}>
           <Button
-            endIcon={
-              <ArrowForwardIosIcon
-                sx={{
-                  fontSize: '14px !important',
-                }}
-              />
-            }
+            endIcon={<ArrowForwardIosIcon sx={{ fontSize: '12px !important' }} />}
             size="small"
           >
             View Details
@@ -243,277 +155,307 @@ function RequestCard({ request, accepted = false }) {
 export default function RequesterDashboard() {
   const navigate = useNavigate();
 
-  const [profileMenuAnchor, setProfileMenuAnchor] =
-    useState(null);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
+  const [user, setUser] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('ALL'); // ALL | PENDING | ACCEPTED
+  const [sortBy, setSortBy] = useState('SOONEST'); // SOONEST | URGENCY
 
   const profileMenuOpen = Boolean(profileMenuAnchor);
 
-  const handleProfileClick = (event) => {
-    setProfileMenuAnchor(event.currentTarget);
-  };
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const handleProfileClose = () => {
-    setProfileMenuAnchor(null);
-  };
+        const currentUser = await getMe();
+
+        if (!currentUser) {
+          navigate('/login');
+          return;
+        }
+
+        setUser(currentUser);
+
+        const response = await getHelpRequests();
+        setRequests(response.data || []);
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+        setError('Unable to load your requests. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboard();
+  }, [navigate]);
+
+  const handleProfileClick = (event) => setProfileMenuAnchor(event.currentTarget);
+  const handleProfileClose = () => setProfileMenuAnchor(null);
 
   const handleEditProfile = () => {
     handleProfileClose();
-    console.log('Edit Profile clicked');
+    navigate('/profile');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     handleProfileClose();
-    console.log('Sign Out clicked');
+    try {
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      console.error('Sign out failed:', err);
+    }
   };
 
-  /*
-   * Navigate to the New Help Request page.
-   *
-   * Make sure this route matches the route
-   * you have defined in App.jsx.
-   */
-  const handleNewRequest = () => {
-    navigate('/helpRequest');
-  };
+  const handleNewRequest = () => navigate('/helpRequest');
+
+  const pendingRequests = useMemo(
+    () => requests.filter((r) => r.status === 'PENDING'),
+    [requests]
+  );
+  const acceptedRequests = useMemo(
+    () => requests.filter((r) => r.status === 'ACCEPTED'),
+    [requests]
+  );
+
+  const urgencyRank = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+  const visibleRequests = useMemo(() => {
+    let list = requests;
+    if (filter === 'PENDING') list = pendingRequests;
+    if (filter === 'ACCEPTED') list = acceptedRequests;
+
+    const sorted = [...list];
+    if (sortBy === 'URGENCY') {
+      sorted.sort(
+        (a, b) => (urgencyRank[a.urgency] ?? 3) - (urgencyRank[b.urgency] ?? 3)
+      );
+    } else {
+      sorted.sort(
+        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
+      );
+    }
+    return sorted;
+  }, [requests, pendingRequests, acceptedRequests, filter, sortBy]);
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const navItemSx = (active) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    px: 1.25,
+    py: 1,
+    borderRadius: 2,
+    cursor: 'pointer',
+    backgroundColor: active ? '#EEF2FF' : 'transparent',
+    color: active ? '#1E293B' : 'text.secondary',
+    '&:hover': { backgroundColor: '#F1F5F9' },
+  });
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#F8FAFC',
-      }}
-    >
-      {/* Header */}
-      <AppBar
-        position="static"
-        elevation={0}
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
+      {/* Slim top bar: notifications + profile only, nav lives in the sidebar */}
+      <Box
         sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: 1,
+          px: 3,
+          py: 1.5,
           backgroundColor: '#FFFFFF',
-          color: '#1E293B',
           borderBottom: '1px solid #E2E8F0',
         }}
       >
-        <Toolbar
-          sx={{
-            maxWidth: '1200px',
-            width: '100%',
-            mx: 'auto',
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{ flexGrow: 1 }}
-          >
-            🏠 Neighborhood Helper
-          </Typography>
+        <IconButton>
+          <NotificationsNoneIcon />
+        </IconButton>
 
-          <IconButton sx={{ mr: 1 }}>
-            <NotificationsNoneIcon />
-          </IconButton>
+        <IconButton onClick={handleProfileClick} sx={{ p: 0.5 }}>
+          <Avatar sx={{ width: 36, height: 36, backgroundColor: '#2563EB' }}>
+            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+          </Avatar>
+        </IconButton>
 
-          <IconButton onClick={handleProfileClick}>
-            <Avatar
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: '#2563EB',
-              }}
-            >
-              A
-            </Avatar>
-          </IconButton>
+        <Typography variant="body2" fontWeight={600}>
+          {user?.name || 'User'}
+        </Typography>
+      </Box>
 
-          <Typography
-            variant="body2"
-            fontWeight={600}
-            sx={{ ml: 0.5 }}
-          >
-           user?.name
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      
       <Menu
         anchorEl={profileMenuAnchor}
         open={profileMenuOpen}
         onClose={handleProfileClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <MenuItem disabled>
-          <Typography fontWeight={600}>
-           user?.name
-          </Typography>
+          <Typography fontWeight={600}>{user?.name || 'User'}</Typography>
         </MenuItem>
-
         <Divider />
-
         <MenuItem onClick={handleEditProfile}>
-          <EditOutlinedIcon
-            sx={{ mr: 1.5 }}
-            fontSize="small"
-          />
+          <EditOutlinedIcon sx={{ mr: 1.5 }} fontSize="small" />
           Edit Profile
         </MenuItem>
-
         <MenuItem onClick={handleSignOut}>
-          <LogoutIcon
-            sx={{ mr: 1.5 }}
-            fontSize="small"
-          />
+          <LogoutIcon sx={{ mr: 1.5 }} fontSize="small" />
           Sign Out
         </MenuItem>
       </Menu>
 
-      {/* Page Content */}
-      <Box
-        sx={{
-          maxWidth: '1000px',
-          mx: 'auto',
-          px: { xs: 2, sm: 3 },
-          py: 5,
-        }}
-      >
-        {/* Welcome Section */}
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h4"
-            fontWeight={700}
-            gutterBottom
-          >
-            Welcome back, user?.name! 👋
-          </Typography>
-
-          <Typography color="text.secondary">
-            How can we help you today?
-          </Typography>
-        </Box>
-
-        {/* New Request Button */}
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<AddIcon />}
-          onClick={handleNewRequest}
-          sx={{
-            mb: 4,
-            px: 4,
-            py: 1.5,
-            borderRadius: 2,
-            textTransform: 'none',
-            fontSize: '16px',
-            fontWeight: 600,
-          }}
-        >
-          New Help Request
-        </Button>
-
-        {/* Request Summary */}
+      <Box sx={{ display: 'flex', maxWidth: '1200px', mx: 'auto' }}>
+        {/* Sidebar */}
         <Box
           sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: '1fr 1fr',
-            },
+            width: SIDEBAR_WIDTH,
+            flexShrink: 0,
+            px: 2,
+            py: 4,
+            display: 'flex',
+            flexDirection: 'column',
             gap: 2,
-            mb: 5,
           }}
         >
-          {/* Pending */}
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow:
-                '0 2px 8px rgba(0,0,0,0.06)',
-            }}
-          >
-            <CardContent>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-                Pending Requests
-              </Typography>
-
-              <Typography
-                variant="h3"
-                fontWeight={700}
-              >
-                {mockPendingRequests.length}
-              </Typography>
-            </CardContent>
-          </Card>
-
-          {/* Accepted */}
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow:
-                '0 2px 8px rgba(0,0,0,0.06)',
-            }}
-          >
-            <CardContent>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
-                Accepted Requests
-              </Typography>
-
-              <Typography
-                variant="h3"
-                fontWeight={700}
-              >
-                {mockAcceptedRequests.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
-
-        {/* Pending Requests */}
-        <Box sx={{ mb: 5 }}>
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            sx={{ mb: 2 }}
-          >
-            Pending Requests
+          <Typography variant="subtitle1" fontWeight={700}>
+            🏠 Neighborhood Helper
           </Typography>
 
-          {mockPendingRequests.map((request) => (
-            <RequestCard
-              key={request.id}
-              request={request}
-            />
-          ))}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleNewRequest}
+            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+          >
+            New Request
+          </Button>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
+              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  Pending
+                </Typography>
+                <Typography variant="h5" fontWeight={700}>
+                  {pendingRequests.length}
+                </Typography>
+              </CardContent>
+            </Card>
+
+            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
+              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  Accepted
+                </Typography>
+                <Typography variant="h5" fontWeight={700}>
+                  {acceptedRequests.length}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
+            <Box sx={navItemSx(true)}>
+              <ListAltOutlinedIcon fontSize="small" />
+              <Typography variant="body2">My requests</Typography>
+            </Box>
+            <Box sx={navItemSx(false)} onClick={handleEditProfile}>
+              <PersonOutlineIcon fontSize="small" />
+              <Typography variant="body2">Profile</Typography>
+            </Box>
+          </Box>
         </Box>
 
-        {/* Accepted Requests */}
-        <Box>
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            sx={{ mb: 2 }}
-          >
-            Accepted Requests
-          </Typography>
+        {/* Main content */}
+        <Box sx={{ flexGrow: 1, minWidth: 0, px: 3, py: 4 }}>
+          <Box   sx={{ mb: 3 }}>
+            <Typography variant="h5" fontWeight={700} gutterBottom>
+              Welcome back, {user?.name || 'User'}! 👋
+            </Typography>
+            <Typography color="text.secondary">How can we help you today?</Typography>
+          </Box>
 
-          {mockAcceptedRequests.map((request) => (
-            <RequestCard
-              key={request.id}
-              request={request}
-              accepted
-            />
-          ))}
+          {error && (
+            <Typography color="error"   sx={{ mb: 3 }}>
+              {error}
+            </Typography>
+          )}
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              mb: 3,
+              flexWrap: 'wrap',
+            }}
+          >
+            {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
+              <Chip
+                key={key}
+                label={key.charAt(0) + key.slice(1).toLowerCase()}
+                onClick={() => setFilter(key)}
+                sx={{
+                  fontWeight: 600,
+                  backgroundColor: filter === key ? '#1E293B' : 'transparent',
+                  color: filter === key ? '#FFFFFF' : 'text.secondary',
+                  border: filter === key ? 'none' : '1px solid #E2E8F0',
+                  '&:hover': {
+                    backgroundColor: filter === key ? '#1E293B' : '#F1F5F9',
+                  },
+                }}
+              />
+            ))}
+
+            <Select
+              size="small"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              sx={{ ml: 'auto', minWidth: 160, backgroundColor: '#FFFFFF' }}
+            >
+              <MenuItem value="SOONEST">Sort: soonest</MenuItem>
+              <MenuItem value="URGENCY">Sort: urgency</MenuItem>
+            </Select>
+          </Box>
+
+          {visibleRequests.length === 0 ? (
+            <Typography color="text.secondary">
+              You don't have any {filter !== 'ALL' ? filter.toLowerCase() : ''} requests.
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, 1fr)',
+                  md: 'repeat(3, 1fr)',
+                },
+                gap: 2,
+              }}
+            >
+              {visibleRequests.map((request) => (
+                <RequestCard key={request.id} request={request} />
+              ))}
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

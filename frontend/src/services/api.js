@@ -70,6 +70,22 @@ export async function createHelpRequest(data, csrfToken) {
     throw err;
   }
 }
+export async function getHelpRequests(csrfToken) {
+  try {
+    const { data } = await api.get('/api/requests', {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    });
+
+    return data;
+  } catch (err) {
+    console.error('Error getting help requests:', err);
+    throw err;
+  }
+}
+
 export async function logout(csrfToken) {
   try {
     await api.post(
