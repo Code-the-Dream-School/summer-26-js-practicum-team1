@@ -41,7 +41,11 @@ function RequesterProfile() {
     emergencyContact: '',
   });
 
-  const { data: profileImage } = useGetProfileImage();
+  const {
+    data: profileImage,
+    isLoading: isImageLoading,
+    isError: isImageError,
+  } = useGetProfileImage();
   const { data, isLoading, isError } = useGetProfile();
   const updateProfileImage = useUpdateProfileImage();
 
@@ -201,13 +205,18 @@ function RequesterProfile() {
                     }}
                   >
                     <Avatar
-                      src={profileImage || undefined}
+                      src={isImageError ? undefined : profileImage || undefined}
                       sx={{
                         width: 130,
                         height: 130,
                         fontSize: '3rem',
                       }}
                     >
+                      {isImageLoading ? (
+                        <CircularProgress size={35} />
+                      ) : (
+                        profile.name?.charAt(0).toUpperCase()
+                      )}
                       {profile.name?.charAt(0).toUpperCase()}
                     </Avatar>
 
