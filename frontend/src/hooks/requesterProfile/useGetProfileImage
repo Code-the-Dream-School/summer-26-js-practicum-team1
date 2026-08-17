@@ -1,9 +1,28 @@
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getRequesterProfileImage } from '../../services/requesterProfileApi';
 
 export function useGetProfileImage() {
-  return useQuery({
+  const { data: blob, ...query } = useQuery({
     queryKey: ['profileImage'],
     queryFn: getRequesterProfileImage,
   });
+
+  const [imageUrl, setImageUrl] = useState(null);
+
+  useEffect(() => {
+    if (!blob) {
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    setImageUrl(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [blob]);
+
+  return {
+    ...query,
+    data: imageUrl,
+  };
 }

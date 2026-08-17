@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 
 import EditIcon from '@mui/icons-material/Edit';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
@@ -27,13 +26,13 @@ import CakeIcon from '@mui/icons-material/Cake';
 
 import { useGetProfile } from '../hooks/requesterProfile/useGetProfile';
 import { useUpdateProfileImage } from '../hooks/requesterProfile/useUpdateProfileImage';
+import { useGetProfileImage } from '../hooks/requesterProfile/useGetProfileImage';
 import EditProfileDialog from '../components/requesterProfile/EditProfileDialog';
 import ProfileField from '../components/requesterProfile/ProfileField';
-import { API_URL } from '../utils/constants';
 
 function RequesterProfile() {
   const [editOpen, setEditOpen] = useState(false);
-  const [imageVersion, setImageVersion] = useState(0);
+
   const [editData, setEditData] = useState({
     phone: '',
     address: '',
@@ -41,6 +40,7 @@ function RequesterProfile() {
     bio: '',
     emergencyContact: '',
   });
+  const { data: profileImage } = useGetProfileImage();
 
   const { data, isLoading, isError } = useGetProfile();
   const updateProfileImage = useUpdateProfileImage();
@@ -93,11 +93,7 @@ function RequesterProfile() {
       return;
     }
 
-    updateProfileImage.mutate(file, {
-      onSuccess: () => {
-        setImageVersion((version) => version + 1);
-      },
-    });
+    updateProfileImage.mutate(file);
 
     event.target.value = '';
   };
@@ -190,7 +186,7 @@ function RequesterProfile() {
                   }}
                 >
                   <Avatar
-                    src={`${API_URL}/api/profile/image?v=${imageVersion}`}
+                    src={profileImage || undefined}
                     sx={{
                       width: 130,
                       height: 130,
