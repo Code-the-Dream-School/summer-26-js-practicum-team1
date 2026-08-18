@@ -159,8 +159,8 @@ export default function RequesterDashboard() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('ALL'); // ALL | PENDING | ACCEPTED
-  const [sortBy, setSortBy] = useState('SOONEST'); // SOONEST | URGENCY
+  const [filter, setFilter] = useState('ALL'); 
+  const [sortBy, setSortBy] = useState('SOONEST'); 
 
   const profileMenuOpen = Boolean(profileMenuAnchor);
 

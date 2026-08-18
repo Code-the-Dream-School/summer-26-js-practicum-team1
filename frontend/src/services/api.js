@@ -74,7 +74,7 @@ export async function createHelpRequest(data, csrfToken) {
 }
 export async function getHelpRequests(csrfToken) {
   try {
-    const { data } = await api.get('/api/requests', {
+    const { data } = await api.get('/api/requests/mine', {
       headers: {
         'X-CSRF-TOKEN': csrfToken,
       },
