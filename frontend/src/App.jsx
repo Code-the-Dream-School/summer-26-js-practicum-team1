@@ -8,6 +8,7 @@ import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequestorRegistration from './pages/Register';
+import Browse from './pages/Browse';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           path="requesterRegistration"
           element={<RequestorRegistration />}
         />
+        <Route path="browse" element={<Browse />} />
       </Route>
     </Routes>
   );
