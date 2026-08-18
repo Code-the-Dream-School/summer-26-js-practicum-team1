@@ -78,3 +78,49 @@ export async function getMe() {
     return null;
   }
 }
+
+function buildHelpRequestParams(filters = {}) {
+  const params = {};
+
+  if (filters.category?.length) params.category = filters.category.join(',');
+  if (filters.urgency?.length) params.urgency = filters.urgency.join(',');
+  if (filters.status?.length) params.status = filters.status.join(',');
+  if (filters.q) params.q = filters.q;
+
+  if (filters.scheduledAfter) params.scheduledAfter = filters.scheduledAfter;
+  if (filters.scheduledBefore) params.scheduledBefore = filters.scheduledBefore;
+  if (filters.createdAfter) params.createdAfter = filters.createdAfter;
+  if (filters.createdBefore) params.createdBefore = filters.createdBefore;
+
+  const hasGeo =
+    filters.lat != null && filters.lng != null && filters.radiusMi != null;
+  if (hasGeo) {
+    params.lat = filters.lat;
+    params.lng = filters.lng;
+    params.radiusMi = filters.radiusMi;
+  }
+
+  if (filters.sortField) {
+    params.sort = `${filters.sortField}:${filters.sortDir || 'desc'}`;
+  }
+
+  return params;
+}
+
+export async function getHelpRequests(filters) {
+  try {
+    const { data } = await api.get('/api/requests', {
+      params: buildHelpRequestParams(filters),
+      withCredentials: true,
+    });
+    return data.data;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+    if (err.response.status === 400) {
+      throw new Error(err.response.data?.message || 'INVALID_REQUEST');
+    }
+    throw new Error('FETCH_HELP_REQUESTS_FAILED');
+  }
+}
