@@ -72,11 +72,11 @@ export async function createHelpRequest(data, csrfToken) {
     throw err;
   }
 }
-export async function getHelpRequests(csrfToken) {
+export async function getHelpRequests(){
   try {
     const { data } = await api.get('/api/requests/mine', {
       headers: {
-        'X-CSRF-TOKEN': csrfToken,
+       
       },
       withCredentials: true,
     });
