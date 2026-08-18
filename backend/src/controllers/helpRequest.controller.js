@@ -20,5 +20,45 @@ const getHelpRequests = asyncHandler(async (req, res) => {
     data: helpRequests,
   });
 });
+const getHelpRequestById = asyncHandler(async (req, res) => {
+  const requesterId = req.user.id;
+  const { id } = req.params;
 
-module.exports = { createHelpRequest, getHelpRequests };
+  const helpRequest = await helpRequestService.getHelpRequestById({
+    id: Number(id),
+    requesterId,
+  });
+
+  res.status(200).json(helpRequest);
+});
+const updateHelpRequest = asyncHandler(async (req, res) => {
+  const requesterId = req.user.id;
+  const { id } = req.params;
+
+  const updatedRequest =
+    await helpRequestService.updateHelpRequest({
+      id: Number(id),
+      requesterId,
+      data: req.body,
+    });
+
+  res.status(200).json(updatedRequest);
+});
+const cancelHelpRequest = asyncHandler(async (req, res) => {
+  const requesterId = req.user.id;
+  const { id } = req.params;
+
+  const cancelledRequest =
+    await helpRequestService.cancelHelpRequest({
+      id: Number(id),
+      requesterId,
+    });
+
+  res.status(200).json(cancelledRequest);
+});
+module.exports = { 
+  createHelpRequest,
+   getHelpRequests, 
+   getHelpRequestById,
+   updateHelpRequest,
+   cancelHelpRequest};
