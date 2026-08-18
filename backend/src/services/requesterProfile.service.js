@@ -142,7 +142,7 @@ const getProfileImage = async (userId) => {
   }
 
   if (!profile.profileImage) {
-    throw new ApiError(404, 'Profile picture not found');
+    return null;
   }
 
   return profile;
