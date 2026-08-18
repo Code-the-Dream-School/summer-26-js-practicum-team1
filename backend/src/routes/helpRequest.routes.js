@@ -33,7 +33,7 @@ router.post(
 
 // Get requester's help requests
 router.get(
-  '/',
+  '/mine',
   jwtMiddleware,
   csrfMiddleware,
   requireRole('REQUESTER'),
@@ -41,7 +41,7 @@ router.get(
 );
 
 
-// Get one help request
+// Get one help request for view
 router.get(
   '/:id',
   jwtMiddleware,
