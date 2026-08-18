@@ -10,6 +10,7 @@ import SignupPage from './pages/SignupPage';
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
 import NewhelpRequest from './pages/Requester/helpRequest'
+import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
 function App() {
   return (
     <Routes>
@@ -18,7 +19,9 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         {/*requester routes*/}
+        
         <Route path="requesterRegistration" element={<RequestorRegistration />}/>
+        <Route element={<RequesterProtectedRoute />}></Route>
         <Route path="/requester-dashboard" element={<RequesterDashboard />} />
         <Route path="/helpRequest" element={<NewhelpRequest/>}/>
         {/* Admin routes */}
