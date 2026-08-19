@@ -129,7 +129,7 @@ export async function getLocationAutoCompleteSuggestions(query, signal) {
   const response = await fetch(
     `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
       query
-    )}&limit=5&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
+    )}&limit=5&lang=en&bias=countrycode%3Aus&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
     {
       signal,
     }
