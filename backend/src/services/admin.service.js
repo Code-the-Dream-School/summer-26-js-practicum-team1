@@ -1,6 +1,10 @@
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
 const { VerificationStatus, Role } = require('@prisma/client');
+const {
+  volunteerSelect,
+  toVolunteerSlice,
+} = require('./volunteerProfile.service');
 
 async function getDashboardStats() {
   const [totalUsers, pendingVolunteers, totalRequesters, totalVolunteers] =
@@ -15,6 +19,7 @@ async function getDashboardStats() {
 
   return { totalUsers, totalRequesters, totalVolunteers, pendingVolunteers };
 }
+
 async function getPendingVolunteers({ page = 1, limit = 20 } = {}) {
   const skip = (page - 1) * limit;
 
@@ -52,6 +57,7 @@ async function getPendingVolunteers({ page = 1, limit = 20 } = {}) {
     },
   };
 }
+
 async function reviewVolunteer({ volunteerId, adminId, status, notes }) {
   if (
     ![VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(status)
@@ -138,6 +144,44 @@ async function getUsers(page = 1, limit = 20) {
   };
 }
 
+async function getUserById(userId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      gender: true,
+      phone: true,
+      dob: true,
+      createdAt: true,
+      requesterProfile: {
+        select: {
+          address: true,
+          city: true,
+          bio: true,
+          emergencyContact: true,
+        },
+      },
+      volunteerProfile: {
+        select: volunteerSelect,
+      },
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const { volunteerProfile, ...account } = user;
+
+  return {
+    ...account,
+    volunteer: toVolunteerSlice(volunteerProfile),
+  };
+}
+
 const getRequesterProfileById = async (userId) => {
   const profile = await prisma.user.findFirst({
     where: {
@@ -169,10 +213,12 @@ const getRequesterProfileById = async (userId) => {
 
   return profile;
 };
+
 module.exports = {
   getDashboardStats,
   getPendingVolunteers,
   reviewVolunteer,
   getUsers,
+  getUserById,
   getRequesterProfileById,
 };

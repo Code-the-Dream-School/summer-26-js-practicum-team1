@@ -29,12 +29,12 @@ const ROLE_SETTINGS = {
     { label: 'My Requests', path: '/' },
   ],
   volunteer: [
-    { label: 'Profile', path: '/' },
+    { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
     { label: 'My Offers', path: '/' },
   ],
   admin: [
-    { label: 'Profile', path: '/' },
+    { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
     { label: 'Admin Dashboard', path: '/admin/dashboard' },
     { label: 'Pending Volunteers', path: '/admin/volunteers' },
