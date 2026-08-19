@@ -67,11 +67,11 @@ User
 │
 Request
 |
-├── requesterId ─────┐
+├── requesterId
 │ │
 │ Conversation
 │ │
-└── volunteerId ─────┘
+└── volunteerId
 │
 │
 Messages
@@ -121,6 +121,6 @@ The frontend uses TanStack Query to periodically retrieve messages.
 
 - Requester can see message timestamps and read/delivery status.
 
-- Requester is notified of new messages (in-app, and push/email if supported).
+- Requester is notified of new messages (in-app).
 
 - Chat history persists for the duration of the request (and is retrievable afterward).
