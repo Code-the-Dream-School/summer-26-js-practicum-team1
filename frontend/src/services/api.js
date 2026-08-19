@@ -76,7 +76,7 @@ export async function getHelpRequests(){
   try {
     const { data } = await api.get('/api/requests/mine', {
     
-     
+        withCredentials: true,
     });
 
     return data;
