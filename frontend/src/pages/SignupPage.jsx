@@ -43,10 +43,17 @@ function RoleCard({ label, description, icon, onClick }) {
         }}
       >
         <Icon color="primary" sx={{ fontSize: 40 }} />
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, textAlign: 'center' }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: 700, textAlign: 'center' }}
+        >
           {label}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: 'center' }}
+        >
           {description}
         </Typography>
       </CardActionArea>

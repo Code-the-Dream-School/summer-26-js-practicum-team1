@@ -23,7 +23,7 @@ import { useState } from 'react';
 
 const ERROR_MESSAGES = {
   EMAIL_TAKEN: 'This email is already registered',
-  VALIDATION_ERROR: 'Please check the fields and try again',
+  VALIDATION_FAILED: 'Please check the fields and try again',
   NETWORK_ERROR: 'Something went wrong. Please try again',
   REGISTER_FAILED: 'Something went wrong. Please try again',
 };

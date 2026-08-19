@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { login, logout, getMe, register } from '../services/api';
+import { login, logout, getMe, registerUser } from '../services/api';
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -15,6 +15,10 @@ export function useAuth() {
     mutationFn: ({ email, password }) => login(email, password),
     onSuccess: (data) => queryClient.setQueryData(['me'], data),
   });
+  
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+  });
 
   const logoutMutation = useMutation({
     mutationFn: () => {
@@ -22,10 +26,6 @@ export function useAuth() {
       return logout(me?.csrfToken);
     },
     onSuccess: () => queryClient.setQueryData(['me'], null),
-  });
-
-  const registerMutation = useMutation({
-    mutationFn: (payload) => register(payload),
   });
 
   return {
@@ -37,7 +37,8 @@ export function useAuth() {
     isLoggingIn: loginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
     register: registerMutation.mutateAsync,
-    registerError: registerMutation.error,
     isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
   };
 }
+

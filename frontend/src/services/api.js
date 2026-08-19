@@ -29,6 +29,27 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+export async function registerUser(userData) {
+  try {
+    const { data } = await api.post('/api/auth/register', userData);
+
+    return data;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+
+    if (err.response.status === 400) {
+      const validationError = new Error('VALIDATION_FAILED');
+      validationError.details = err.response.data.details;
+      throw validationError;
+    }
+
+    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+
+    throw new Error('REGISTER_FAILED');
+  }
+}
 
 export async function logout(csrfToken) {
   try {
@@ -60,14 +81,14 @@ export async function getMe() {
   }
 }
 
-export async function register(payload) {
-  try {
-    const { data } = await api.post('/api/auth/register', payload);
-    return data;
-  } catch (err) {
-    if (!err.response) throw new Error('NETWORK_ERROR');
-    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
-    if (err.response.status === 400) throw new Error('VALIDATION_ERROR');
-    throw new Error('REGISTER_FAILED');
-  }
-}
+// export async function register(payload) {
+//   try {
+//     const { data } = await api.post('/api/auth/register', payload);
+//     return data;
+//   } catch (err) {
+//     if (!err.response) throw new Error('NETWORK_ERROR');
+//     if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+//     if (err.response.status === 400) throw new Error('VALIDATION_ERROR');
+//     throw new Error('REGISTER_FAILED');
+//   }
+// }
