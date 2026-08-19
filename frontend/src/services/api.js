@@ -124,3 +124,22 @@ export async function getHelpRequests(filters) {
     throw new Error('FETCH_HELP_REQUESTS_FAILED');
   }
 }
+
+export async function getLocationAutoCompleteSuggestions(query, signal) {
+  const response = await fetch(
+    `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+      query
+    )}&limit=5&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
+    {
+      signal,
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch location suggestions');
+  }
+
+  const data = await response.json();
+
+  return data.results ?? [];
+}
