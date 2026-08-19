@@ -26,6 +26,7 @@ enum VerificationStatus {
   APPROVED
   REJECTED
 }
+
 enum Category {
   GROCERY
   TRANSPORTATION
@@ -38,11 +39,13 @@ enum Category {
   MEDICAL_ERRAND
   OTHER
 }
+
 enum Urgency {
   LOW
   MEDIUM
   HIGH
 }
+
 enum RequestStatus {
   PENDING
   ACCEPTED
@@ -63,14 +66,17 @@ model User {
   dob                 DateTime
   gender              Gender
   profileImage        Bytes?    @map("profile_image")
-  profileImageType    String?      @map("profile_image_type")
+  profileImageType    String?   @map("profile_image_type")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  volunteerProfile       VolunteerProfile?
-  requesterProfile       RequesterProfile?
+  volunteerProfile VolunteerProfile?
+  requesterProfile RequesterProfile?
+
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
-   helpRequests HelpRequest[]
+  helpRequests           HelpRequest[]
+  sentMessages           Message[]
+
   @@map("users")
 }
 
@@ -100,11 +106,12 @@ model VolunteerVerification {
 
   @@map("volunteer_verifications")
 }
+
 model HelpRequest {
-  id           Int      @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   requesterId  Int
   volunteerId  Int?
-  title        String   @db.VarChar(100)
+  title        String        @db.VarChar(100)
   category     Category
   urgency      Urgency
   scheduledAt  DateTime
@@ -113,10 +120,12 @@ model HelpRequest {
   longitude    Float
   description  String?
   status       RequestStatus @default(PENDING)
-  createdAt    DateTime @default(now())
+  createdAt    DateTime      @default(now())
   completedAt  DateTime?
+  conversation Conversation?
 
   requester User @relation(fields: [requesterId], references: [id])
+}
 
 model RequesterProfile {
   userId           Int     @id
@@ -128,4 +137,31 @@ model RequesterProfile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("requester_profiles")
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  requestId Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request  HelpRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  content        String    @db.VarChar(1000)
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
 }
