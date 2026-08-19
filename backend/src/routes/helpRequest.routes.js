@@ -28,7 +28,6 @@ router.post(
 router.get(
   '/mine',
   jwtMiddleware,
-  csrfMiddleware,
   requireRole('REQUESTER'),
   getHelpRequests
 );
