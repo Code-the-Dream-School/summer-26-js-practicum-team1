@@ -75,6 +75,9 @@ const commaList = (allowedValues, label) =>
     .messages({ 'string.empty': `${label} cannot be empty` });
 
 const browseHelpRequestQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).max(25).default(5),
+
   category: commaList(CATEGORY_VALUES, 'category'),
   urgency: commaList(URGENCY_VALUES, 'urgency'),
   status: commaList(STATUS_VALUES, 'status'),
