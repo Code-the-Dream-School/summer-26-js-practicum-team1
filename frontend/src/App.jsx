@@ -21,9 +21,10 @@ function App() {
         {/*requester routes*/}
         
         <Route path="requesterRegistration" element={<RequestorRegistration />}/>
-        <Route element={<RequesterProtectedRoute />}></Route>
+        <Route element={<RequesterProtectedRoute />}>
         <Route path="/requester-dashboard" element={<RequesterDashboard />} />
-        <Route path="/helpRequest" element={<NewhelpRequest/>}/>
+       <Route path="/helpRequest" element={<NewhelpRequest />} />
+         </Route>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
