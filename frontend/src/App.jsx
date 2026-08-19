@@ -37,9 +37,10 @@ function App() {
           <Route path="profile" element={<RequesterProfile />} />
         </Route>
         <Route
-          path="requesterRegistration"
-          element={<RequestorRegistration />}
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
         />
+        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
       </Route>
     </Routes>
   );
