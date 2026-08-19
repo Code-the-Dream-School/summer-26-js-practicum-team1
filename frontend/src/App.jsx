@@ -4,13 +4,18 @@ import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
+
+import RequesterProfile from './pages/RequesterProfile';
+
 import RequestorRegistration from './pages/Register';
-import NewhelpRequest from './pages/Requester/helpRequest'
-import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
+import NewhelpRequest from './pages/Requester/helpRequest';
+
 function App() {
   return (
     <Routes>
@@ -19,12 +24,16 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         {/*requester routes*/}
-        
-        <Route path="requesterRegistration" element={<RequestorRegistration />}/>
+
+        <Route
+          path="requesterRegistration"
+          element={<RequestorRegistration />}
+        />
         <Route element={<RequesterProtectedRoute />}>
-        <Route path="/requester-dashboard" element={<RequesterDashboard />} />
-       <Route path="/helpRequest" element={<NewhelpRequest />} />
-         </Route>
+          <Route path="/requester-dashboard" element={<RequesterDashboard />} />
+          <Route path="/helpRequest" element={<NewhelpRequest />} />
+          <Route path="profile" element={<RequesterProfile />} />
+        </Route>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
@@ -34,7 +43,6 @@ function App() {
         <Route path="signup" element={<SignupPage />} />
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        
       </Route>
     </Routes>
   );

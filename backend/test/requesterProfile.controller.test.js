@@ -275,18 +275,12 @@ describe('GET /api/profile/image', () => {
     expect(profileService.getProfileImage).toHaveBeenCalledWith(1);
   });
 
-  it('returns 404 when profile image is not found', async () => {
-    profileService.getProfileImage.mockRejectedValue(
-      Object.assign(new Error('Profile picture not found'), {
-        status: 404,
-        success: false,
-      })
-    );
+  it('returns 204 when no profile image exists', async () => {
+    profileService.getProfileImage.mockResolvedValue(null);
 
     const res = await request(app).get('/api/profile/image');
 
-    expect(res.status).toBe(404);
-
-    expect(profileService.getProfileImage).toHaveBeenCalledWith(1);
+    expect(res.status).toBe(204);
+    expect(res.body).toEqual({});
   });
 });

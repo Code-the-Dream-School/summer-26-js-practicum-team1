@@ -1,5 +1,7 @@
 const adminService = require('../services/admin.service');
+const requesterProfileService = require('../services/requesterProfile.service');
 const asyncHandler = require('../utils/asyncHandler');
+const ApiError = require('../utils/ApiError');
 const { VerificationStatus } = require('@prisma/client');
 
 const getAdminDashboard = asyncHandler(async (req, res) => {
@@ -63,10 +65,35 @@ async function getUsers(req, res, next) {
   }
 }
 
+const getAdminRequesterProfile = asyncHandler(async (req, res) => {
+  const userId = Number(req.params.id);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new ApiError(400, 'Invalid requester ID');
+  }
+
+  const profile = await adminService.getRequesterProfileById(userId);
+
+  res.status(200).json(profile);
+});
+
+const getAdminUserProfileImage = asyncHandler(async (req, res) => {
+  const userId = Number(req.params.id);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new ApiError(400, 'Invalid user ID');
+  }
+
+  const profileImage = await requesterProfileService.getProfileImage(userId);
+  res.set('Content-Type', profileImage.profileImageType);
+  return res.status(200).send(Buffer.from(profileImage.profileImage));
+});
 module.exports = {
   getAdminDashboard,
   getPendingVolunteers,
   approveVolunteer,
   rejectVolunteer,
+  getAdminRequesterProfile,
+  getAdminUserProfileImage,
   getUsers,
 };
