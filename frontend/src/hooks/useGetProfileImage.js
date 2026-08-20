@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getRequesterProfileImage } from '../services/requesterProfileApi';
 
@@ -6,24 +6,23 @@ export function useGetProfileImage() {
   const { data: blob, ...query } = useQuery({
     queryKey: ['profileImage'],
     queryFn: getRequesterProfileImage,
+    retry: false,
   });
 
-  const [imageUrl, setImageUrl] = useState(null);
+  const imageUrl = useMemo(
+    () => (blob ? URL.createObjectURL(blob) : null),
+    [blob]
+  );
 
   useEffect(() => {
-    if (!blob) {
-      return;
+    if (!imageUrl) {
+      return undefined;
     }
 
-    const url = URL.createObjectURL(blob);
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setImageUrl(url);
-
     return () => {
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(imageUrl);
     };
-  }, [blob]);
+  }, [imageUrl]);
 
   return {
     ...query,

@@ -13,12 +13,6 @@ function RequesterProfileView({ profile }) {
   return (
     <Stack spacing={3} sx={{ mt: 3 }}>
       <ProfileField
-        icon={<PhoneOutlinedIcon />}
-        label="Phone"
-        value={profile?.phone}
-      />
-
-      <ProfileField
         icon={<LocationOnOutlinedIcon />}
         label="Address"
         value={requester?.address}
