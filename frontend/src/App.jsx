@@ -9,6 +9,7 @@ import UsersList from './pages/admin/UsersList';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+import VolunteerRegistrationPage from './pages/VolunteerRegistrationPage';
 import RequesterProfile from './pages/RequesterProfile';
 import RequestorRegistration from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
@@ -30,21 +31,20 @@ function App() {
           <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
         </Route>
         <Route path="signup" element={<SignupPage />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
+        <Route
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
+        />
         <Route element={<RequesterProtectedRoute />}>
           {/* Requester Routes */}
           {/* TODO: Move profile route inside requester dashboard once ready */}
           <Route path="profile" element={<RequesterProfile />} />
         </Route>
         <Route
-          path="requesterRegistration"
-          element={<RequestorRegistration />}
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
         />
+        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
       </Route>
     </Routes>
   );

@@ -45,6 +45,8 @@ export async function registerUser(userData) {
       throw validationError;
     }
 
+    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+
     throw new Error('REGISTER_FAILED');
   }
 }
@@ -79,6 +81,17 @@ export async function getMe() {
   }
 }
 
+// export async function register(payload) {
+//   try {
+//     const { data } = await api.post('/api/auth/register', payload);
+//     return data;
+//   } catch (err) {
+//     if (!err.response) throw new Error('NETWORK_ERROR');
+//     if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+//     if (err.response.status === 400) throw new Error('VALIDATION_ERROR');
+//     throw new Error('REGISTER_FAILED');
+//   }
+// }
 export async function getProfile() {
   const { data } = await api.get('/api/profile', { withCredentials: true });
   return data.data;
