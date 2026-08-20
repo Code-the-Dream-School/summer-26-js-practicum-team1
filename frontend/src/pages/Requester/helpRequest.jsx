@@ -1,8 +1,5 @@
-import {
-  searchPlaces,
-  reverseGeocode,
-} from '../../services/geoapify';
-import { useState } from 'react';
+import { searchPlaces, reverseGeocode } from '../../services/geoapify';
+import { useEffect, useRef, useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -48,7 +45,14 @@ function NewHelpRequest() {
   const { createHelpRequest, isCreating } = useHelpRequests();
 
   const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
-
+  const addressSearchTimeoutRef = useRef(null);
+  useEffect(() => {
+    return () => {
+      if (addressSearchTimeoutRef.current) {
+        clearTimeout(addressSearchTimeoutRef.current);
+      }
+    };
+  }, []);
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -107,7 +111,7 @@ function NewHelpRequest() {
     }));
   };
 
-  const handleAddressChange = async (event) => {
+  const handleAddressChange = (event) => {
     const value = event.target.value;
 
     setFormData((previous) => ({
@@ -127,32 +131,40 @@ function NewHelpRequest() {
       address: '',
     }));
 
+    // Cancel the previous pending search
+    if (addressSearchTimeoutRef.current) {
+      clearTimeout(addressSearchTimeoutRef.current);
+    }
+
     if (value.trim().length < 2) {
       setLocationSuggestions([]);
+      setIsSearchingLocation(false);
       return;
     }
 
-    try {
-      setIsSearchingLocation(true);
+    setIsSearchingLocation(true);
 
-      const results = await searchPlaces(value);
+    // Wait 300ms after the user stops typing
+    addressSearchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await searchPlaces(value);
 
-      setLocationSuggestions(results);
-    } catch (locationError) {
-      console.error('Location search failed:', locationError);
+        setLocationSuggestions(results);
+      } catch (locationError) {
+        console.error('Location search failed:', locationError);
 
-      setLocationSuggestions([]);
+        setLocationSuggestions([]);
 
-      setFieldErrors((previous) => ({
-        ...previous,
-        address:
-          'We could not search for this address. Please try again or use your current location.',
-      }));
-    } finally {
-      setIsSearchingLocation(false);
-    }
+        setFieldErrors((previous) => ({
+          ...previous,
+          address:
+            'We could not search for this address. Please try again or use your current location.',
+        }));
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 300);
   };
-
   const handleSelectAddress = (location) => {
     setFormData((previous) => ({
       ...previous,
@@ -202,8 +214,7 @@ function NewHelpRequest() {
         try {
           const data = await reverseGeocode(latitude, longitude);
 
-          const currentAddress =
-            data.features?.[0]?.properties?.formatted;
+          const currentAddress = data.features?.[0]?.properties?.formatted;
 
           setFormData((previous) => ({
             ...previous,
@@ -212,10 +223,7 @@ function NewHelpRequest() {
               `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
           }));
         } catch (locationError) {
-          console.error(
-            'Unable to get current address:',
-            locationError
-          );
+          console.error('Unable to get current address:', locationError);
 
           setFormData((previous) => ({
             ...previous,
@@ -248,11 +256,9 @@ function NewHelpRequest() {
     const errors = {};
 
     if (!formData.title.trim()) {
-      errors.title =
-        'Please enter a title for your help request.';
+      errors.title = 'Please enter a title for your help request.';
     } else if (formData.title.trim().length > 100) {
-      errors.title =
-        'Title must be 100 characters or less.';
+      errors.title = 'Title must be 100 characters or less.';
     }
 
     if (!formData.category) {
@@ -272,8 +278,7 @@ function NewHelpRequest() {
     }
 
     if (!formData.address.trim()) {
-      errors.address =
-        'Please enter the address where help is needed.';
+      errors.address = 'Please enter the address where help is needed.';
     } else if (
       coordinates.latitude === null ||
       coordinates.longitude === null
@@ -285,16 +290,12 @@ function NewHelpRequest() {
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
 
-      setError(
-        'Please correct the highlighted fields and try again.'
-      );
+      setError('Please correct the highlighted fields and try again.');
 
       return;
     }
 
-    const scheduledAt = new Date(
-      `${formData.date}T${formData.time}`
-    );
+    const scheduledAt = new Date(`${formData.date}T${formData.time}`);
 
     if (Number.isNaN(scheduledAt.getTime())) {
       setFieldErrors({
@@ -313,9 +314,7 @@ function NewHelpRequest() {
         time: 'Please select a future time.',
       });
 
-      setError(
-        'The help request date and time must be in the future.'
-      );
+      setError('The help request date and time must be in the future.');
 
       return;
     }
@@ -362,14 +361,10 @@ function NewHelpRequest() {
         navigate('/requester-dashboard');
       }, 3000);
     } catch (submitError) {
-      console.error(
-        'Create help request error:',
-        submitError
-      );
+      console.error('Create help request error:', submitError);
 
       if (submitError.response?.status === 400) {
-        const serverDetails =
-          submitError.response?.data?.details;
+        const serverDetails = submitError.response?.data?.details;
 
         if (Array.isArray(serverDetails)) {
           const serverFieldErrors = {};
@@ -377,14 +372,11 @@ function NewHelpRequest() {
           serverDetails.forEach((detail) => {
             if (detail.field) {
               serverFieldErrors[detail.field] =
-                detail.message ||
-                'This field is invalid.';
+                detail.message || 'This field is invalid.';
             }
           });
 
-          if (
-            Object.keys(serverFieldErrors).length > 0
-          ) {
+          if (Object.keys(serverFieldErrors).length > 0) {
             setFieldErrors(serverFieldErrors);
           }
         }
@@ -495,10 +487,7 @@ function NewHelpRequest() {
               {user?.name?.charAt(0).toUpperCase() || 'R'}
             </Avatar>
 
-            <Typography
-              variant="body2"
-              fontWeight={600}
-            >
+            <Typography variant="body2" fontWeight={600}>
               {user?.name || 'Requester'}
             </Typography>
           </Button>
@@ -530,7 +519,6 @@ function NewHelpRequest() {
         <MenuItem
           onClick={() => {
             handleProfileClose();
-          
           }}
         >
           Edit Profile
@@ -539,7 +527,6 @@ function NewHelpRequest() {
         <MenuItem
           onClick={() => {
             handleProfileClose();
-           
           }}
         >
           Sign Out
@@ -602,8 +589,7 @@ function NewHelpRequest() {
               sm: 5,
             },
             border: '1px solid #D7E5D8',
-            boxShadow:
-              '0 4px 16px rgba(46, 125, 50, 0.08)',
+            boxShadow: '0 4px 16px rgba(46, 125, 50, 0.08)',
           }}
         >
           {error && (
@@ -696,10 +682,7 @@ function NewHelpRequest() {
               }}
             >
               {categories.map((item) => (
-                <MenuItem
-                  key={item.value}
-                  value={item.value}
-                >
+                <MenuItem key={item.value} value={item.value}>
                   {item.label}
                 </MenuItem>
               ))}
@@ -725,10 +708,7 @@ function NewHelpRequest() {
               }}
             >
               {urgencies.map((item) => (
-                <MenuItem
-                  key={item.value}
-                  value={item.value}
-                >
+                <MenuItem key={item.value} value={item.value}>
                   {item.label}
                 </MenuItem>
               ))}
@@ -769,10 +749,7 @@ function NewHelpRequest() {
                   color: '#334155',
                 }}
               >
-                Date{' '}
-                <span style={{ color: '#d32f2f' }}>
-                  *
-                </span>
+                Date <span style={{ color: '#d32f2f' }}>*</span>
               </Typography>
 
               <TextField
@@ -807,10 +784,7 @@ function NewHelpRequest() {
                   color: '#334155',
                 }}
               >
-                Time{' '}
-                <span style={{ color: '#d32f2f' }}>
-                  *
-                </span>
+                Time <span style={{ color: '#d32f2f' }}>*</span>
               </Typography>
 
               <TextField
@@ -919,8 +893,7 @@ function NewHelpRequest() {
                   mt: 1,
                   backgroundColor: '#FFFFFF',
                   overflow: 'hidden',
-                  boxShadow:
-                    '0 4px 12px rgba(0,0,0,0.08)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                 }}
               >
                 {locationSuggestions.map((location) => (
@@ -931,9 +904,7 @@ function NewHelpRequest() {
                     }
                     type="button"
                     fullWidth
-                    onClick={() =>
-                      handleSelectAddress(location)
-                    }
+                    onClick={() => handleSelectAddress(location)}
                     sx={{
                       justifyContent: 'flex-start',
                       textAlign: 'left',
@@ -1028,9 +999,7 @@ function NewHelpRequest() {
             <Button
               type="button"
               variant="outlined"
-              onClick={() =>
-                navigate('/requester-dashboard')
-              }
+              onClick={() => navigate('/requester-dashboard')}
               disabled={isCreating}
               sx={{
                 px: 4,
@@ -1064,9 +1033,7 @@ function NewHelpRequest() {
                 },
               }}
             >
-              {isCreating
-                ? 'Creating...'
-                : 'Create My Request'}
+              {isCreating ? 'Creating...' : 'Create My Request'}
             </Button>
           </Box>
         </Box>
