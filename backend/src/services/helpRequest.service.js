@@ -24,6 +24,17 @@ async function createHelpRequest({ requesterId, data }) {
   });
 }
 
+async function getHelpRequests({ requesterId }) {
+  return prisma.helpRequest.findMany({
+    where: {
+      requesterId,
+    },
+    orderBy: {
+      scheduledAt: 'asc',
+    },
+  });
+}
+
 const SORTABLE_FIELDS = ['createdAt', 'scheduledAt', 'urgency', 'distance'];
 const DEFAULT_SORT_DIR = {
   createdAt: 'desc',
@@ -44,7 +55,7 @@ function haversineMiles(lat1, lng1, lat2, lng2) {
   return EARTH_RADIUS_MI * 2 * Math.asin(Math.sqrt(Math.min(1, a)));
 }
 
-const getHelpRequests = async ({ user, query }) => {
+const getBrowseHelpRequests = async ({ user, query }) => {
   const where = {};
   const andConditions = [];
 
@@ -153,4 +164,8 @@ const getHelpRequests = async ({ user, query }) => {
   return data;
 };
 
-module.exports = { createHelpRequest, getHelpRequests };
+module.exports = {
+  createHelpRequest,
+  getHelpRequests,
+  getBrowseHelpRequests,
+};

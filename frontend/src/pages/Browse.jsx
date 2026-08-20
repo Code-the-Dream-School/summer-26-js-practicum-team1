@@ -25,7 +25,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
 import { useMemo, useState } from 'react';
-import { useHelpRequests } from '../hooks/useHelpRequests.js';
+import { useBrowseHelpRequests } from '../hooks/useHelpRequests.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useLocationAutocomplete } from '../hooks/useLocationAutocomplete.js';
 import SortControl from '../components/browse/SortControl.jsx';
@@ -130,7 +130,7 @@ function Browse() {
   ]);
 
   const { helpRequests, isLoading, isFetching, isError, error } =
-    useHelpRequests(filters);
+    useBrowseHelpRequests(filters);
 
   const categoryCounts = useMemo(() => {
     return helpRequests.reduce((acc, r) => {

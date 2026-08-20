@@ -190,14 +190,14 @@ describe('GET /api/requests — query validation', () => {
   });
 });
 
-describe('helpRequestService.getHelpRequests — filters', () => {
+describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   const admin = { id: 1, role: 'ADMIN' };
   const volunteer = { id: 9, role: 'VOLUNTEER' };
 
   beforeEach(() => prisma.helpRequest.findMany.mockResolvedValue([]));
 
   it('defaults to status=PENDING when none is provided', async () => {
-    await helpRequestService.getHelpRequests({ user: admin, query: {} });
+    await helpRequestService.getBrowseHelpRequests({ user: admin, query: {} });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -207,7 +207,7 @@ describe('helpRequestService.getHelpRequests — filters', () => {
   });
 
   it('scopes a VOLUNTEER requesting a non-pending status to their own rows', async () => {
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
       query: { status: 'ACCEPTED' },
     });
@@ -219,7 +219,7 @@ describe('helpRequestService.getHelpRequests — filters', () => {
   });
 
   it('does NOT scope an ADMIN requesting a non-pending status', async () => {
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { status: 'ACCEPTED' },
     });
@@ -229,14 +229,14 @@ describe('helpRequestService.getHelpRequests — filters', () => {
   });
 
   it('does NOT scope a default request', async () => {
-    await helpRequestService.getHelpRequests({ user: volunteer, query: {} });
+    await helpRequestService.getBrowseHelpRequests({ user: volunteer, query: {} });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
     expect(where.AND).toBeUndefined();
   });
 
   it('does NOT scope when status is explicitly PENDING only', async () => {
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
       query: { status: 'PENDING' },
     });
@@ -246,7 +246,7 @@ describe('helpRequestService.getHelpRequests — filters', () => {
   });
 
   it('combines q search AND ownership scoping without one overwriting the other', async () => {
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
       query: { status: 'ACCEPTED', q: 'lawn' },
     });
@@ -267,13 +267,13 @@ describe('helpRequestService.getHelpRequests — filters', () => {
   });
 });
 
-describe('helpRequestService.getHelpRequests — sorting', () => {
+describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
   const admin = { id: 1, role: 'ADMIN' };
 
   it('passes DB-level orderBy for createdAt', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
-    await helpRequestService.getHelpRequests({ user: admin, query: {} });
+    await helpRequestService.getBrowseHelpRequests({ user: admin, query: {} });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ orderBy: { createdAt: 'desc' } })
@@ -283,7 +283,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
   it('defaults scheduledAt sort direction to asc when none is given', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { sort: 'scheduledAt' },
     });
@@ -296,7 +296,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
   it('does not pass a DB-level orderBy for urgency (sorted in memory instead)', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { sort: 'urgency' },
     });
@@ -312,7 +312,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
       { id: 3, urgency: 'MEDIUM' },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { sort: 'urgency' },
     });
@@ -327,7 +327,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
       { id: 3, urgency: 'MEDIUM' },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { sort: 'urgency:asc' },
     });
@@ -337,7 +337,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
 
   it('rejects sort=distance when lat/lng were not provided', async () => {
     await expect(
-      helpRequestService.getHelpRequests({
+      helpRequestService.getBrowseHelpRequests({
         user: admin,
         query: { sort: 'distance' },
       })
@@ -351,7 +351,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
       { id: 3, latitude: 40.8, longitude: -74 },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { lat: '40.7', lng: '-74', radiusMi: '50', sort: 'distance' },
     });
@@ -361,7 +361,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
 
   it('rejects an unrecognized sort field', async () => {
     await expect(
-      helpRequestService.getHelpRequests({
+      helpRequestService.getBrowseHelpRequests({
         user: admin,
         query: { sort: 'title:asc' },
       })
@@ -369,7 +369,7 @@ describe('helpRequestService.getHelpRequests — sorting', () => {
   });
 });
 
-describe('helpRequestService.getHelpRequests — distanceMi', () => {
+describe('helpRequestService.getBrowseHelpRequests — distanceMi', () => {
   const admin = { id: 1, role: 'ADMIN' };
 
   it('attaches distanceMi to every result when geo params are present, regardless of sort field', async () => {
@@ -377,7 +377,7 @@ describe('helpRequestService.getHelpRequests — distanceMi', () => {
       { id: 1, latitude: 40.71, longitude: -74, urgency: 'LOW' },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { lat: '40.7', lng: '-74', radiusMi: '50', sort: 'urgency' },
     });
@@ -388,7 +388,7 @@ describe('helpRequestService.getHelpRequests — distanceMi', () => {
   it('does not attach distanceMi when no geo params are provided', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([{ id: 1, urgency: 'LOW' }]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: {},
     });
@@ -402,7 +402,7 @@ describe('helpRequestService.getHelpRequests — distanceMi', () => {
       { id: 2, latitude: 40.71, longitude: -74 },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { lat: '40.7', lng: '-74', radiusMi: '5' },
     });

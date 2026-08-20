@@ -156,12 +156,22 @@ Keep existing `created_at` / verification fields. Do not add separate availabili
 
 ---
 
-## API (for HELPER-31, not built here)
+## API (HELPER-31)
 
-- `GET /api/volunteers/me/preferences`
-- `PUT /api/volunteers/me/preferences` — body includes `serviceArea`, `availability`, and selected category ids
+Self:
 
-Same flat response style as login/register: resource on success, `{ error, details? }` on validation errors.
+- `GET /api/profile` — identity for any logged-in user, plus `requesterProfile` and/or `volunteer` slices when they exist
+- `PUT /api/profile/volunteer` — volunteer slice write (`serviceArea`, coordinates, `availability`, `interestIds`)
+- `GET /api/support-categories` — shared catalog
+
+Admin:
+
+- `GET /api/admin/users/:id` — user detail shell
+- `GET /api/admin/users/:id/volunteer` / `PUT /api/admin/users/:id/volunteer` — same volunteer slice
+
+`PATCH /api/profile` stays requester-only (HELPER-25). Opening it would upsert `RequesterProfile` for volunteers.
+
+Same envelope as login/register: resource on success, `{ error, details? }` on validation errors.
 
 ---
 

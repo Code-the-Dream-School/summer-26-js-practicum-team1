@@ -29,9 +29,12 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post('/api/auth/register', userData);
+    const { data } = await api.post('/api/auth/register', userData, {
+      withCredentials: true,
+    });
 
     return data;
   } catch (err) {
@@ -39,13 +42,41 @@ export async function registerUser(userData) {
       throw new Error('NETWORK_ERROR');
     }
 
-    if (err.response.status === 400) {
+    if (err.response?.status === 400 && err.response?.data?.details) {
       const validationError = new Error('VALIDATION_FAILED');
       validationError.details = err.response.data.details;
       throw validationError;
     }
 
-    throw new Error('REGISTER_FAILED');
+    throw new Error('REGISTRATION_FAILED');
+  }
+}
+
+export async function createHelpRequest(data, csrfToken) {
+  try {
+    const { data: responseData } = await api.post('/api/requests', data, {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    });
+
+    return responseData;
+  } catch (err) {
+    console.error('Error:', err);
+    throw err;
+  }
+}
+export async function getHelpRequests() {
+  try {
+    const { data } = await api.get('/api/requests/mine', {
+      withCredentials: true,
+    });
+
+    return data;
+  } catch (err) {
+    console.error('Error getting help requests:', err);
+    throw err;
   }
 }
 
@@ -70,7 +101,6 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
-  //uncomment once registration is ready
   try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;
@@ -107,7 +137,7 @@ function buildHelpRequestParams(filters = {}) {
   return params;
 }
 
-export async function getHelpRequests(filters) {
+export async function getBrowseHelpRequests(filters) {
   try {
     const { data } = await api.get('/api/requests', {
       params: buildHelpRequestParams(filters),
@@ -125,21 +155,7 @@ export async function getHelpRequests(filters) {
   }
 }
 
-export async function getLocationAutoCompleteSuggestions(query, signal) {
-  const response = await fetch(
-    `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
-      query
-    )}&limit=5&lang=en&bias=countrycode%3Aus&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
-    {
-      signal,
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch location suggestions');
-  }
-
-  const data = await response.json();
-
-  return data.results ?? [];
+export async function getProfile() {
+  const { data } = await api.get('/api/profile', { withCredentials: true });
+  return data.data;
 }

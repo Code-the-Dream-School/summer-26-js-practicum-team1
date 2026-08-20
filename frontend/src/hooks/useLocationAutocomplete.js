@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getLocationAutoCompleteSuggestions } from '../services/api';
+import { getLocationAutoCompleteSuggestions } from '../services/geoapify';
 import { useDebouncedValue } from './useDebouncedValue';
 
 export function useLocationAutocomplete(query) {

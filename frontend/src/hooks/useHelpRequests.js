@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { getHelpRequests } from '../services/api';
+import { getBrowseHelpRequests } from '../services/api';
 
-export function useHelpRequests(filters) {
+export function useBrowseHelpRequests(filters) {
   const {
     data: helpRequests,
     isLoading,
@@ -10,7 +10,7 @@ export function useHelpRequests(filters) {
     error,
   } = useQuery({
     queryKey: ['help-requests', filters],
-    queryFn: () => getHelpRequests(filters),
+    queryFn: () => getBrowseHelpRequests(filters),
     placeholderData: (previousData) => previousData,
   });
 
@@ -20,5 +20,29 @@ export function useHelpRequests(filters) {
     isFetching,
     isError,
     error,
+  }
+}
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createHelpRequest } from '../services/api';
+
+export function useHelpRequests() {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: ({ data, csrfToken }) =>
+      createHelpRequest(data, csrfToken),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['helpRequests'],
+      });
+    },
+  });
+
+  return {
+    createHelpRequest: createMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    createError: createMutation.error,
   };
 }
