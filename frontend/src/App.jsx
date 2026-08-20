@@ -6,14 +6,15 @@ import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
 import UsersList from './pages/admin/UsersList';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 
-import RequesterProfile from './pages/RequesterProfile';
-
 import RequestorRegistration from './pages/Register';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewhelpRequest from './pages/Requester/helpRequest';
 
 function App() {
@@ -32,15 +33,18 @@ function App() {
         <Route element={<RequesterProtectedRoute />}>
           <Route path="/requester-dashboard" element={<RequesterDashboard />} />
           <Route path="/helpRequest" element={<NewhelpRequest />} />
-          <Route path="profile" element={<RequesterProfile />} />
         </Route>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
+          <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
         </Route>
         <Route path="signup" element={<SignupPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
       </Route>

@@ -1,5 +1,9 @@
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
+const {
+  volunteerSelect,
+  toVolunteerSlice,
+} = require('./volunteerProfile.service');
 
 const getProfile = async (userId) => {
   const profile = await prisma.user.findUnique({
@@ -20,6 +24,9 @@ const getProfile = async (userId) => {
           emergencyContact: true,
         },
       },
+      volunteerProfile: {
+        select: volunteerSelect,
+      },
     },
   });
 
@@ -27,7 +34,12 @@ const getProfile = async (userId) => {
     throw new ApiError(404, 'User profile not found');
   }
 
-  return profile;
+  const { volunteerProfile, ...account } = profile;
+
+  return {
+    ...account,
+    volunteer: toVolunteerSlice(volunteerProfile),
+  };
 };
 
 const updateProfile = async (userId, data) => {
