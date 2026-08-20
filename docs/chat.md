@@ -47,7 +47,7 @@ Mark messages as read
 
 ## Get Message
 
-GET /api/requests/:requestId/messages
+GET /api/chat/requests/:requestId/messages
 
 Authorization:
 
@@ -55,11 +55,11 @@ The authenticated user must be either Requester, Assigned volunteer
 
 ## Send Message
 
-POST /api/requests/:requestId/messages
+POST /api/chat/requests/:requestId/messages
 
 ## Read Status
 
-PATCH /api/requests/:requestId/messages/read
+PATCH /api/chat/requests/:requestId/messages/read
 
 # Database Relation
 
