@@ -1,16 +1,12 @@
 import { searchPlaces, reverseGeocode } from '../../services/geoapify';
 import { useEffect, useRef, useState } from 'react';
 import {
-  AppBar,
-  Avatar,
+  Alert,
   Box,
   Button,
-  Menu,
   MenuItem,
   TextField,
-  Toolbar,
   Typography,
-  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
@@ -44,15 +40,8 @@ function NewHelpRequest() {
 
   const { createHelpRequest, isCreating } = useHelpRequests();
 
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const addressSearchTimeoutRef = useRef(null);
-  useEffect(() => {
-    return () => {
-      if (addressSearchTimeoutRef.current) {
-        clearTimeout(addressSearchTimeoutRef.current);
-      }
-    };
-  }, []);
+
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -82,18 +71,15 @@ function NewHelpRequest() {
     date: '',
     time: '',
     address: '',
-    description: '',
   });
 
-  const profileMenuOpen = Boolean(profileMenuAnchor);
-
-  const handleProfileClick = (event) => {
-    setProfileMenuAnchor(event.currentTarget);
-  };
-
-  const handleProfileClose = () => {
-    setProfileMenuAnchor(null);
-  };
+  useEffect(() => {
+    return () => {
+      if (addressSearchTimeoutRef.current) {
+        clearTimeout(addressSearchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -131,7 +117,6 @@ function NewHelpRequest() {
       address: '',
     }));
 
-    // Cancel the previous pending search
     if (addressSearchTimeoutRef.current) {
       clearTimeout(addressSearchTimeoutRef.current);
     }
@@ -144,7 +129,6 @@ function NewHelpRequest() {
 
     setIsSearchingLocation(true);
 
-    // Wait 300ms after the user stops typing
     addressSearchTimeoutRef.current = setTimeout(async () => {
       try {
         const results = await searchPlaces(value);
@@ -165,6 +149,7 @@ function NewHelpRequest() {
       }
     }, 300);
   };
+
   const handleSelectAddress = (location) => {
     setFormData((previous) => ({
       ...previous,
@@ -289,9 +274,7 @@ function NewHelpRequest() {
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-
       setError('Please correct the highlighted fields and try again.');
-
       return;
     }
 
@@ -304,7 +287,6 @@ function NewHelpRequest() {
       });
 
       setError('Please enter a valid date and time.');
-
       return;
     }
 
@@ -315,7 +297,6 @@ function NewHelpRequest() {
       });
 
       setError('The help request date and time must be in the future.');
-
       return;
     }
 
@@ -441,98 +422,6 @@ function NewHelpRequest() {
         backgroundColor: '#F7FAF7',
       }}
     >
-      <AppBar
-        position="static"
-        elevation={0}
-        sx={{
-          backgroundColor: '#FFFFFF',
-          color: '#1E293B',
-          borderBottom: '1px solid #D7E5D8',
-        }}
-      >
-        <Toolbar
-          sx={{
-            maxWidth: '1200px',
-            width: '100%',
-            mx: 'auto',
-          }}
-        >
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              flexGrow: 1,
-              color: '#1B5E20',
-            }}
-          >
-            🏠 Neighborhood Helper
-          </Typography>
-
-          <Button
-            onClick={handleProfileClick}
-            sx={{
-              minWidth: 0,
-              textTransform: 'none',
-              color: '#1E293B',
-              gap: 1,
-            }}
-          >
-            <Avatar
-              sx={{
-                width: 40,
-                height: 40,
-                backgroundColor: '#2E7D32',
-              }}
-            >
-              {user?.name?.charAt(0).toUpperCase() || 'R'}
-            </Avatar>
-
-            <Typography variant="body2" fontWeight={600}>
-              {user?.name || 'Requester'}
-            </Typography>
-          </Button>
-        </Toolbar>
-      </AppBar>
-
-      <Menu
-        anchorEl={profileMenuAnchor}
-        open={profileMenuOpen}
-        onClose={handleProfileClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            handleProfileClose();
-            navigate('/requester-dashboard');
-          }}
-        >
-          Dashboard
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            handleProfileClose();
-          }}
-        >
-          Edit Profile
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            handleProfileClose();
-          }}
-        >
-          Sign Out
-        </MenuItem>
-      </Menu>
-
       <Box
         sx={{
           maxWidth: '760px',
@@ -828,8 +717,6 @@ function NewHelpRequest() {
             multiline
             minRows={4}
             placeholder="Describe the help you need..."
-            error={Boolean(fieldErrors.description)}
-            helperText={fieldErrors.description}
             sx={{
               mb: 4,
               '& .MuiOutlinedInput-root.Mui-focused fieldset': {
