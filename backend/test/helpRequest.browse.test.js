@@ -273,6 +273,63 @@ describe('GET /api/requests — end-to-end wiring (route -> controller -> servic
   });
 });
 
+describe('GET /api/requests — end-to-end wiring (route -> controller -> service -> prisma)', () => {
+  const adminCookie = cookieFor(1);
+
+  beforeEach(() => {
+    prisma.user.findUnique.mockResolvedValue(mockUser());
+  });
+
+  it('translates page/pageSize into skip/take and returns matching meta', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    prisma.helpRequest.count.mockResolvedValue(23);
+
+    const res = await browse('?page=3&pageSize=5', adminCookie);
+
+    expect(res.status).toBe(200);
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 5 })
+    );
+    expect(res.body.meta).toEqual({
+      page: 3,
+      pageSize: 5,
+      totalCount: 23,
+      totalPages: 5,
+    });
+  });
+
+  it('resolves a geo + distance-sorted request end to end, including distanceMi and radius filtering', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.9, longitude: -74, urgency: 'LOW' }, // ~13.8mi away
+      { id: 2, latitude: 40.71, longitude: -74, urgency: 'HIGH' }, // ~0.8mi away
+      { id: 3, latitude: 45, longitude: -74, urgency: 'MEDIUM' }, // way out of radius
+    ]);
+
+    const res = await browse(
+      '?lat=40.7&lng=-74&radiusMi=25&sort=distance&page=1&pageSize=5',
+      adminCookie
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((r) => r.id)).toEqual([2, 1]);
+    expect(res.body.data[0].distanceMi).toEqual(expect.any(Number));
+    expect(res.body.meta.totalCount).toBe(2);
+  });
+
+  it('scopes results to the requesting VOLUNTEER when status is not PENDING', async () => {
+    prisma.user.findUnique.mockResolvedValue(asVolunteer('APPROVED'));
+    prisma.helpRequest.findMany.mockResolvedValue([]);
+
+    const res = await browse('?status=ACCEPTED', cookieFor(5));
+
+    expect(res.status).toBe(200);
+    const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
+    expect(where.AND).toEqual(
+      expect.arrayContaining([{ OR: [{ requesterId: 5 }, { volunteerId: 5 }] }])
+    );
+  });
+});
+
 describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   const admin = { id: 1, role: 'ADMIN' };
   const volunteer = { id: 9, role: 'VOLUNTEER' };
