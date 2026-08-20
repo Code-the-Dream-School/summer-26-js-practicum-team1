@@ -2,6 +2,10 @@ const ApiError = require('../src/utils/ApiError');
 
 jest.mock('../src/services/requesterProfile.service');
 jest.mock('../src/services/admin.service');
+jest.mock('../src/services/volunteerProfile.service', () => ({
+  getVolunteerProfile: jest.fn(),
+  updateVolunteerProfile: jest.fn(),
+}));
 
 jest.mock('../src/middleware/jwt.middleware', () => {
   return (req, res, next) => {
@@ -31,6 +35,7 @@ const request = require('supertest');
 const app = require('../src/app');
 
 const adminService = require('../src/services/admin.service');
+const volunteerProfileService = require('../src/services/volunteerProfile.service');
 const requesterProfileService = require('../src/services/requesterProfile.service');
 
 const {
@@ -178,6 +183,95 @@ describe('PUT /api/admin/volunteers/:id/reject', () => {
   });
 });
 
+describe('GET /api/admin/users/:id', () => {
+  it('returns a user by id', async () => {
+    const user = {
+      id: 5,
+      name: 'Ada',
+      email: 'ada@test.com',
+      role: 'VOLUNTEER',
+      requesterProfile: null,
+      volunteer: { bio: 'Helper', verificationStatus: 'APPROVED' },
+    };
+
+    adminService.getUserById.mockResolvedValue(user);
+
+    const res = await request(app).get('/api/admin/users/5');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: user });
+    expect(adminService.getUserById).toHaveBeenCalledWith(5);
+  });
+
+  it('rejects invalid user id', async () => {
+    const res = await request(app).get('/api/admin/users/abc');
+
+    expect(res.status).toBe(400);
+    expect(adminService.getUserById).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /api/admin/users/:id/volunteer', () => {
+  it('returns the volunteer slice for a user', async () => {
+    const volunteer = {
+      serviceArea: 'Oakland',
+      availability: null,
+      interests: [],
+    };
+
+    volunteerProfileService.getVolunteerProfile.mockResolvedValue(volunteer);
+
+    const res = await request(app).get('/api/admin/users/5/volunteer');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: volunteer });
+    expect(volunteerProfileService.getVolunteerProfile).toHaveBeenCalledWith(5);
+  });
+
+  it('rejects invalid user id', async () => {
+    const res = await request(app).get('/api/admin/users/abc/volunteer');
+
+    expect(res.status).toBe(400);
+    expect(volunteerProfileService.getVolunteerProfile).not.toHaveBeenCalled();
+  });
+});
+
+describe('PUT /api/admin/users/:id/volunteer', () => {
+  it('updates the volunteer slice for a user', async () => {
+    const body = {
+      serviceArea: 'Oakland',
+      serviceLatitude: 37.8044,
+      serviceLongitude: -122.2712,
+      availability: {
+        frequency: 'WEEKLY',
+        slots: [{ dayOfWeek: 'FRI', startTime: '14:00', endTime: '18:00' }],
+      },
+      interestIds: [2, 3],
+    };
+    const volunteer = {
+      serviceArea: 'Oakland',
+      availability: body.availability,
+      interests: [
+        { id: 2, name: 'Errands' },
+        { id: 3, name: 'Transport' },
+      ],
+    };
+
+    volunteerProfileService.updateVolunteerProfile.mockResolvedValue(volunteer);
+
+    const res = await request(app)
+      .put('/api/admin/users/5/volunteer')
+      .send(body);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ success: true, data: volunteer });
+    expect(volunteerProfileService.updateVolunteerProfile).toHaveBeenCalledWith(
+      5,
+      body
+    );
+  });
+});
+
 describe('GET /api/admin/requesters/:id/profile', () => {
   const mockProfile = {
     id: 12,
@@ -222,7 +316,6 @@ describe('GET /api/admin/requesters/:id/profile', () => {
     );
 
     expect(response.status).toBe(404);
-
     expect(response.body.message).toBe('Requester profile not found');
   });
 
@@ -232,9 +325,7 @@ describe('GET /api/admin/requesters/:id/profile', () => {
     );
 
     expect(response.status).toBe(400);
-
     expect(response.body.message).toBe('Invalid requester ID');
-
     expect(adminService.getRequesterProfileById).not.toHaveBeenCalled();
   });
 });
@@ -253,9 +344,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
     );
 
     expect(response.status).toBe(200);
-
     expect(response.headers['content-type']).toMatch(/image\/png/);
-
     expect(requesterProfileService.getProfileImage).toHaveBeenCalledWith(12);
   });
 
@@ -265,9 +354,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
     );
 
     expect(response.status).toBe(400);
-
     expect(response.body.message).toBe('Invalid user ID');
-
     expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
   });
 
@@ -275,9 +362,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
     const response = await request(app).get('/api/admin/users/0/profile/image');
 
     expect(response.status).toBe(400);
-
     expect(response.body.message).toBe('Invalid user ID');
-
     expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
   });
 
@@ -291,7 +376,6 @@ describe('GET /api/admin/users/:id/profile/image', () => {
     );
 
     expect(response.status).toBe(404);
-
     expect(response.body.message).toBe('Profile picture not found');
   });
 });

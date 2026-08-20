@@ -92,3 +92,7 @@ export async function getMe() {
 //     throw new Error('REGISTER_FAILED');
 //   }
 // }
+export async function getProfile() {
+  const { data } = await api.get('/api/profile', { withCredentials: true });
+  return data.data;
+}

@@ -1,10 +1,12 @@
 const request = require('supertest');
 
 jest.mock('../src/middleware/jwt.middleware', () => {
-  return (req, res, next) => {
+  const state = { role: 'REQUESTER' };
+
+  const middleware = (req, res, next) => {
     req.user = {
       id: 1,
-      role: 'REQUESTER',
+      role: state.role,
       name: 'Test User',
     };
 
@@ -14,6 +16,12 @@ jest.mock('../src/middleware/jwt.middleware', () => {
 
     next();
   };
+
+  middleware.__setRole = (role) => {
+    state.role = role;
+  };
+
+  return middleware;
 });
 
 jest.mock('../src/middleware/csrf.middleware', () => {
@@ -28,6 +36,7 @@ jest.mock('../src/services/requesterProfile.service', () => ({
 }));
 
 const profileService = require('../src/services/requesterProfile.service');
+const jwtMiddleware = require('../src/middleware/jwt.middleware');
 const app = require('../src/app');
 
 const tinyPng = Buffer.from(
@@ -36,6 +45,7 @@ const tinyPng = Buffer.from(
 );
 
 beforeEach(() => {
+  jwtMiddleware.__setRole('REQUESTER');
   jest.clearAllMocks();
 
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -73,6 +83,31 @@ describe('GET /api/profile', () => {
       data: profile,
     });
 
+    expect(profileService.getProfile).toHaveBeenCalledWith(1);
+  });
+
+  it('lets a volunteer read identity and volunteer slice', async () => {
+    jwtMiddleware.__setRole('VOLUNTEER');
+
+    const profile = {
+      id: 1,
+      name: 'Test Volunteer',
+      email: 'volunteer@example.com',
+      role: 'VOLUNTEER',
+      requesterProfile: null,
+      volunteer: {
+        serviceArea: 'San Jose',
+        availability: null,
+        interests: [],
+      },
+    };
+
+    profileService.getProfile.mockResolvedValue(profile);
+
+    const res = await request(app).get('/api/profile');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ data: profile });
     expect(profileService.getProfile).toHaveBeenCalledWith(1);
   });
 
@@ -140,6 +175,17 @@ describe('PATCH/api/profile', () => {
 
     expect(res.body.error).toBe('Validation failed');
 
+    expect(profileService.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it('rejects volunteer updates on the requester profile path', async () => {
+    jwtMiddleware.__setRole('VOLUNTEER');
+
+    const res = await request(app).patch('/api/profile').send({
+      phone: '1234567890',
+    });
+
+    expect(res.status).toBe(403);
     expect(profileService.updateProfile).not.toHaveBeenCalled();
   });
 });
