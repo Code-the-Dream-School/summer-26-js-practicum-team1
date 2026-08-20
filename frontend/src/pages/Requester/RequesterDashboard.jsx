@@ -7,9 +7,7 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Divider,
-  IconButton,
-  Menu,
+  Collapse,
   MenuItem,
   Select,
   Typography,
@@ -18,134 +16,461 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import AddIcon from '@mui/icons-material/Add';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import LogoutIcon from '@mui/icons-material/Logout';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined';
 
-import { getMe, getHelpRequests, logout } from '../../services/api';
-
-const SIDEBAR_WIDTH = 232;
-
+import { getMe, getHelpRequests } from '../../services/api';
 
 const URGENCY_STYLES = {
-  HIGH: { border: '#E24B4A', bg: '#FCEBEB', text: '#791F1F' },
-  MEDIUM: { border: '#EF9F27', bg: '#FAEEDA', text: '#633806' },
-  LOW: { border: '#639922', bg: '#EAF3DE', text: '#27500A' },
+  HIGH: {
+    border: '#9b1518ff',
+    bg: '#e82618ff',
+    text: '#FFF1F0',
+  },
+
+  MEDIUM: {
+    border: '#FFB020',
+    bg: '#FFB020',
+    text: '#FFF8E1',
+  },
+
+  LOW: {
+    border: '#22C55E',
+    bg: '#15803D',
+    text: '#FFF8E1',
+  },
+};
+
+const STATUS_STYLES = {
+  PENDING: {
+    label: 'Pending',
+    bg: '#FEF3C7',
+    text: '#e33f3fff',
+  },
+  ACCEPTED: {
+    label: 'Accepted',
+    bg: '#DCFCE7',
+    text: '#166534',
+  },
+  COMPLETED: {
+    label: 'Completed',
+    bg: '#E0E7FF',
+    text: '#3730A3',
+  },
+  CANCELLED: {
+    label: 'Cancelled',
+    bg: '#FEE2E2',
+    text: '#991B1B',
+  },
 };
 
 function getUrgencyStyle(urgency) {
   return URGENCY_STYLES[urgency] || URGENCY_STYLES.LOW;
 }
 
-function RequestCard({ request }) {
+function getStatusStyle(status) {
+  return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
+}
+
+function RequestCard({
+  request,
+  expandedRequest,
+  setExpandedRequest,
+}) {
   const accepted = request.status === 'ACCEPTED';
+
   const urgencyStyle = getUrgencyStyle(request.urgency);
+  const statusStyle = getStatusStyle(request.status);
+
+  const isExpanded = expandedRequest === request.id;
+
+  const handleToggleDetails = () => {
+    setExpandedRequest(isExpanded ? null : request.id);
+  };
 
   return (
     <Card
-      sx={{
-        borderRadius: 3,
-        borderLeft: `4px solid ${urgencyStyle.border}`,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <CardContent sx={{ p: 2.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+  sx={{
+    borderRadius: 3,
+    borderLeft: `4px solid ${urgencyStyle.border}`,
+    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignSelf: 'start',
+  }}
+>
+  <CardContent
+    sx={{
+      p: { xs: 2.5, md: 3 },
+      display: 'flex',
+      flexDirection: 'column',
+    }}
+  >
+        {/* Status */}
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'flex-start',
-            gap: 1,
-            mb: 1,
+            mb: 2,
           }}
         >
-          <Typography variant="subtitle1" fontWeight={600}>
-            {request.title}
-          </Typography>
-
           <Chip
-            label={accepted ? 'Accepted' : 'Pending'}
+            label={statusStyle.label}
             size="small"
             sx={{
               fontWeight: 600,
               flexShrink: 0,
-              backgroundColor: accepted ? '#DCFCE7' : '#FEF3C7',
-              color: accepted ? '#166534' : '#92400E',
+              minHeight: 32,
+              backgroundColor: statusStyle.bg,
+              color: statusStyle.text,
             }}
           />
         </Box>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          {request.description || 'No description provided.'}
+        {/* Category */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            mb: 1.5,
+          }}
+        >
+          {request.category}
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} color="action" />
-            <Typography variant="caption" color="text.secondary">
-              {request.scheduledAt
-                ? new Date(request.scheduledAt).toLocaleString()
-                : 'Date not available'}
-            </Typography>
-          </Box>
+        {/* Date and Time */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1,
+            mb: 1.5,
+          }}
+        >
+          <CalendarMonthOutlinedIcon
+            sx={{
+              fontSize: 20,
+              mt: 0.2,
+            }}
+            color="action"
+          />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <LocationOnOutlinedIcon sx={{ fontSize: 16 }} color="action" />
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {request.address || 'Address not available'}
+          <Box>
+            {/* Date */}
+            <Typography
+              variant="body2"
+            
+               sx={{
+    color: '#166534',
+    fontSize: '1rem',
+    fontWeight: 700,
+    mt: 0.5,
+  }}
+            >
+              Date:{' '}
+  <Box
+    component="span"
+    sx={{ color: '#aa7b23', fontWeight: 700 }}
+  >
+    {request.scheduledAt
+      ? new Date(request.scheduledAt).toLocaleDateString()
+      : 'Date not available'}
+  </Box>
+</Typography>
+
+            {/* Time */}
+            <Typography
+              variant="body2"
+            
+               sx={{
+    color: '#166534',
+    fontSize: '1rem',
+    fontWeight: 700,
+    mt: 0.5,
+  }}
+            >
+              Time:{' '}
+             <Box
+    component="span"
+    sx={{ color: '#aa7b23ff', fontWeight: 700 }}
+  >
+    {request.scheduledAt
+      ? new Date(request.scheduledAt).toLocaleTimeString([], {
+          hour: 'numeric',
+          minute: '2-digit',
+        })
+      : 'Time not available'}
+  </Box>
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          <Chip label={request.category} size="small" variant="outlined" />
+        {/* Urgency */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 1.5,
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              fontSize: '1rem',
+              fontWeight: 700,
+            }}
+          >
+            Urgency:
+          </Typography>
+
           <Chip
             label={request.urgency}
             size="small"
             sx={{
+              minHeight: 32,
+              fontSize: '0.9rem',
               backgroundColor: urgencyStyle.bg,
               color: urgencyStyle.text,
-              fontWeight: 600,
+              fontWeight: 700,
             }}
           />
         </Box>
 
-        {accepted && request.volunteer && (
-          <>
-            <Divider sx={{ my: 1.5 }} />
-
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-              <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>
-                {request.volunteer.name?.charAt(0)}
-              </Avatar>
-              <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Volunteer
-                </Typography>
-                <Typography variant="body2" fontWeight={600}>
-                  {request.volunteer.name}
-                </Typography>
-              </Box>
-            </Box>
-          </>
-        )}
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto', pt: 1.5 }}>
+        {/* View Details Button */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            mt: 'auto',
+            pt: 1,
+          }}
+        >
           <Button
-            endIcon={<ArrowForwardIosIcon sx={{ fontSize: '12px !important' }} />}
-            size="small"
+            onClick={handleToggleDetails}
+            sx={{
+              minHeight: 44,
+              px: 2,
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'none',
+            }}
           >
-            View Details
+            {isExpanded ? 'Hide Details' : 'View Details'}
           </Button>
         </Box>
+
+        {/* Expanded Details */}
+        <Collapse
+          in={isExpanded}
+          timeout="auto"
+          unmountOnExit
+        >
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: '1px solid #E2E8F0',
+            }}
+          >
+            {/* Title */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Title:</strong> {request.title}
+            </Typography>
+
+            {/* Description */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+                lineHeight: 1.6,
+              }}
+            >
+              <strong>Description:</strong>{' '}
+              {request.description ||
+                'No description provided.'}
+            </Typography>
+
+            {/* Location */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1,
+                mt: 1.5,
+              }}
+            >
+              <LocationOnOutlinedIcon
+                sx={{
+                  fontSize: 20,
+                  mt: 0.2,
+                }}
+                color="action"
+              />
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontSize: '1rem',
+                  lineHeight: 1.5,
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                <strong>Location:</strong>{' '}
+                {request.address ||
+                  'Address not available'}
+              </Typography>
+            </Box>
+
+            {/* Category */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Category:</strong>{' '}
+              {request.category}
+            </Typography>
+
+            {/* Urgency */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Urgency:</strong>{' '}
+              {request.urgency}
+            </Typography>
+
+            {/* Status */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Status:</strong>{' '}
+              {statusStyle.label}
+            </Typography>
+
+            {/* Volunteer Information */}
+            {accepted && request.volunteer && (
+              <Box
+                sx={{
+                  mt: 2,
+                  pt: 2,
+                  borderTop: '1px solid #E2E8F0',
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={700}
+                  sx={{
+                    mb: 1.5,
+                    fontSize: '1rem',
+                  }}
+                >
+                  Volunteer Details
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      fontSize: 16,
+                    }}
+                  >
+                    {request.volunteer.name
+                      ?.charAt(0)
+                      ?.toUpperCase()}
+                  </Avatar>
+
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      Volunteer
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      fontWeight={600}
+                      sx={{
+                        fontSize: '1rem',
+                      }}
+                    >
+                      {request.volunteer.name ||
+                        'Not available'}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Volunteer Phone */}
+                {request.volunteer.phone && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 1.5,
+                      fontSize: '1rem',
+                    }}
+                  >
+                    <strong>Phone:</strong>{' '}
+                    {request.volunteer.phone}
+                  </Typography>
+                )}
+
+                {/* Volunteer Email */}
+                {request.volunteer.email && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 1,
+                      fontSize: '1rem',
+                    }}
+                  >
+                    <strong>Email:</strong>{' '}
+                    {request.volunteer.email}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </Box>
+        </Collapse>
       </CardContent>
     </Card>
   );
@@ -154,15 +479,15 @@ function RequestCard({ request }) {
 export default function RequesterDashboard() {
   const navigate = useNavigate();
 
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('ALL'); 
-  const [sortBy, setSortBy] = useState('SOONEST'); 
+  const [filter, setFilter] = useState('ALL');
+  const [sortBy, setSortBy] = useState('SOONEST');
 
-  const profileMenuOpen = Boolean(profileMenuAnchor);
+  const [expandedRequest, setExpandedRequest] =
+    useState(null);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -182,8 +507,14 @@ export default function RequesterDashboard() {
         const response = await getHelpRequests();
         setRequests(response.data || []);
       } catch (err) {
-        console.error('Failed to load dashboard:', err);
-        setError('Unable to load your requests. Please try again.');
+        console.error(
+          'Failed to load dashboard:',
+          err
+        );
+
+        setError(
+          'Unable to load your requests. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
@@ -192,54 +523,49 @@ export default function RequesterDashboard() {
     loadDashboard();
   }, [navigate]);
 
-  const handleProfileClick = (event) => setProfileMenuAnchor(event.currentTarget);
-  const handleProfileClose = () => setProfileMenuAnchor(null);
-
-  const handleEditProfile = () => {
-    handleProfileClose();
-    navigate('/profile');
+  const handleNewRequest = () => {
+    navigate('/helpRequest');
   };
 
-  const handleSignOut = async () => {
-    handleProfileClose();
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error('Sign out failed:', err);
-    }
+  const urgencyRank = {
+    HIGH: 0,
+    MEDIUM: 1,
+    LOW: 2,
   };
-
-  const handleNewRequest = () => navigate('/helpRequest');
-
-  const pendingRequests = useMemo(
-    () => requests.filter((r) => r.status === 'PENDING'),
-    [requests]
-  );
-  const acceptedRequests = useMemo(
-    () => requests.filter((r) => r.status === 'ACCEPTED'),
-    [requests]
-  );
-
-  const urgencyRank = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
   const visibleRequests = useMemo(() => {
     let list = requests;
-    if (filter === 'PENDING') list = pendingRequests;
-    if (filter === 'ACCEPTED') list = acceptedRequests;
+
+    if (filter === 'PENDING') {
+      list = requests.filter(
+        (request) => request.status === 'PENDING'
+      );
+    }
+
+    if (filter === 'ACCEPTED') {
+      list = requests.filter(
+        (request) => request.status === 'ACCEPTED'
+      );
+    }
 
     const sorted = [...list];
+
     if (sortBy === 'URGENCY') {
       sorted.sort(
-        (a, b) => (urgencyRank[a.urgency] ?? 3) - (urgencyRank[b.urgency] ?? 3)
+        (a, b) =>
+          (urgencyRank[a.urgency] ?? 3) -
+          (urgencyRank[b.urgency] ?? 3)
       );
     } else {
       sorted.sort(
-        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
+        (a, b) =>
+          new Date(a.scheduledAt || 0) -
+          new Date(b.scheduledAt || 0)
       );
     }
+
     return sorted;
-  }, [requests, pendingRequests, acceptedRequests, filter, sortBy]);
+  }, [requests, filter, sortBy]);
 
   if (loading) {
     return (
@@ -256,206 +582,199 @@ export default function RequesterDashboard() {
     );
   }
 
-  const navItemSx = (active) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1,
-    px: 1.25,
-    py: 1,
-    borderRadius: 2,
-    cursor: 'pointer',
-    backgroundColor: active ? '#EEF2FF' : 'transparent',
-    color: active ? '#1E293B' : 'text.secondary',
-    '&:hover': { backgroundColor: '#F1F5F9' },
-  });
-
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
+    <Box
       
+    >
+      {/* Welcome section - centered across the full page */}
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: 1,
-          px: 3,
-          py: 1.5,
-          backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E2E8F0',
+          width: '100%',
+          textAlign: 'center',
+          pt: {
+            xs: 3,
+            md: 4,
+          },
+          pb: {
+            xs: 3,
+            md: 4,
+          },
+          px: 2,
         }}
       >
-        <IconButton>
-          <NotificationsNoneIcon />
-        </IconButton>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          gutterBottom
+          sx={{
+            fontSize: {
+              xs: '1.75rem',
+              md: '2rem',
+            },
+          }}
+        >
+          Welcome back, {user?.name || 'User'}! 👋
+        </Typography>
 
-        <IconButton onClick={handleProfileClick} sx={{ p: 0.5 }}>
-          <Avatar sx={{ width: 36, height: 36, backgroundColor: '#2563EB' }}>
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </Avatar>
-        </IconButton>
-
-        <Typography variant="body2" fontWeight={600}>
-          {user?.name || 'User'}
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{
+            fontSize: {
+              xs: '1rem',
+              md: '1.1rem',
+            },
+          }}
+        >
+          How can we help you today?
         </Typography>
       </Box>
 
-      <Menu
-        anchorEl={profileMenuAnchor}
-        open={profileMenuOpen}
-        onClose={handleProfileClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <MenuItem disabled>
-          <Typography fontWeight={600}>{user?.name || 'User'}</Typography>
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleEditProfile}>
-          <EditOutlinedIcon sx={{ mr: 1.5 }} fontSize="small" />
-          Edit Profile
-        </MenuItem>
-        <MenuItem onClick={handleSignOut}>
-          <LogoutIcon sx={{ mr: 1.5 }} fontSize="small" />
-          Sign Out
-        </MenuItem>
-      </Menu>
-
-      <Box sx={{ display: 'flex', maxWidth: '1200px', mx: 'auto' }}>
+      {/* Main Content */}
+      <Box
         
-        <Box
-          sx={{
-            width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            px: 2,
-            py: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
-        >
-          <Typography variant="subtitle1" fontWeight={700}>
-            🏠 Neighborhood Helper
+      >
+        {/* Error message */}
+        {error && (
+          <Typography
+            color="error"
+            sx={{
+              mb: 3,
+              fontSize: '1rem',
+            }}
+          >
+            {error}
           </Typography>
+        )}
 
+        {/* Filters, sorting, and New Request */}
+       <Box
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 7,
+    mb: 3,
+    flexWrap: 'wrap',
+  }}
+>
+          {/* Filter chips */}
+          {['ALL', 'PENDING', 'ACCEPTED'].map(
+            (key) => (
+              <Chip
+                key={key}
+                
+                label={
+                  key.charAt(0) +
+                  key.slice(1).toLowerCase()
+                }
+                onClick={() => setFilter(key)}
+                sx={{
+                  minHeight: 44,
+                  px: 1,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  backgroundColor:
+                    filter === key
+                      ? '#1E293B'
+                      : 'transparent',
+                  color:
+                    filter === key
+                      ? '#FFFFFF'
+                      : 'text.secondary',
+                  border:
+                    filter === key
+                      ? 'none'
+                      : '1px solid #E2E8F0',
+                  '&:hover': {
+                    backgroundColor:
+                      filter === key
+                        ? '#1E293B'
+                        : '#F1F5F9',
+                  },
+                }}
+              />
+            )
+          )}
+
+          {/* Sorting */}
+          <Select
+  value={sortBy}
+  onChange={(event) =>
+    setSortBy(event.target.value)
+  }
+  sx={{
+  
+    minWidth: 180,
+    minHeight: 44,
+    backgroundColor: '#FFFFFF',
+    fontSize: '1rem',
+  }}
+>
+            <MenuItem value="SOONEST">
+              Sort: soonest
+            </MenuItem>
+
+            <MenuItem value="URGENCY">
+              Sort: urgency
+            </MenuItem>
+          </Select>
+
+          {/* New Request */}
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleNewRequest}
-            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+            sx={{
+              minHeight: 40,
+              px: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '1rem',
+            }}
           >
             New Request
           </Button>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
-              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">
-                  Pending
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  {pendingRequests.length}
-                </Typography>
-              </CardContent>
-            </Card>
-
-            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
-              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">
-                  Accepted
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  {acceptedRequests.length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
-            <Box sx={navItemSx(true)}>
-              <ListAltOutlinedIcon fontSize="small" />
-              <Typography variant="body2">My requests</Typography>
-            </Box>
-            <Box sx={navItemSx(false)} onClick={handleEditProfile}>
-              <PersonOutlineIcon fontSize="small" />
-              <Typography variant="body2">Profile</Typography>
-            </Box>
-          </Box>
         </Box>
 
-        
-        <Box sx={{ flexGrow: 1, minWidth: 0, px: 3, py: 4 }}>
-          <Box   sx={{ mb: 3 }}>
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              Welcome back, {user?.name || 'User'}! 👋
-            </Typography>
-            <Typography color="text.secondary">How can we help you today?</Typography>
-          </Box>
-
-          {error && (
-            <Typography color="error"   sx={{ mb: 3 }}>
-              {error}
-            </Typography>
-          )}
-
-          <Box
+        {/* Request list */}
+        {visibleRequests.length === 0 ? (
+          <Typography
+            color="text.secondary"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 3,
-              flexWrap: 'wrap',
+              fontSize: '1rem',
             }}
           >
-            {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
-              <Chip
-                key={key}
-                label={key.charAt(0) + key.slice(1).toLowerCase()}
-                onClick={() => setFilter(key)}
-                sx={{
-                  fontWeight: 600,
-                  backgroundColor: filter === key ? '#1E293B' : 'transparent',
-                  color: filter === key ? '#FFFFFF' : 'text.secondary',
-                  border: filter === key ? 'none' : '1px solid #E2E8F0',
-                  '&:hover': {
-                    backgroundColor: filter === key ? '#1E293B' : '#F1F5F9',
-                  },
-                }}
+            You don't have any{' '}
+            {filter !== 'ALL'
+              ? filter.toLowerCase()
+              : ''}{' '}
+            requests.
+          </Typography>
+        ) : (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr',
+                lg: 'repeat(3, 1fr)',
+              },
+              gap: 4,
+            }}
+          >
+            {visibleRequests.map((request) => (
+              <RequestCard
+                key={request.id}
+                request={request}
+                expandedRequest={expandedRequest}
+                setExpandedRequest={
+                  setExpandedRequest
+                }
               />
             ))}
-
-            <Select
-              size="small"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              sx={{ ml: 'auto', minWidth: 160, backgroundColor: '#FFFFFF' }}
-            >
-              <MenuItem value="SOONEST">Sort: soonest</MenuItem>
-              <MenuItem value="URGENCY">Sort: urgency</MenuItem>
-            </Select>
           </Box>
-
-          {visibleRequests.length === 0 ? (
-            <Typography color="text.secondary">
-              You don't have any {filter !== 'ALL' ? filter.toLowerCase() : ''} requests.
-            </Typography>
-          ) : (
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                },
-                gap: 2,
-              }}
-            >
-              {visibleRequests.map((request) => (
-                <RequestCard key={request.id} request={request} />
-              ))}
-            </Box>
-          )}
-        </Box>
+        )}
       </Box>
     </Box>
   );
