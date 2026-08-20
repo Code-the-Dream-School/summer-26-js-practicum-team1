@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getUserProfileImage } from '../../services/adminApi';
 
@@ -10,19 +10,18 @@ export function useAdminUserProfileImage(userId) {
     retry: false,
   });
 
-  const [imageUrl, setImageUrl] = useState(null);
+  const imageUrl = useMemo(
+    () => (blob ? URL.createObjectURL(blob) : null),
+    [blob]
+  );
 
   useEffect(() => {
-    if (!blob) {
-      setImageUrl(null);
+    if (!imageUrl) {
       return undefined;
     }
 
-    const url = URL.createObjectURL(blob);
-    setImageUrl(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [blob]);
+    return () => URL.revokeObjectURL(imageUrl);
+  }, [imageUrl]);
 
   return {
     ...query,
