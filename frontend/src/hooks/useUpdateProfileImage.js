@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateRequesterProfileImage } from '../services/requesterProfileApi';
+import { updateProfileImage } from '../services/profileApi';
 
 export function useUpdateProfileImage() {
   const queryClient = useQueryClient();
@@ -8,7 +8,7 @@ export function useUpdateProfileImage() {
     mutationFn: (imageFile) => {
       const me = queryClient.getQueryData(['me']);
 
-      return updateRequesterProfileImage(imageFile, me?.csrfToken);
+      return updateProfileImage(imageFile, me?.csrfToken);
     },
 
     onSuccess: () => {

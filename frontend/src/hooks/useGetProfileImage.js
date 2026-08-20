@@ -1,11 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getRequesterProfileImage } from '../services/requesterProfileApi';
+import { getProfileImage } from '../services/profileApi';
 
 export function useGetProfileImage() {
   const { data: blob, ...query } = useQuery({
     queryKey: ['profileImage'],
-    queryFn: getRequesterProfileImage,
+    queryFn: getProfileImage,
     retry: false,
   });
 

@@ -26,7 +26,7 @@ function RequesterProfileView({ profile }) {
 
       <ProfileField
         icon={<InfoOutlinedIcon />}
-        label="Bio"
+        label="About Me"
         value={requester?.bio}
       />
 
