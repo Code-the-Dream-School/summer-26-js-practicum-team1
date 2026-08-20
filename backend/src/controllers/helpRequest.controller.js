@@ -21,4 +21,12 @@ const getHelpRequests = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { createHelpRequest, getHelpRequests };
+const getBrowseHelpRequests = asyncHandler(async (req, res) => {
+  const helpRequests = await helpRequestService.getBrowseHelpRequests({
+    user: req.user,
+    query: req.query,
+  });
+  return res.status(200).json({ success: true, data: helpRequests });
+});
+
+module.exports = { createHelpRequest, getHelpRequests, getBrowseHelpRequests };

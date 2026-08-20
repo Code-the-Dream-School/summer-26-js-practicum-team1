@@ -53,7 +53,12 @@ describe('jwt middleware', () => {
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: USER.id },
-        select: { id: true, name: true, role: true },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          volunteerProfile: { select: { verificationStatus: true } },
+        },
       });
     });
   });

@@ -29,7 +29,12 @@ const jwtMiddleware = asyncHandler(async (req, res, next) => {
 
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
-    select: { id: true, name: true, role: true },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      volunteerProfile: { select: { verificationStatus: true } },
+    },
   });
 
   if (!user) {
