@@ -3,7 +3,7 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
-import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
@@ -19,7 +19,7 @@ function App() {
         <Route path="login" element={<Login />} />
 
         {/* Admin routes */}
-        <Route element={<AdminProtectedRoute />}>
+        <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
@@ -31,7 +31,11 @@ function App() {
           path="requesterRegistration"
           element={<RequestorRegistration />}
         />
-        <Route path="browse" element={<Browse />} />
+        <Route
+          element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}
+        >
+          <Route path="browse" element={<Browse />} />
+        </Route>
       </Route>
     </Routes>
   );
