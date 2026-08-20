@@ -119,6 +119,7 @@ model HelpRequest {
   category    Category
   urgency     Urgency
   scheduledAt DateTime
+  scheduledDayOfWeek Int    @default(dbgenerated())
   address     String
   latitude    Float
   longitude   Float
@@ -128,6 +129,7 @@ model HelpRequest {
   completedAt DateTime?
 
   requester User @relation(fields: [requesterId], references: [id])
+  @@index([scheduledDayOfWeek])
 }
 
 model RequesterProfile {
