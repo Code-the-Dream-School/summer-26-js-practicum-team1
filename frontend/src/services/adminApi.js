@@ -49,4 +49,22 @@ export const getUsers = async () => {
   return data.data;
 };
 
+export const getUserById = async (userId) => {
+  const { data } = await adminApi.get(`/api/admin/users/${userId}`);
+  return data.data;
+};
+
+export const updateUserVolunteerById = async (userId, payload, csrfToken) => {
+  const { data } = await adminApi.put(
+    `/api/admin/users/${userId}/volunteer`,
+    payload,
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+    }
+  );
+  return data.data;
+};
+
 export default adminApi;
