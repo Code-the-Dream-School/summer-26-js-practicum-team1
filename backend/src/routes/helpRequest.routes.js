@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   createHelpRequest,
   getHelpRequests,
+  getBrowseHelpRequests,
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
@@ -35,7 +36,9 @@ router.get(
   requireRole(['VOLUNTEER', 'ADMIN']),
   requireApprovedIfVolunteer,
   validate(browseHelpRequestQuerySchema, 'query'),
-  getHelpRequests
+  getBrowseHelpRequests
 );
+
+router.get('/mine', jwtMiddleware, requireRole('REQUESTER'), getHelpRequests);
 
 module.exports = router;

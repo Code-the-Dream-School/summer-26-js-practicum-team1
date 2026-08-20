@@ -31,7 +31,11 @@ export async function login(email, password) {
 }
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post('/api/auth/register', userData);
+    const { data } = await api.post(
+      '/api/auth/register',
+      userData,
+      { withCredentials: true }
+    );
 
     return data;
   } catch (err) {
@@ -39,13 +43,46 @@ export async function registerUser(userData) {
       throw new Error('NETWORK_ERROR');
     }
 
-    if (err.response.status === 400) {
-      const validationError = new Error('VALIDATION_FAILED');
-      validationError.details = err.response.data.details;
-      throw validationError;
-    }
+    if (err.response?.status === 400 && err.response?.data?.details) {
+  const validationError = new Error('VALIDATION_FAILED');
+  validationError.details = err.response.data.details;
+  throw validationError;
+}
 
-    throw new Error('REGISTER_FAILED');
+    throw new Error('REGISTRATION_FAILED');
+  }
+}
+export async function createHelpRequest(data, csrfToken) {
+  try {
+    const { data: responseData } = await api.post(
+      '/api/requests',
+      data,
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
+
+    return responseData;
+  } catch (err) {
+
+    console.error('Error:', err);
+    throw err;
+  }
+}
+export async function getHelpRequests(){
+  try {
+    const { data } = await api.get('/api/requests/mine', {
+    
+        withCredentials: true,
+    });
+
+    return data;
+  } catch (err) {
+    console.error('Error getting help requests:', err);
+    throw err;
   }
 }
 
@@ -70,7 +107,7 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
-  //uncomment once registration is ready
+  
   try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;
