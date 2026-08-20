@@ -11,7 +11,7 @@ export const COLORS = {
 export const DEFAULT_DISTANCE_MI = 5;
 
 export const CATEGORIES = [
-  { key: 'groceries', apiValue: 'GROCERIES', label: 'Groceries' },
+  { key: 'groceries', apiValue: 'GROCERY', label: 'Groceries' },
   {
     key: 'transportation',
     apiValue: 'TRANSPORTATION',
