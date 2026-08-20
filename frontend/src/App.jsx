@@ -9,10 +9,13 @@ import UsersList from './pages/admin/UsersList';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
-import RequesterProfile from './pages/RequesterProfile';
+
+import RequesterDashboard from './pages/Requester/RequesterDashboard';
+
 import RequestorRegistration from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import NewhelpRequest from './pages/Requester/helpRequest';
 
 function App() {
   return (
@@ -21,7 +24,16 @@ function App() {
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
+        {/*requester routes*/}
 
+        <Route
+          path="requesterRegistration"
+          element={<RequestorRegistration />}
+        />
+        <Route element={<RequesterProtectedRoute />}>
+          <Route path="/requester-dashboard" element={<RequesterDashboard />} />
+          <Route path="/helpRequest" element={<NewhelpRequest />} />
+        </Route>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
@@ -35,16 +47,6 @@ function App() {
         </Route>
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
-        <Route element={<RequesterProtectedRoute />}>
-          {/* Requester Routes */}
-          {/* TODO: Move profile route inside requester dashboard once ready */}
-          <Route path="profile" element={<RequesterProfile />} />
-        </Route>
-        <Route
-          path="requesterRegistration"
-          element={<RequestorRegistration />}
-        />
       </Route>
     </Routes>
   );

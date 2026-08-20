@@ -39,6 +39,57 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 3. Validate body (see below) → 400 on failure.
 4. Create request with `status = PENDING`, `requesterId` from session.
 5. Return created object.
+ Get authenticated requester's requests
+
+GET /api/requests/mine
+
+1. Authenticate → 401 if not logged in.
+2. Authorize REQUESTER role → 403 otherwise.
+3. Get requesterId from the authenticated session (`req.user.id`); never accept requesterId from the client.
+4. Return all help requests belonging to the authenticated requester.
+
+Success response:
+
+{
+  "success": true,
+  "data": [
+    { ...request fields... }
+  ]
+}
+
+Error response:
+
+{
+  "success": false,
+  "message": "..."
+}
+
+### 2. Get one help request
+
+GET /api/requests/:id
+
+1. Authenticate → 401 if not logged in.
+2. Validate request ID → 400 if invalid.
+3. Authorize access to the request.
+4. REQUESTER can retrieve only their own request.
+5. VOLUNTEER can retrieve a request available/assigned to them according to the assignment flow.
+6. ADMIN can retrieve any request.
+7. Return 404 if the request does not exist or the user is not authorized to access it.
+
+Success response:
+
+{
+  "success": true,
+  "data": { ...request fields... }
+}
+
+Error response:
+
+{
+  "success": false,
+  "message": "..."
+}
+
 
 **Validation:** `title`, `category`/`urgency` (enum match), `scheduledAt` (future date), `latitude`/`longitude` (valid ranges) required; `description`/`placeId` optional.
 

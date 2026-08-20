@@ -19,7 +19,7 @@ const ERROR_MESSAGES = {
 };
 
 const ROLE_REDIRECTS = {
-  requester: '/',
+  requester: '/requester-dashboard',
   volunteer: '/',
   admin: '/admin/dashboard',
 };

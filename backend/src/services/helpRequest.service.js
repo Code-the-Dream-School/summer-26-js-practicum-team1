@@ -24,4 +24,19 @@ async function createHelpRequest({ requesterId, data }) {
   });
 }
 
-module.exports = { createHelpRequest };
+
+async function getHelpRequests({ requesterId }) {
+  return prisma.helpRequest.findMany({
+    where: {
+      requesterId,
+    },
+    orderBy: {
+      scheduledAt: 'asc',
+    },
+  });
+}
+
+module.exports = {
+  createHelpRequest,
+  getHelpRequests,
+};
