@@ -19,8 +19,7 @@ const {
   getProfileImage,
 } = require('../controllers/requesterProfile.controller');
 
-// Requester profile
-router.get('/', jwtMiddleware, requesterOnly, getProfile);
+router.get('/', jwtMiddleware, getProfile);
 
 router.patch(
   '/',

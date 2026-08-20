@@ -117,3 +117,8 @@ export async function getMe() {
     return null;
   }
 }
+
+export async function getProfile() {
+  const { data } = await api.get('/api/profile', { withCredentials: true });
+  return data.data;
+}
