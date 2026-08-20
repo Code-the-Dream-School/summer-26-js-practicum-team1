@@ -39,6 +39,6 @@ router.patch(
   updateProfileImage
 );
 
-router.get('/image', jwtMiddleware, requesterOnly, getProfileImage);
+router.get('/image', jwtMiddleware, getProfileImage);
 
 module.exports = router;
