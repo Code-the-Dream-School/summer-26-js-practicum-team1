@@ -12,12 +12,35 @@ import {
 
 import { useUpdateProfile } from '../../hooks/requesterProfile/useUpdateProfile';
 
+const EMPTY_FORM = {
+  phone: '',
+  address: '',
+  city: '',
+  bio: '',
+  emergencyContact: '',
+};
+
 function EditProfileDialog({ open, onClose, formData }) {
   const updateProfile = useUpdateProfile();
 
-  const [form, setForm] = useState(formData);
-
+  const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
+
+  const handleOpen = () => {
+    if (!open) {
+      return;
+    }
+
+    setForm({
+      phone: formData?.phone ?? '',
+      address: formData?.address ?? '',
+      city: formData?.city ?? '',
+      bio: formData?.bio ?? '',
+      emergencyContact: formData?.emergencyContact ?? '',
+    });
+
+    setErrors({});
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -45,7 +68,7 @@ function EditProfileDialog({ open, onClose, formData }) {
       onError: (error) => {
         const details = error?.response?.data?.details;
 
-        if (details) {
+        if (Array.isArray(details)) {
           const fieldErrors = {};
 
           details.forEach((detail) => {
@@ -66,9 +89,14 @@ function EditProfileDialog({ open, onClose, formData }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      onTransitionEnter={handleOpen}
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle
-        variant="h5"
         sx={{
           fontWeight: 700,
           fontSize: {
@@ -146,7 +174,6 @@ function EditProfileDialog({ open, onClose, formData }) {
             borderRadius: 1,
             boxShadow: 3,
             transition: '0.3s',
-
             '&:hover': {
               boxShadow: 8,
               transform: 'translateY(-4px)',
@@ -164,7 +191,6 @@ function EditProfileDialog({ open, onClose, formData }) {
             borderRadius: 1,
             boxShadow: 3,
             transition: '0.3s',
-
             '&:hover': {
               boxShadow: 8,
               transform: 'translateY(-4px)',

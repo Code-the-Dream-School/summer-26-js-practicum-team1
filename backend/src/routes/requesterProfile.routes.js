@@ -34,7 +34,6 @@ router.patch(
   '/image',
   jwtMiddleware,
   csrfMiddleware,
-  requesterOnly,
   profileImageUpload,
   updateProfileImage
 );

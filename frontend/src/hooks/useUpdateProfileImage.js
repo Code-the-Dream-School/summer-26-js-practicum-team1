@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateRequesterProfileImage } from '../../services/requesterProfileApi';
+import { updateRequesterProfileImage } from '../services/requesterProfileApi';
 
 export function useUpdateProfileImage() {
   const queryClient = useQueryClient();

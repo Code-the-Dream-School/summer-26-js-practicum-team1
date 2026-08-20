@@ -9,7 +9,6 @@ import UsersList from './pages/admin/UsersList';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
-import RequesterProfile from './pages/RequesterProfile';
 import RequestorRegistration from './pages/Register';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -39,7 +38,6 @@ function App() {
         <Route element={<RequesterProtectedRoute />}>
           {/* Requester Routes */}
           {/* TODO: Move profile route inside requester dashboard once ready */}
-          <Route path="profile" element={<RequesterProfile />} />
         </Route>
         <Route
           path="requesterRegistration"

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getRequesterProfileImage } from '../../services/requesterProfileApi';
+import { getRequesterProfileImage } from '../services/requesterProfileApi';
 
 export function useGetProfileImage() {
   const { data: blob, ...query } = useQuery({
@@ -16,9 +16,13 @@ export function useGetProfileImage() {
     }
 
     const url = URL.createObjectURL(blob);
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImageUrl(url);
 
-    return () => URL.revokeObjectURL(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
   }, [blob]);
 
   return {

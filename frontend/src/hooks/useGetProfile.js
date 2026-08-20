@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRequesterProfile } from '../../services/requesterProfileApi';
+import { getRequesterProfile } from '../services/requesterProfileApi';
 
 export function useGetProfile() {
   return useQuery({
