@@ -14,10 +14,11 @@ const {
 
 const {
   getProfile,
-  updateProfile,
   updateProfileImage,
   getProfileImage,
 } = require('../controllers/profile.controller');
+
+const { updateProfile } = require('../controllers/requesterProfile.controller');
 
 router.get('/', jwtMiddleware, getProfile);
 

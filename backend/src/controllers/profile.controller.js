@@ -10,14 +10,6 @@ const getProfile = asyncHandler(async (req, res) => {
   });
 });
 
-const updateProfile = asyncHandler(async (req, res) => {
-  const profile = await profileService.updateProfile(req.user.id, req.body);
-
-  return res.status(200).json({
-    data: profile,
-  });
-});
-
 const updateProfileImage = asyncHandler(async (req, res) => {
   if (!req.file) {
     throw new ApiError(400, 'Profile image file is required');
@@ -41,7 +33,6 @@ const getProfileImage = asyncHandler(async (req, res) => {
 
 module.exports = {
   getProfile,
-  updateProfile,
   updateProfileImage,
   getProfileImage,
 };
