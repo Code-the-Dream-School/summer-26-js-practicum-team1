@@ -25,6 +25,9 @@ function ProfilePage() {
     city: '',
     bio: '',
     emergencyContact: '',
+    latitude: null,
+    longitude: null,
+    placeId: null,
   });
 
   const isRequester = user?.role?.toLowerCase() === 'requester';
@@ -102,6 +105,9 @@ function ProfilePage() {
       city: requester.city ?? '',
       bio: requester.bio ?? '',
       emergencyContact: requester.emergencyContact ?? '',
+      latitude: requester.latitude ?? null,
+      longitude: requester.longitude ?? null,
+      placeId: requester.placeId ?? null,
     });
 
     setIsRequesterEditing(true);
@@ -188,7 +194,8 @@ function ProfilePage() {
             <EditProfileDialog
               open={isRequesterEditing}
               onClose={() => setIsRequesterEditing(false)}
-              formData={requesterFormData}
+              form={requesterFormData}
+              setForm={setRequesterFormData}
             />
           </>
         )}
