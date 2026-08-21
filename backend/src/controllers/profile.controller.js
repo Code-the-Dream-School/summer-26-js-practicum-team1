@@ -1,4 +1,4 @@
-const profileService = require('../services/requesterProfile.service');
+const profileService = require('../services/profile.service');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 

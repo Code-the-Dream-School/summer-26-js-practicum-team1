@@ -17,7 +17,7 @@ const {
   updateProfile,
   updateProfileImage,
   getProfileImage,
-} = require('../controllers/requesterProfile.controller');
+} = require('../controllers/profile.controller');
 
 router.get('/', jwtMiddleware, getProfile);
 

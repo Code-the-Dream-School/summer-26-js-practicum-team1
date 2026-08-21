@@ -28,14 +28,14 @@ jest.mock('../src/middleware/csrf.middleware', () => {
   return (req, res, next) => next();
 });
 
-jest.mock('../src/services/requesterProfile.service', () => ({
+jest.mock('../src/services/profile.service', () => ({
   getProfile: jest.fn(),
   updateProfile: jest.fn(),
   updateProfileImage: jest.fn(),
   getProfileImage: jest.fn(),
 }));
 
-const profileService = require('../src/services/requesterProfile.service');
+const profileService = require('../src/services/profile.service');
 const jwtMiddleware = require('../src/middleware/jwt.middleware');
 const app = require('../src/app');
 
