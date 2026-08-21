@@ -167,7 +167,7 @@ npm run dev
 ```
 
 Backend runs on:
-http://localhost:5000
+http://localhost:8080
 
 ### Database Setup & Scripts
 
@@ -222,20 +222,14 @@ npm run dev
 VITE_BASE_URL=""
 
 # Local backend server
-VITE_TARGET="http://localhost:3000"
+VITE_TARGET="http://localhost:8080"
 
 # Production backend URL (Render)
 # VITE_TARGET="https://node-homework-909.onrender.com"
-
-# Google reCAPTCHA
-VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
-
-# Google OAuth
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 Frontend runs on:  
-http://localhost:3000
+http://localhost:5173
 
 ### Frontend
 
