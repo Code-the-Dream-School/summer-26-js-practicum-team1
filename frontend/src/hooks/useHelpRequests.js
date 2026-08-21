@@ -1,37 +1,52 @@
-import { useQuery } from '@tanstack/react-query';
-import { getBrowseHelpRequests } from '../services/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  getBrowseHelpRequests,
+  getCategoryFacets,
+  createHelpRequest,
+} from '../services/api';
 
 export function useBrowseHelpRequests(filters) {
-  const {
-    data: helpRequests,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-  } = useQuery({
+  const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: ['help-requests', filters],
     queryFn: () => getBrowseHelpRequests(filters),
     placeholderData: (previousData) => previousData,
   });
 
   return {
-    helpRequests: helpRequests || [],
+    helpRequests: data?.data || [],
+    meta: data?.meta,
     isLoading,
     isFetching,
     isError,
     error,
-  }
+  };
 }
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createHelpRequest } from '../services/api';
+export function useCategoryFacets(filters) {
+  const {
+    data: categoryCounts,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['help-requests-facets', filters],
+    queryFn: () => getCategoryFacets(filters),
+    placeholderData: (previousData) => previousData,
+  });
+
+  return {
+    categoryCounts: categoryCounts || {},
+    isLoading,
+    isError,
+    error,
+  };
+}
 
 export function useHelpRequests() {
   const queryClient = useQueryClient();
 
   const createMutation = useMutation({
-    mutationFn: ({ data, csrfToken }) =>
-      createHelpRequest(data, csrfToken),
+    mutationFn: ({ data, csrfToken }) => createHelpRequest(data, csrfToken),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
