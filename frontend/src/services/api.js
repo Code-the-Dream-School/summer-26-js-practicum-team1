@@ -29,13 +29,12 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post(
-      '/api/auth/register',
-      userData,
-      { withCredentials: true }
-    );
+    const { data } = await api.post('/api/auth/register', userData, {
+      withCredentials: true,
+    });
 
     return data;
   } catch (err) {
@@ -44,39 +43,34 @@ export async function registerUser(userData) {
     }
 
     if (err.response?.status === 400 && err.response?.data?.details) {
-  const validationError = new Error('VALIDATION_FAILED');
-  validationError.details = err.response.data.details;
-  throw validationError;
-}
+      const validationError = new Error('VALIDATION_FAILED');
+      validationError.details = err.response.data.details;
+      throw validationError;
+    }
 
     throw new Error('REGISTRATION_FAILED');
   }
 }
+
 export async function createHelpRequest(data, csrfToken) {
   try {
-    const { data: responseData } = await api.post(
-      '/api/requests',
-      data,
-      {
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-        },
-        withCredentials: true,
-      }
-    );
+    const { data: responseData } = await api.post('/api/requests', data, {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    });
 
     return responseData;
   } catch (err) {
-
     console.error('Error:', err);
     throw err;
   }
 }
-export async function getHelpRequests(){
+export async function getHelpRequests() {
   try {
     const { data } = await api.get('/api/requests/mine', {
-    
-        withCredentials: true,
+      withCredentials: true,
     });
 
     return data;
@@ -107,12 +101,57 @@ export async function logout(csrfToken) {
 }
 
 export async function getMe() {
-  
   try {
     const { data } = await api.get('/api/auth/me', { withCredentials: true });
     return data;
   } catch {
     return null;
+  }
+}
+
+function buildHelpRequestParams(filters = {}) {
+  const params = {};
+
+  if (filters.category?.length) params.category = filters.category.join(',');
+  if (filters.urgency?.length) params.urgency = filters.urgency.join(',');
+  if (filters.status?.length) params.status = filters.status.join(',');
+  if (filters.q) params.q = filters.q;
+
+  if (filters.scheduledAfter) params.scheduledAfter = filters.scheduledAfter;
+  if (filters.scheduledBefore) params.scheduledBefore = filters.scheduledBefore;
+  if (filters.createdAfter) params.createdAfter = filters.createdAfter;
+  if (filters.createdBefore) params.createdBefore = filters.createdBefore;
+
+  const hasGeo =
+    filters.lat != null && filters.lng != null && filters.radiusMi != null;
+  if (hasGeo) {
+    params.lat = filters.lat;
+    params.lng = filters.lng;
+    params.radiusMi = filters.radiusMi;
+  }
+
+  if (filters.sortField) {
+    params.sort = `${filters.sortField}:${filters.sortDir || 'desc'}`;
+  }
+
+  return params;
+}
+
+export async function getBrowseHelpRequests(filters) {
+  try {
+    const { data } = await api.get('/api/requests', {
+      params: buildHelpRequestParams(filters),
+      withCredentials: true,
+    });
+    return data.data;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+    if (err.response.status === 400) {
+      throw new Error(err.response.data?.message || 'INVALID_REQUEST');
+    }
+    throw new Error('FETCH_HELP_REQUESTS_FAILED');
   }
 }
 

@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-function AdminProtectedRoute() {
+
+function RoleProtectedRoute({ allowedRoles }) {
   const { user, isCheckingSession } = useAuth();
 
   if (isCheckingSession) {
@@ -8,14 +9,14 @@ function AdminProtectedRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
-  if (user?.role?.toLowerCase() !== 'admin') {
-    return <Navigate to="/" />;
+  if (!allowedRoles.includes(user.role?.toLowerCase())) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
 }
 
-export default AdminProtectedRoute;
+export default RoleProtectedRoute;

@@ -1,3 +1,28 @@
+import { useQuery } from '@tanstack/react-query';
+import { getBrowseHelpRequests } from '../services/api';
+
+export function useBrowseHelpRequests(filters) {
+  const {
+    data: helpRequests,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['help-requests', filters],
+    queryFn: () => getBrowseHelpRequests(filters),
+    placeholderData: (previousData) => previousData,
+  });
+
+  return {
+    helpRequests: helpRequests || [],
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  }
+}
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createHelpRequest } from '../services/api';
 

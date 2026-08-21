@@ -6,7 +6,7 @@ function MainLayout() {
   return (
     <>
       <Header />
-      <Container maxWidth="md" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
         <Outlet />
       </Container>
     </>
