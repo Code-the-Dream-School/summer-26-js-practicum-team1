@@ -1,0 +1,94 @@
+const prisma = require('../config/prisma');
+const ApiError = require('../utils/ApiError');
+const {
+  volunteerSelect,
+  toVolunteerSlice,
+} = require('./volunteerProfile.service');
+
+const getProfile = async (userId) => {
+  const profile = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      dob: true,
+      gender: true,
+      role: true,
+      requesterProfile: {
+        select: {
+          address: true,
+          city: true,
+          bio: true,
+          emergencyContact: true,
+        },
+      },
+      volunteerProfile: {
+        select: volunteerSelect,
+      },
+    },
+  });
+
+  if (!profile) {
+    throw new ApiError(404, 'User profile not found');
+  }
+
+  const { volunteerProfile, ...account } = profile;
+
+  return {
+    ...account,
+    volunteer: toVolunteerSlice(volunteerProfile),
+  };
+};
+
+const updateProfileImage = async (userId, imageBuffer, imageType) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+  if (!imageBuffer || !imageType) {
+    throw new ApiError(400, 'Profile image is required');
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      profileImage: imageBuffer,
+      profileImageType: imageType,
+    },
+  });
+
+  return {
+    message: 'Profile image updated successfully',
+  };
+};
+
+const getProfileImage = async (userId) => {
+  const profile = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      profileImage: true,
+      profileImageType: true,
+    },
+  });
+
+  if (!profile) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (!profile.profileImage) {
+    return null;
+  }
+
+  return profile;
+};
+
+module.exports = {
+  getProfile,
+  updateProfileImage,
+  getProfileImage,
+};

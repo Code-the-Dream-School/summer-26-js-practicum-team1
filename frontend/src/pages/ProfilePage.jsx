@@ -1,96 +1,235 @@
 import { useState } from 'react';
 import { Alert, Box, IconButton, Typography } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+
 import { useAuth } from '../hooks/useAuth';
+import { useGetProfile } from '../hooks/useGetProfile';
 import { useVolunteerProfile } from '../hooks/useVolunteerProfile';
+import { useGetProfileImage } from '../hooks/useGetProfileImage';
+import { useUpdateProfileImage } from '../hooks/useUpdateProfileImage';
+
 import ProfileSummary from '../components/profile/ProfileSummary';
+import RequesterProfileView from '../components/requesterProfile/RequesterProfileView';
 import VolunteerPreferencesForm from '../components/profile/VolunteerPreferencesForm';
 import VolunteerPreferencesView from '../components/profile/VolunteerPreferencesView';
+import EditProfileDialog from '../components/profile/EditProfileDialog';
 
 function ProfilePage() {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const isVolunteer = user?.role === 'volunteer';
 
-  const { profile, volunteer, isLoading, isError, saveVolunteer, isSaving } =
-    useVolunteerProfile({
-      enabled: Boolean(user),
-    });
+  const [isRequesterEditing, setIsRequesterEditing] = useState(false);
+  const [isVolunteerEditing, setIsVolunteerEditing] = useState(false);
+  const [requesterFormData, setRequesterFormData] = useState({
+    phone: '',
+    address: '',
+    city: '',
+    bio: '',
+    emergencyContact: '',
+  });
 
+  const isRequester = user?.role?.toLowerCase() === 'requester';
+  const isVolunteer = user?.role?.toLowerCase() === 'volunteer';
+
+  const {
+    data,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+  } = useGetProfile({
+    enabled: Boolean(user),
+  });
+
+  const {
+    volunteer,
+    saveVolunteer,
+    isSaving,
+    isLoading: isVolunteerLoading,
+    isError: isVolunteerError,
+  } = useVolunteerProfile({
+    enabled: Boolean(user) && isVolunteer,
+  });
+  const {
+    data: profileImage,
+    isLoading: isImageLoading,
+    isError: isImageError,
+  } = useGetProfileImage();
+
+  const updateProfileImage = useUpdateProfileImage();
   if (!user) {
     return null;
   }
 
-  const summaryUser = profile
-    ? { ...user, ...profile, role: profile.role || user.role }
-    : user;
+  if (isProfileLoading) {
+    return (
+      <Box sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{
+            margin: 3,
+            marginLeft: 0,
+            fontWeight: 700,
+            mb: 3,
+          }}
+        >
+          MY PROFILE
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" align="center">
+          Loading profile...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isProfileError || !data) {
+    return <Alert severity="error">Failed to load profile.</Alert>;
+  }
+
+  const profile = data?.data ?? data;
+
+  const summaryUser = {
+    ...user,
+    ...profile,
+    role: profile.role || user.role,
+  };
+
+  const handleRequesterEdit = () => {
+    const requester = profile.requesterProfile || {};
+
+    setRequesterFormData({
+      phone: profile.phone ?? '',
+      address: requester.address ?? '',
+      city: requester.city ?? '',
+      bio: requester.bio ?? '',
+      emergencyContact: requester.emergencyContact ?? '',
+    });
+
+    setIsRequesterEditing(true);
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    updateProfileImage.mutate(file);
+
+    event.target.value = '';
+  };
+
+  const showEditButton =
+    (isRequester && !isRequesterEditing) ||
+    (isVolunteer && !isVolunteerEditing);
 
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        borderRadius: '24px',
-        p: { xs: 3, sm: 4, md: 5 },
-      }}
-    >
-      <Box
+    <>
+      <Typography
+        variant="h5"
+        align="center"
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          margin: 3,
+          marginLeft: 0,
+          fontWeight: 700,
           mb: 3,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#52462A' }}>
-          My Profile
-        </Typography>
+        MY PROFILE
+      </Typography>
 
-        {isVolunteer && !isEditing && !isLoading && (
-          <IconButton
-            aria-label="Edit preferences"
-            onClick={() => setIsEditing(true)}
-            sx={{ color: '#8C8164' }}
-          >
-            <EditOutlinedIcon />
-          </IconButton>
+      <Box
+        sx={{
+          borderRadius: { xs: 2, sm: 3 },
+          boxShadow: 3,
+          p: { xs: 3, sm: 4, md: 5 },
+        }}
+      >
+        <ProfileSummary
+          user={summaryUser}
+          profileImage={profileImage}
+          isImageLoading={isImageLoading}
+          onImageChange={handleImageChange}
+          isImageUpdating={updateProfileImage.isPending}
+          isImageError={isImageError}
+          action={
+            showEditButton ? (
+              <IconButton
+                aria-label={
+                  isRequester ? 'Edit profile' : 'Edit volunteer preferences'
+                }
+                onClick={() => {
+                  if (isRequester) {
+                    handleRequesterEdit();
+                  } else {
+                    setIsVolunteerEditing(true);
+                  }
+                }}
+                sx={{
+                  boxShadow: 2,
+                  transition: '0.3s',
+                  flexShrink: 0,
+                  '&:hover': {
+                    boxShadow: 5,
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                <EditOutlinedIcon />
+              </IconButton>
+            ) : null
+          }
+        />
+
+        {isRequester && (
+          <>
+            <RequesterProfileView profile={profile} />
+
+            <EditProfileDialog
+              open={isRequesterEditing}
+              onClose={() => setIsRequesterEditing(false)}
+              form={requesterFormData}
+              setForm={setRequesterFormData}
+            />
+          </>
+        )}
+
+        {isVolunteer && (
+          <>
+            {isVolunteerLoading && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
+                Loading preferences...
+              </Typography>
+            )}
+
+            {isVolunteerError && !isVolunteerEditing && (
+              <Alert severity="info" sx={{ mt: 3 }}>
+                Could not load preferences yet. Try editing your volunteer
+                preferences again.
+              </Alert>
+            )}
+
+            {isVolunteerEditing ? (
+              <VolunteerPreferencesForm
+                key={volunteer ? 'loaded' : 'empty'}
+                initialPreferences={volunteer}
+                isSaving={isSaving}
+                onCancel={() => setIsVolunteerEditing(false)}
+                onSave={async (payload) => {
+                  await saveVolunteer(payload);
+                  setIsVolunteerEditing(false);
+                }}
+              />
+            ) : (
+              !isVolunteerLoading &&
+              !isVolunteerError && (
+                <VolunteerPreferencesView preferences={volunteer} />
+              )
+            )}
+          </>
         )}
       </Box>
-
-      <ProfileSummary user={summaryUser} />
-
-      {isVolunteer && (
-        <>
-          {isLoading && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
-              Loading preferences...
-            </Typography>
-          )}
-
-          {isError && !isEditing && (
-            <Alert severity="info" sx={{ mt: 3 }}>
-              Could not load preferences yet. Tap edit to try saving once your
-              volunteer profile is ready.
-            </Alert>
-          )}
-
-          {isEditing ? (
-            <VolunteerPreferencesForm
-              key={volunteer ? 'loaded' : 'empty'}
-              initialPreferences={volunteer}
-              isSaving={isSaving}
-              onCancel={() => setIsEditing(false)}
-              onSave={async (payload) => {
-                await saveVolunteer(payload);
-                setIsEditing(false);
-              }}
-            />
-          ) : (
-            !isLoading &&
-            !isError && <VolunteerPreferencesView preferences={volunteer} />
-          )}
-        </>
-      )}
-    </Box>
+    </>
   );
 }
 
