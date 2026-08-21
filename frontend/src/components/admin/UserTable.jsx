@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -19,13 +18,128 @@ import {
   MenuItem,
   Stack,
   Button,
+  Typography,
+  Box,
+  Chip,
 } from '@mui/material';
-
+import { grey } from '@mui/material/colors';
+import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
 import { useUsers } from '../../hooks/admin/useUsers';
-import { red, grey } from '@mui/material/colors';
 import Pagination from '../common/Pagination';
 
+const TITLE_COLOR = '#52462A';
+
+const filterFieldSx = {
+  minWidth: { xs: '100%', sm: 160 },
+  flex: { sm: 1 },
+  boxShadow: 1,
+  borderRadius: 2,
+  bgcolor: 'background.paper',
+  '& .MuiOutlinedInput-root': {
+    height: 40,
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    border: 'none',
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '0.875rem',
+  },
+  '& .MuiInputBase-input': {
+    fontSize: '0.875rem',
+  },
+};
+
+const viewButtonSx = {
+  borderRadius: 1.5,
+  fontSize: '0.8125rem',
+  fontWeight: 400,
+  textTransform: 'none',
+  minWidth: 64,
+  boxShadow: 'none',
+  '&:hover': {
+    boxShadow: 1,
+  },
+};
+
+const headerCellSx = {
+  color: 'common.white',
+  fontWeight: 600,
+  fontSize: '0.75rem',
+  py: 1.25,
+  px: 2,
+  borderBottom: 'none',
+  whiteSpace: 'nowrap',
+};
+
+const bodyCellSx = {
+  py: 1.25,
+  px: 2,
+  fontSize: '0.875rem',
+  fontWeight: 400,
+};
+
+const stickyActionsCellSx = {
+  position: 'sticky',
+  right: 0,
+  bgcolor: 'background.paper',
+  zIndex: 1,
+  boxShadow: '-4px 0 8px -4px rgba(0,0,0,0.08)',
+};
+
+const stickyActionsHeaderSx = {
+  ...stickyActionsCellSx,
+  top: 0,
+  bgcolor: 'success.main',
+  zIndex: 3,
+  boxShadow: 'none',
+};
+
+const hideOnXs = {
+  display: { xs: 'none', sm: 'table-cell' },
+};
+
+function getRoleChipProps(role) {
+  switch (role) {
+    case 'ADMIN':
+      return { label: 'Admin', color: 'primary', variant: 'filled' };
+    case 'VOLUNTEER':
+      return { label: 'Volunteer', color: 'success', variant: 'filled' };
+    case 'REQUESTER':
+      return { label: 'Requester', color: 'default', variant: 'outlined' };
+    default:
+      return { label: 'N/A', color: 'default', variant: 'outlined' };
+  }
+}
+
+function formatDate(value) {
+  if (!value) return 'N/A';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function formatGender(value) {
+  if (!value) return 'N/A';
+  const labels = {
+    PREFER_NOT_TO_SAY: 'Prefer not to say',
+    MALE: 'Male',
+    FEMALE: 'Female',
+    OTHER: 'Other',
+  };
+  return labels[value] ?? value;
+}
+
+const SORT_LABELS = {
+  newest: 'Newest',
+  oldest: 'Oldest',
+};
+
 function UserTable() {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useUsers();
   const users = data?.users ?? [];
 
@@ -34,10 +148,26 @@ function UserTable() {
   const [sortOrder, setSortOrder] = useState('newest');
   const [page, setPage] = useState(1);
 
-  const rowsPerPage = 5;
+  const rowsPerPage = 8;
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setRole('ALL');
+    setSortOrder('newest');
+    setPage(1);
+  };
+
+  const handleRowClick = (userId, event) => {
+    if (event.target.closest('a, button')) return;
+    navigate(`/admin/users/${userId}`);
+  };
 
   if (isLoading) {
-    return <CircularProgress color="success" />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+        <CircularProgress color="success" />
+      </Box>
+    );
   }
 
   if (error) {
@@ -54,206 +184,322 @@ function UserTable() {
     if (sortOrder === 'newest') {
       return new Date(b.createdAt) - new Date(a.createdAt);
     }
-
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
 
-  const totalPages = Math.ceil(sortedUsers.length / rowsPerPage);
+  const totalPages = Math.ceil(sortedUsers.length / rowsPerPage) || 1;
 
   const currentUsers = sortedUsers.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
 
+  const hasActiveFilters =
+    search !== '' || role !== 'ALL' || sortOrder !== 'newest';
+
   return (
     <>
-      <Stack
-        direction={{
-          xs: 'column',
-          sm: 'row',
-        }}
-        spacing={3}
+      <Box
         sx={{
-          mb: 5,
+          mb: 2,
+          p: 2,
+          borderRadius: 2,
+          boxShadow: 1,
+          bgcolor: 'background.paper',
         }}
       >
-        <TextField
-          sx={{
-            minWidth: 160,
-            boxShadow: 3,
-            borderRadius: 3,
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-
-          label="Search User"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-
-        <FormControl
-          sx={{
-            minWidth: 160,
-            boxShadow: 3,
-            borderRadius: 3,
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          alignItems={{ sm: 'center' }}
         >
-          <InputLabel>Role</InputLabel>
-
-          <Select
-            value={role}
-            label="Role"
+          <TextField
+            sx={filterFieldSx}
+            size="small"
+            label="Search user"
+            placeholder="Name or email"
+            value={search}
             onChange={(e) => {
-              setRole(e.target.value);
+              setSearch(e.target.value);
               setPage(1);
             }}
-          >
-            <MenuItem value="ALL">All</MenuItem>
+          />
 
-            <MenuItem value="ADMIN">Admin</MenuItem>
+          <FormControl sx={filterFieldSx} size="small">
+            <InputLabel>Role</InputLabel>
+            <Select
+              value={role}
+              label="Role"
+              onChange={(e) => {
+                setRole(e.target.value);
+                setPage(1);
+              }}
+            >
+              <MenuItem value="ALL">All</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
+              <MenuItem value="VOLUNTEER">Volunteer</MenuItem>
+              <MenuItem value="REQUESTER">Requester</MenuItem>
+            </Select>
+          </FormControl>
 
-            <MenuItem value="VOLUNTEER">Volunteer</MenuItem>
+          <FormControl sx={filterFieldSx} size="small">
+            <InputLabel>Sort</InputLabel>
+            <Select
+              value={sortOrder}
+              label="Sort"
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <MenuItem value="newest">Newest</MenuItem>
+              <MenuItem value="oldest">Oldest</MenuItem>
+            </Select>
+          </FormControl>
 
-            <MenuItem value="REQUESTER">Requester</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl
-          sx={{
-            minWidth: 160,
-            boxShadow: 3,
-            borderRadius: 3,
-            '& .MuiOutlinedInput-notchedOutline': {
-              border: 'none',
-            },
-          }}
-        >
-          <InputLabel>Sort</InputLabel>
-
-          <Select
-            value={sortOrder}
-            label="Sort"
-            onChange={(e) => {
-              setSortOrder(e.target.value);
+          <Chip
+            label={`${filteredUsers.length} user${filteredUsers.length === 1 ? '' : 's'}`}
+            color="success"
+            variant="outlined"
+            size="small"
+            sx={{
+              ml: { sm: 'auto' },
+              height: 40,
+              px: 0.5,
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              color: TITLE_COLOR,
+              borderColor: 'success.main',
+              alignSelf: { xs: 'flex-start', sm: 'center' },
             }}
-          >
-            <MenuItem value="newest">Newest</MenuItem>
+          />
+        </Stack>
 
-            <MenuItem value="oldest">Oldest</MenuItem>
-          </Select>
-        </FormControl>
-      </Stack>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', mt: 1.5, fontSize: '0.75rem' }}
+        >
+          Sorted by: {SORT_LABELS[sortOrder]}
+        </Typography>
+      </Box>
 
       <TableContainer
         component={Paper}
+        elevation={0}
         sx={{
           width: '100%',
-          borderRadius: 3,
-          boxShadow: 3,
+          maxWidth: '100%',
+          borderRadius: 2,
+          border: 1,
+          borderColor: 'divider',
+          boxShadow: 1,
           overflowX: 'auto',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          bgcolor: 'background.paper',
+          '&::-webkit-scrollbar': {
+            height: 8,
+            width: 8,
+          },
+          '&::-webkit-scrollbar-thumb': {
+            bgcolor: grey[400],
+            borderRadius: 4,
+          },
+          '&::-webkit-scrollbar-track': {
+            bgcolor: grey[100],
+          },
         }}
       >
-        <Table
-          sx={{
-            minWidth: 800,
-          }}
-        >
+        <Table stickyHeader size="small" sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow
               sx={{
-                backgroundColor: 'success.main',
+                '& .MuiTableCell-head': headerCellSx,
               }}
             >
-              {[
-                'USER',
-                'EMAIL',
-                'ROLE',
-                'PHONE',
-                'GENDER',
-                'DATE OF BIRTH',
-                'ACTIONS',
-              ].map((title) => (
-                <TableCell
-                  key={title}
-                  sx={{
-                    color: 'white',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {title}
-                </TableCell>
-              ))}
+              <TableCell
+                sx={{
+                  ...headerCellSx,
+                  bgcolor: 'success.main',
+                }}
+              >
+                User
+              </TableCell>
+              <TableCell sx={{ ...headerCellSx, bgcolor: 'success.main' }}>
+                Email
+              </TableCell>
+              <TableCell sx={{ ...headerCellSx, bgcolor: 'success.main' }}>
+                Role
+              </TableCell>
+              <TableCell
+                sx={{ ...headerCellSx, bgcolor: 'success.main', ...hideOnXs }}
+              >
+                Phone
+              </TableCell>
+              <TableCell
+                sx={{ ...headerCellSx, bgcolor: 'success.main', ...hideOnXs }}
+              >
+                Gender
+              </TableCell>
+              <TableCell
+                align="right"
+                sx={{ ...headerCellSx, bgcolor: 'success.main' }}
+              >
+                Date of birth
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{ ...headerCellSx, ...stickyActionsHeaderSx }}
+              >
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
 
-          <TableBody
-            sx={{
-              bgcolor: grey[100],
-            }}
-          >
+          <TableBody>
             {currentUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  No users found
+                <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                  <Stack spacing={1.5} alignItems="center">
+                    <SearchOffOutlinedIcon
+                      sx={{ fontSize: 40, color: 'text.disabled' }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      No users found
+                    </Typography>
+                    {hasActiveFilters && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="success"
+                        onClick={handleClearFilters}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
+                  </Stack>
                 </TableCell>
               </TableRow>
             ) : (
-              currentUsers.map((user) => (
-                <TableRow key={user.id} hover>
-                  <TableCell>
-                    <Stack
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      spacing={3}
-                    >
+              currentUsers.map((user, index) => (
+                <TableRow
+                  key={user.id}
+                  hover
+                  onClick={(event) => handleRowClick(user.id, event)}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    cursor: 'pointer',
+                    '&:last-child td': { borderBottom: 0 },
+                    '&:hover': { bgcolor: 'action.hover' },
+                    '&:hover .sticky-actions-cell': {
+                      bgcolor: 'action.hover',
+                    },
+                    ...(index < currentUsers.length - 1 && {
+                      '& td': {
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                      },
+                    }),
+                  }}
+                >
+                  <TableCell sx={{ minWidth: 180, ...bodyCellSx }}>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
                       <Avatar
                         src={user.profileImage}
                         alt={user.name}
                         sx={{
-                          bgcolor: red[500],
+                          width: 34,
+                          height: 34,
+                          fontSize: '0.8125rem',
+                          bgcolor: grey[400],
                         }}
                       >
-                        {user.name?.charAt(0)}
+                        {user.name?.charAt(0)?.toUpperCase()}
                       </Avatar>
-
-                      {user.name}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          color: TITLE_COLOR,
+                        }}
+                        noWrap
+                      >
+                        {user.name}
+                      </Typography>
                     </Stack>
                   </TableCell>
 
-                  <TableCell>{user.email}</TableCell>
-
-                  <TableCell>{user.role}</TableCell>
-
-                  <TableCell>{user.phone || 'N/A'}</TableCell>
-
-                  <TableCell>{user.gender || 'N/A'}</TableCell>
-
-                  <TableCell>
-                    {new Date(user.dob).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    }) || 'N/A'}
+                  <TableCell sx={{ maxWidth: 220, ...bodyCellSx }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      fontWeight={400}
+                      noWrap
+                      title={user.email}
+                    >
+                      {user.email}
+                    </Typography>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell sx={bodyCellSx}>
+                    <Chip
+                      {...getRoleChipProps(user.role)}
+                      size="small"
+                      sx={{ height: 24, fontSize: '0.75rem', fontWeight: 500 }}
+                    />
+                  </TableCell>
+
+                  <TableCell
+                    sx={{
+                      ...bodyCellSx,
+                      ...hideOnXs,
+                      whiteSpace: 'nowrap',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {user.phone || 'N/A'}
+                  </TableCell>
+
+                  <TableCell
+                    sx={{
+                      ...bodyCellSx,
+                      ...hideOnXs,
+                      whiteSpace: 'nowrap',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {formatGender(user.gender)}
+                  </TableCell>
+
+                  <TableCell
+                    align="right"
+                    sx={{
+                      ...bodyCellSx,
+                      whiteSpace: 'nowrap',
+                      fontVariantNumeric: 'tabular-nums',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {formatDate(user.dob)}
+                  </TableCell>
+
+                  <TableCell
+                    align="center"
+                    className="sticky-actions-cell"
+                    sx={{
+                      ...bodyCellSx,
+                      ...stickyActionsCellSx,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     <Button
                       component={RouterLink}
                       to={`/admin/users/${user.id}`}
                       size="small"
-                      variant="outlined"
+                      variant="contained"
+                      color="success"
+                      sx={viewButtonSx}
+                      onClick={(event) => event.stopPropagation()}
                     >
                       View
                     </Button>
@@ -266,7 +512,9 @@ function UserTable() {
       </TableContainer>
 
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        <Box sx={{ mt: 3 }}>
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        </Box>
       )}
     </>
   );
