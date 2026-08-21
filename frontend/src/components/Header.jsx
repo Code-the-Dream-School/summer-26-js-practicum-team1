@@ -26,7 +26,8 @@ const ROLE_SETTINGS = {
   requester: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
-    { label: 'My Requests', path: '/' },
+    { label: 'My Requests', path: '/requester-dashboard' },
+    { label: 'Create New Help Request', path: '/helpRequest' },
   ],
   volunteer: [
     { label: 'Profile', path: '/profile' },
