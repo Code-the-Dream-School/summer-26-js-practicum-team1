@@ -408,7 +408,7 @@ describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
   });
 });
 
-describe('helpRequestService.getHelpRequests — sorting (in-memory path: geo or distance)', () => {
+describe('helpRequestService.getBrowseHelpRequests — sorting (in-memory path: geo or distance)', () => {
   const admin = { id: 1, role: 'ADMIN' };
 
   it('sorts by distance ascending by default (closest first)', async () => {
@@ -456,7 +456,7 @@ describe('helpRequestService.getHelpRequests — sorting (in-memory path: geo or
       },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: paged({
         lat: '40.7',
@@ -485,7 +485,7 @@ describe('helpRequestService.getHelpRequests — sorting (in-memory path: geo or
       },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: paged({
         lat: '40.7',
@@ -505,7 +505,7 @@ describe('helpRequestService.getHelpRequests — sorting (in-memory path: geo or
       { id: 3, latitude: 40.73, longitude: -74, urgency: 'MEDIUM' },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: paged({
         lat: '40.7',
@@ -525,7 +525,7 @@ describe('helpRequestService.getHelpRequests — sorting (in-memory path: geo or
       { id: 3, latitude: 40.73, longitude: -74, urgency: 'MEDIUM' },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: paged({
         lat: '40.7',
@@ -586,14 +586,14 @@ describe('helpRequestService.getBrowseHelpRequests — distanceMi', () => {
   });
 });
 
-describe('helpRequestService.getHelpRequests — pagination', () => {
+describe('helpRequestService.getBrowseHelpRequests — pagination', () => {
   const admin = { id: 1, role: 'ADMIN' };
 
   it('computes skip/take from page and pageSize on the DB fast path', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
     prisma.helpRequest.count.mockResolvedValue(0);
 
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { page: 3, pageSize: 5 },
     });
@@ -607,7 +607,7 @@ describe('helpRequestService.getHelpRequests — pagination', () => {
     prisma.helpRequest.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
     prisma.helpRequest.count.mockResolvedValue(23);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { page: 2, pageSize: 5 },
     });
@@ -628,7 +628,7 @@ describe('helpRequestService.getHelpRequests — pagination', () => {
       { id: 1, latitude: 40.71, longitude: -74 },
     ]);
 
-    await helpRequestService.getHelpRequests({
+    await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: paged({ lat: '40.7', lng: '-74', radiusMi: '50' }),
     });
@@ -644,7 +644,7 @@ describe('helpRequestService.getHelpRequests — pagination', () => {
       { id: 4, latitude: 40.73, longitude: -74 },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: {
         lat: '40.7',
@@ -671,7 +671,7 @@ describe('helpRequestService.getHelpRequests — pagination', () => {
       { id: 2, latitude: 41.9, longitude: -74 }, // out of radius
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: { lat: '40.7', lng: '-74', radiusMi: '5', page: 1, pageSize: 5 },
     });
@@ -685,7 +685,7 @@ describe('helpRequestService.getHelpRequests — pagination', () => {
       { id: 1, latitude: 40.71, longitude: -74 },
     ]);
 
-    const result = await helpRequestService.getHelpRequests({
+    const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
       query: {
         lat: '40.7',

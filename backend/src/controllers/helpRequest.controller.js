@@ -23,7 +23,7 @@ const getHelpRequests = asyncHandler(async (req, res) => {
 });
 
 const getBrowseHelpRequests = asyncHandler(async (req, res) => {
-  const { data, meta } = await helpRequestService.getHelpRequests({
+  const { data, meta } = await helpRequestService.getBrowseHelpRequests({
     user: req.user,
     query: req.query,
   });

@@ -142,8 +142,9 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   const options = { where };
   const page = query.page;
   const pageSize = query.pageSize;
-  
+
   const requiresInMemoryProcessing = hasGeo || sortField === 'distance';
+
   if (!requiresInMemoryProcessing) {
     options.orderBy = [{ [sortField]: sortDir }, { id: 'asc' }];
 
@@ -193,7 +194,7 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   data.sort((a, b) => {
     const diff = compareBy[sortField](a, b);
     if (diff !== 0) return sortDir === 'asc' ? diff : -diff;
-    return a.id - b.id;
+    return a.id - b.id;  
   });
 
   const totalCount = data.length;
