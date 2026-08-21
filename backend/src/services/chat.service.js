@@ -39,21 +39,19 @@ const getAuthorizedConversation = async (
     throw new ApiError(403, 'Chat is not available for this request');
   }
 
-  let conversation = await prisma.conversation.findUnique({
+  const conversation = await prisma.conversation.findUnique({
     where: { requestId },
   });
-
-  if (!conversation) {
-    conversation = await prisma.conversation.create({
-      data: { requestId },
-    });
-  }
 
   return conversation;
 };
 
 const getMessages = async (requestId, userId) => {
   const conversation = await getAuthorizedConversation(requestId, userId);
+
+  if (!conversation) {
+    return [];
+  }
 
   return prisma.message.findMany({
     where: {
@@ -66,7 +64,15 @@ const getMessages = async (requestId, userId) => {
 };
 
 const sendMessage = async (requestId, userId, content) => {
-  const conversation = await getAuthorizedConversation(requestId, userId, true);
+  let conversation = await getAuthorizedConversation(requestId, userId, true);
+
+  if (!conversation) {
+    conversation = await prisma.conversation.create({
+      data: {
+        requestId,
+      },
+    });
+  }
 
   return prisma.message.create({
     data: {
@@ -79,6 +85,10 @@ const sendMessage = async (requestId, userId, content) => {
 
 const markMessagesRead = async (requestId, userId) => {
   const conversation = await getAuthorizedConversation(requestId, userId);
+
+  if (!conversation) {
+    return { count: 0 };
+  }
 
   return prisma.message.updateMany({
     where: {
