@@ -3,16 +3,17 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
-import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
-import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
+import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
 import UsersList from './pages/admin/UsersList';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
-import RequesterProfile from './pages/RequesterProfile';
+import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
+import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import NewhelpRequest from './pages/Requester/helpRequest';
 
 function App() {
   return (
@@ -21,30 +22,39 @@ function App() {
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
+        <Route path="signup" element={<SignupPage />} />
+        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
+        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+        <Route
+          path="requesterRegistration"
+          element={<RequestorRegistration />}
+        />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
+
+        {/* Requester Routes */}
+        <Route element={<RoleProtectedRoute allowedRoles={['requester']} />}>
+          <Route path="/requester-dashboard" element={<RequesterDashboard />} />
+          <Route path="/helpRequest" element={<NewhelpRequest />} />
+        </Route>
 
         {/* Admin routes */}
-        <Route element={<AdminProtectedRoute />}>
+        <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
           <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
         </Route>
-        <Route path="signup" element={<SignupPage />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="profile" element={<ProfilePage />} />
-        </Route>
-        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
-        <Route element={<RequesterProtectedRoute />}>
-          {/* Requester Routes */}
-          {/* TODO: Move profile route inside requester dashboard once ready */}
-          <Route path="profile" element={<RequesterProfile />} />
-        </Route>
+
+        {/* Volunteer Routes */}
         <Route
-          path="requesterRegistration"
-          element={<RequestorRegistration />}
-        />
+          element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}
+        >
+          <Route path="browse" element={<Browse />} />
+        </Route>
       </Route>
     </Routes>
   );

@@ -1,4 +1,7 @@
-const requireRole = (requiredRole) => {
+const { VerificationStatus } = require('@prisma/client');
+
+const requireRole = (roles) => {
+  const allowed = Array.isArray(roles) ? roles : [roles];
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
@@ -6,7 +9,7 @@ const requireRole = (requiredRole) => {
       });
     }
 
-    if (req.user.role !== requiredRole) {
+    if (!allowed.includes(req.user.role)) {
       return res.status(403).json({
         error: 'Forbidden',
       });
@@ -16,4 +19,15 @@ const requireRole = (requiredRole) => {
   };
 };
 
-module.exports = { requireRole };
+const requireApprovedIfVolunteer = (req, res, next) => {
+  if (
+    req.user.role === 'VOLUNTEER' &&
+    req.user.volunteerProfile?.verificationStatus !==
+      VerificationStatus.APPROVED
+  ) {
+    return res.status(403).json({ error: 'Volunteer account not approved' });
+  }
+  next();
+};
+
+module.exports = { requireRole, requireApprovedIfVolunteer };

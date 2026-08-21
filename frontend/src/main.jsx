@@ -27,7 +27,7 @@ const theme = createTheme({
     divider: '#E5E5E3',
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
