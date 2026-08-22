@@ -87,12 +87,13 @@ model VolunteerProfile {
   createdAt          DateTime           @default(now())
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  verifications     VolunteerVerification[]
-  availability      Json?
-  serviceArea       String?                 @map("service_area") @db.VarChar(255)
-  serviceLatitude   Float?                  @map("service_latitude")
-  serviceLongitude  Float?                  @map("service_longitude")
-  supportCategories UserSupportCategory[]
+  verifications VolunteerVerification[]
+  availability       Json?
+  serviceArea        String?  @map("service_area") @db.VarChar(255)
+  serviceLatitude    Float?   @map("service_latitude")
+  serviceLongitude   Float?   @map("service_longitude")
+  supportCategories  UserSupportCategory[]
+  helpRequests       HelpRequest[]
 
   @@index([serviceArea])
   @@index([verificationStatus])
@@ -131,6 +132,7 @@ model HelpRequest {
   conversation Conversation?
 
   requester User @relation(fields: [requesterId], references: [id])
+  volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [userId])
 }
 
 model RequesterProfile {

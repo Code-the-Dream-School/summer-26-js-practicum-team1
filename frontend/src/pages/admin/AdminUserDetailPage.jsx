@@ -2,24 +2,48 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Alert,
+  Avatar,
   Box,
   Button,
+  Chip,
   CircularProgress,
   IconButton,
+  Stack,
   Typography,
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import ContactPhoneOutlinedIcon from '@mui/icons-material/ContactPhoneOutlined';
+import CakeIcon from '@mui/icons-material/Cake';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../hooks/useAuth';
+import { useAdminUserProfileImage } from '../../hooks/admin/useAdminUserProfileImage';
 import { getUserById, updateUserVolunteerById } from '../../services/adminApi';
 import VolunteerPreferencesForm from '../../components/profile/VolunteerPreferencesForm';
 import VolunteerPreferencesView from '../../components/profile/VolunteerPreferencesView';
 import ProfileSection from '../../components/profile/ProfileSection';
+import ProfileField from '../../components/requesterProfile/ProfileField';
+
+const ROLE_LABELS = {
+  ADMIN: 'Admin',
+  REQUESTER: 'Requester',
+  VOLUNTEER: 'Volunteer',
+};
+
+const VERIFICATION_COLORS = {
+  APPROVED: 'success',
+  PENDING: 'warning',
+  REJECTED: 'error',
+};
 
 function formatDate(value) {
-  if (!value) return 'N/A';
+  if (!value) return 'Not provided';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
+  if (Number.isNaN(date.getTime())) return 'Not provided';
   return date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -27,15 +51,8 @@ function formatDate(value) {
   });
 }
 
-function DetailRow({ label, value }) {
-  return (
-    <Typography variant="body2" sx={{ mb: 0.75 }}>
-      <Box component="span" sx={{ color: 'text.secondary', mr: 1 }}>
-        {label}
-      </Box>
-      {value || 'N/A'}
-    </Typography>
-  );
+function displayValue(value) {
+  return value?.trim() || 'Not provided';
 }
 
 function AdminUserDetailPage() {
@@ -57,9 +74,13 @@ function AdminUserDetailPage() {
     retry: false,
   });
 
+  const { data: profileImageUrl } = useAdminUserProfileImage(id);
+
   const volunteer = selectedUser?.volunteer;
   const showVolunteer =
     Boolean(volunteer) || selectedUser?.role === 'VOLUNTEER';
+  const requesterProfile = selectedUser?.requesterProfile;
+  const roleLabel = ROLE_LABELS[selectedUser?.role] ?? selectedUser?.role;
 
   const saveMutation = useMutation({
     mutationFn: (payload) =>
@@ -73,7 +94,11 @@ function AdminUserDetailPage() {
   });
 
   if (isLoadingUser) {
-    return <CircularProgress color="success" />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress color="success" aria-label="Loading user profile" />
+      </Box>
+    );
   }
 
   if (isUserError) {
@@ -83,8 +108,6 @@ function AdminUserDetailPage() {
       </Alert>
     );
   }
-
-  const requesterProfile = selectedUser?.requesterProfile;
 
   return (
     <Box
@@ -105,33 +128,108 @@ function AdminUserDetailPage() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 700, color: '#52462A' }}>
-          {selectedUser?.name || `User #${id}`}
+          User Profile
         </Typography>
         <Button variant="outlined" onClick={() => navigate('/admin/users')}>
           Back to users
         </Button>
       </Box>
 
-      <ProfileSection title="Account">
-        <DetailRow label="Email" value={selectedUser?.email} />
-        <DetailRow label="Role" value={selectedUser?.role} />
-        <DetailRow label="Phone" value={selectedUser?.phone} />
-        <DetailRow label="Gender" value={selectedUser?.gender} />
-        <DetailRow label="Date of birth" value={formatDate(selectedUser?.dob)} />
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        alignItems={{ xs: 'center', sm: 'flex-start' }}
+        sx={{ mb: 3, pb: 3, borderBottom: 1, borderColor: 'divider' }}
+      >
+        <Avatar
+          src={profileImageUrl || undefined}
+          alt={selectedUser?.name}
+          sx={{ width: 88, height: 88, bgcolor: 'primary.main', fontSize: 32 }}
+        >
+          {selectedUser?.name?.charAt(0)?.toUpperCase()}
+        </Avatar>
+
+        <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#52462A' }}>
+            {selectedUser?.name}
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              mt: 1,
+              flexWrap: 'wrap',
+              justifyContent: { xs: 'center', sm: 'flex-start' },
+              gap: 1,
+            }}
+          >
+            <Chip label={roleLabel} size="small" color="primary" />
+            {volunteer?.verificationStatus && (
+              <Chip
+                label={volunteer.verificationStatus}
+                size="small"
+                color={
+                  VERIFICATION_COLORS[volunteer.verificationStatus] || 'default'
+                }
+              />
+            )}
+          </Stack>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Member since {formatDate(selectedUser?.createdAt)}
+          </Typography>
+        </Box>
+      </Stack>
+
+      <ProfileSection title="Account information">
+        <Stack spacing={2}>
+          <ProfileField
+            icon={<EmailOutlinedIcon />}
+            label="Email"
+            value={displayValue(selectedUser?.email)}
+          />
+          <ProfileField
+            icon={<PhoneOutlinedIcon />}
+            label="Phone"
+            value={displayValue(selectedUser?.phone)}
+          />
+          <ProfileField
+            icon={<CakeIcon />}
+            label="Date of birth"
+            value={formatDate(selectedUser?.dob)}
+          />
+          <ProfileField
+            icon={<DescriptionOutlinedIcon />}
+            label="Gender"
+            value={displayValue(selectedUser?.gender)}
+          />
+        </Stack>
       </ProfileSection>
 
       {selectedUser?.role === 'REQUESTER' && (
         <ProfileSection title="Requester profile">
           {requesterProfile ? (
-            <>
-              <DetailRow label="City" value={requesterProfile.city} />
-              <DetailRow label="Address" value={requesterProfile.address} />
-              <DetailRow label="Bio" value={requesterProfile.bio} />
-              <DetailRow
-                label="Emergency contact"
-                value={requesterProfile.emergencyContact}
+            <Stack spacing={2}>
+              <ProfileField
+                icon={<LocationCityOutlinedIcon />}
+                label="City"
+                value={displayValue(requesterProfile.city)}
               />
-            </>
+              <ProfileField
+                icon={<HomeOutlinedIcon />}
+                label="Address"
+                value={displayValue(requesterProfile.address)}
+              />
+              <ProfileField
+                icon={<DescriptionOutlinedIcon />}
+                label="Bio"
+                value={displayValue(requesterProfile.bio)}
+              />
+              <ProfileField
+                icon={<ContactPhoneOutlinedIcon />}
+                label="Emergency contact"
+                value={displayValue(requesterProfile.emergencyContact)}
+              />
+            </Stack>
           ) : (
             <Typography variant="body2" color="text.secondary">
               No requester profile on file.
@@ -148,7 +246,7 @@ function AdminUserDetailPage() {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 1,
-              mb: 1,
+              mb: 2,
             }}
           >
             <Typography variant="body2" color="text.secondary">

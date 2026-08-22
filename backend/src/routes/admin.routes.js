@@ -21,7 +21,7 @@ const {
   getAdminUserProfileImage,
 } = require('../controllers/admin.controllers');
 
-router.use(jwtMiddleware, csrfMiddleware, adminAuth);
+router.use(jwtMiddleware, adminAuth);
 
 router.get('/dashboard', getAdminDashboard);
 router.get('/volunteers/pending', getPendingVolunteers);
@@ -29,12 +29,15 @@ router.get('/users', getUsers);
 router.get('/users/:id/volunteer', getUserVolunteer);
 router.get('/users/:id/profile/image', getAdminUserProfileImage);
 router.get('/users/:id', getUser);
+router.get('/requesters/:id/profile', getAdminRequesterProfile);
+
 router.put(
   '/users/:id/volunteer',
+  csrfMiddleware,
   validate(updateVolunteerProfileSchema),
   updateUserVolunteer
 );
-router.put('/volunteers/:id/approve', approveVolunteer);
-router.put('/volunteers/:id/reject', rejectVolunteer);
-router.get('/requesters/:id/profile', getAdminRequesterProfile);
+router.put('/volunteers/:id/approve', csrfMiddleware, approveVolunteer);
+router.put('/volunteers/:id/reject', csrfMiddleware, rejectVolunteer);
+
 module.exports = router;
