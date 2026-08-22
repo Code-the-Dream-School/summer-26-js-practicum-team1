@@ -46,6 +46,10 @@ describe('Chat Controller', () => {
           content: 'Hello volunteer',
           createdAt: new Date(),
           readAt: null,
+          sender: {
+            id: 10,
+            name: 'Test User',
+          },
         },
       ];
 
@@ -74,6 +78,10 @@ describe('Chat Controller', () => {
         content: 'Hello volunteer',
         createdAt: new Date(),
         readAt: null,
+        sender: {
+          id: 10,
+          name: 'Test User',
+        },
       };
 
       chatService.sendMessage.mockResolvedValue(message);

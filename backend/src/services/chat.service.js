@@ -60,6 +60,14 @@ const getMessages = async (requestId, userId) => {
     orderBy: {
       createdAt: 'asc',
     },
+    include: {
+      sender: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
   });
 };
 
@@ -79,6 +87,14 @@ const sendMessage = async (requestId, userId, content) => {
       conversationId: conversation.id,
       senderId: userId,
       content,
+    },
+    include: {
+      sender: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 };
