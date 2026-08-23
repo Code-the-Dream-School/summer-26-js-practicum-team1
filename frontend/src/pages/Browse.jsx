@@ -10,13 +10,13 @@ import {
   Autocomplete,
 } from '@mui/material';
 import {
-  COLORS,
   DEFAULT_DISTANCE_MI,
   CATEGORY_BY_API_VALUE,
   URGENCY_LEVELS,
   fieldSx,
   inputLabelSx,
 } from '../utils/browse.constants.js';
+import { COLORS } from '../utils/constants.js';
 import {
   toggleInArray,
   friendlyErrorMessage,

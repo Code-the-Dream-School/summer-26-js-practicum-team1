@@ -1,12 +1,4 @@
-export const COLORS = {
-  bgSubtle: '#F6F6F4',
-  border: '#E5E5E2',
-  borderHover: '#B2B2AE',
-  textMuted: '#6B6B68',
-  textFaint: '#9C9C98',
-  primary: '#3F6B4E',
-  primaryHover: '#345A41',
-};
+import { COLORS } from "./constants";
 
 export const DEFAULT_DISTANCE_MI = 5;
 
