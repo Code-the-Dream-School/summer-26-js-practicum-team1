@@ -7,44 +7,142 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  Divider,
-  IconButton,
-  Menu,
+  Collapse,
   MenuItem,
   Select,
   Typography,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 
 import AddIcon from '@mui/icons-material/Add';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import LogoutIcon from '@mui/icons-material/Logout';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined';
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 
-import { getMe, getHelpRequests, logout } from '../../services/api';
-
-const SIDEBAR_WIDTH = 232;
-
+import {
+  getMe,
+  getHelpRequests,
+  getHelpRequestById,
+  updateHelpRequest,
+  cancelHelpRequest,
+} from '../../services/api';
 
 const URGENCY_STYLES = {
-  HIGH: { border: '#E24B4A', bg: '#FCEBEB', text: '#791F1F' },
-  MEDIUM: { border: '#EF9F27', bg: '#FAEEDA', text: '#633806' },
-  LOW: { border: '#639922', bg: '#EAF3DE', text: '#27500A' },
+  HIGH: {
+    border: '#9b1518ff',
+    bg: '#e82618ff',
+    text: '#FFF1F0',
+  },
+
+  MEDIUM: {
+    border: '#FFB020',
+    bg: '#FFB020',
+    text: '#FFF8E1',
+  },
+
+  LOW: {
+    border: '#22C55E',
+    bg: '#15803D',
+    text: '#FFF8E1',
+  },
 };
+
+const STATUS_STYLES = {
+  PENDING: {
+    label: 'Pending',
+    bg: '#FEF3C7',
+    text: '#e33f3fff',
+  },
+
+  ACCEPTED: {
+    label: 'Accepted',
+    bg: '#DCFCE7',
+    text: '#166534',
+  },
+
+  COMPLETED: {
+    label: 'Completed',
+    bg: '#E0E7FF',
+    text: '#3730A3',
+  },
+
+  CANCELLED: {
+    label: 'Cancelled',
+    bg: '#FEE2E2',
+    text: '#991B1B',
+  },
+};
+
+const CATEGORY_OPTIONS = [
+  'GROCERY',
+  'TRANSPORTATION',
+  'HOUSEHOLD_CHORES',
+  'YARD_WORK',
+  'PET_CARE',
+  'TECH_SUPPORT',
+  'COMPANIONSHIP',
+  'MEAL_PREP',
+  'MEDICAL_ERRAND',
+  'OTHER',
+];
+
+const URGENCY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 
 function getUrgencyStyle(urgency) {
   return URGENCY_STYLES[urgency] || URGENCY_STYLES.LOW;
 }
 
-function RequestCard({ request }) {
+function getStatusStyle(status) {
+  return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
+}
+
+
+function formatDateTimeLocal(dateValue) {
+  if (!dateValue) {
+    return '';
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function RequestCard({
+  request,
+  expandedRequest,
+  setExpandedRequest,
+  onEdit,
+  onCancel,
+}) {
   const accepted = request.status === 'ACCEPTED';
+  const isPending = request.status === 'PENDING';
   const urgencyStyle = getUrgencyStyle(request.urgency);
+  const statusStyle = getStatusStyle(request.status);
+
+  const isExpanded = expandedRequest === request.id;
+
+  const handleToggleDetails = () => {
+    setExpandedRequest(isExpanded ? null : request.id);
+  };
 
   return (
     <Card
@@ -52,100 +150,417 @@ function RequestCard({ request }) {
         borderRadius: 3,
         borderLeft: `4px solid ${urgencyStyle.border}`,
         boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-        height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        alignSelf: 'start',
       }}
     >
-      <CardContent sx={{ p: 2.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <CardContent
+        sx={{
+          p: { xs: 2.5, md: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Status */}
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'flex-start',
-            gap: 1,
-            mb: 1,
+            mb: 2,
           }}
         >
-          <Typography variant="subtitle1" fontWeight={600}>
-            {request.title}
-          </Typography>
-
           <Chip
-            label={accepted ? 'Accepted' : 'Pending'}
+            label={statusStyle.label}
             size="small"
             sx={{
               fontWeight: 600,
               flexShrink: 0,
-              backgroundColor: accepted ? '#DCFCE7' : '#FEF3C7',
-              color: accepted ? '#166534' : '#92400E',
+              minHeight: 32,
+              backgroundColor: statusStyle.bg,
+              color: statusStyle.text,
             }}
           />
         </Box>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          {request.description || 'No description provided.'}
+        {/* Category */}
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            mb: 1.5,
+          }}
+        >
+          {request.category}
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarMonthOutlinedIcon sx={{ fontSize: 16 }} color="action" />
-            <Typography variant="caption" color="text.secondary">
-              {request.scheduledAt
-                ? new Date(request.scheduledAt).toLocaleString()
-                : 'Date not available'}
-            </Typography>
-          </Box>
+        {/* Date and Time */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1,
+            mb: 1.5,
+          }}
+        >
+          <CalendarMonthOutlinedIcon
+            sx={{
+              fontSize: 20,
+              mt: 0.2,
+            }}
+            color="action"
+          />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <LocationOnOutlinedIcon sx={{ fontSize: 16 }} color="action" />
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {request.address || 'Address not available'}
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#166534',
+                fontSize: '1rem',
+                fontWeight: 700,
+                mt: 0.5,
+              }}
+            >
+              Date:{' '}
+              <Box
+                component="span"
+                sx={{
+                  color: '#aa7b23',
+                  fontWeight: 700,
+                }}
+              >
+                {request.scheduledAt
+                  ? new Date(
+                      request.scheduledAt
+                    ).toLocaleDateString()
+                  : 'Date not available'}
+              </Box>
+            </Typography>
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#166534',
+                fontSize: '1rem',
+                fontWeight: 700,
+                mt: 0.5,
+              }}
+            >
+              Time:{' '}
+              <Box
+                component="span"
+                sx={{
+                  color: '#aa7b23',
+                  fontWeight: 700,
+                }}
+              >
+                {request.scheduledAt
+                  ? new Date(
+                      request.scheduledAt
+                    ).toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })
+                  : 'Time not available'}
+              </Box>
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          <Chip label={request.category} size="small" variant="outlined" />
+        {/* Urgency */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 1.5,
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              fontSize: '1rem',
+              fontWeight: 700,
+            }}
+          >
+            Urgency:
+          </Typography>
+
           <Chip
             label={request.urgency}
             size="small"
             sx={{
+              minHeight: 32,
+              fontSize: '0.9rem',
               backgroundColor: urgencyStyle.bg,
               color: urgencyStyle.text,
-              fontWeight: 600,
+              fontWeight: 700,
             }}
           />
         </Box>
 
-        {accepted && request.volunteer && (
-          <>
-            <Divider sx={{ my: 1.5 }} />
+       
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-              <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>
-                {request.volunteer.name?.charAt(0)}
-              </Avatar>
-              <Box>
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Volunteer
-                </Typography>
-                <Typography variant="body2" fontWeight={600}>
-                  {request.volunteer.name}
-                </Typography>
-              </Box>
-            </Box>
-          </>
-        )}
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto', pt: 1.5 }}>
+        {/* View Details */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            mt: 'auto',
+            pt: 1,
+          }}
+        >
           <Button
-            endIcon={<ArrowForwardIosIcon sx={{ fontSize: '12px !important' }} />}
-            size="small"
+            onClick={handleToggleDetails}
+            sx={{
+              minHeight: 44,
+              px: 2,
+              fontSize: '1rem',
+              fontWeight: 600,
+              textTransform: 'none',
+            }}
           >
-            View Details
+            {isExpanded ? 'Hide Details' : 'View Details'}
           </Button>
-        </Box>
+        {isPending &&(
+          <>
+            <Tooltip title="Edit request">
+              <IconButton
+                onClick={() => onEdit(request)}
+                aria-label="Edit help request"
+                size="small"
+                sx={{
+                  color: '#318ce7ff',
+                  '&:hover': {
+                    backgroundColor: '#DCFCE7',
+                  },
+                }}
+              >
+                <EditOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Cancel request">
+              <IconButton
+                onClick={() => onCancel(request)}
+                aria-label="Cancel help request"
+                size="small"
+                sx={{
+                  color: '#991B1B',
+                  '&:hover': {
+                    backgroundColor: '#FEE2E2',
+                  },
+                }}
+              >
+                <DeleteForeverOutlinedIcon />
+              </IconButton>
+            </Tooltip>
+            </>
+        )}
+          </Box>
+      
+        {/* Expanded Details */}
+        <Collapse
+          in={isExpanded}
+          timeout="auto"
+          unmountOnExit
+        >
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: '1px solid #E2E8F0',
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Title:</strong> {request.title}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+                lineHeight: 1.6,
+              }}
+            >
+              <strong>Description:</strong>{' '}
+              {request.description ||
+                'No description provided.'}
+            </Typography>
+
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1,
+                mt: 1.5,
+              }}
+            >
+              <LocationOnOutlinedIcon
+                sx={{
+                  fontSize: 20,
+                  mt: 0.2,
+                }}
+                color="action"
+              />
+
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  fontSize: '1rem',
+                  lineHeight: 1.5,
+                  overflowWrap: 'anywhere',
+                }}
+              >
+                <strong>Location:</strong>{' '}
+                {request.address ||
+                  'Address not available'}
+              </Typography>
+            </Box>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Category:</strong>{' '}
+              {request.category}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Urgency:</strong>{' '}
+              {request.urgency}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                mt: 1.5,
+                fontSize: '1rem',
+              }}
+            >
+              <strong>Status:</strong>{' '}
+              {statusStyle.label}
+            </Typography>
+
+            {accepted && request.volunteer && (
+              <Box
+                sx={{
+                  mt: 2,
+                  pt: 2,
+                  borderTop: '1px solid #E2E8F0',
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={700}
+                  sx={{
+                    mb: 1.5,
+                    fontSize: '1rem',
+                  }}
+                >
+                  Volunteer Details
+                </Typography>
+
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      fontSize: 16,
+                    }}
+                  >
+                    {request.volunteer.name
+                      ?.charAt(0)
+                      ?.toUpperCase()}
+                  </Avatar>
+
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: '0.95rem',
+                      }}
+                    >
+                      Volunteer
+                    </Typography>
+
+                    <Typography
+                      variant="body1"
+                      fontWeight={600}
+                      sx={{
+                        fontSize: '1rem',
+                      }}
+                    >
+                      {request.volunteer.name ||
+                        'Not available'}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {request.volunteer.phone && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 1.5,
+                      fontSize: '1rem',
+                    }}
+                  >
+                    <strong>Phone:</strong>{' '}
+                    {request.volunteer.phone}
+                  </Typography>
+                )}
+
+                {request.volunteer.email && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mt: 1,
+                      fontSize: '1rem',
+                    }}
+                  >
+                    <strong>Email:</strong>{' '}
+                    {request.volunteer.email}
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </Box>
+        </Collapse>
       </CardContent>
     </Card>
   );
@@ -154,16 +569,55 @@ function RequestCard({ request }) {
 export default function RequesterDashboard() {
   const navigate = useNavigate();
 
-  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
   const [user, setUser] = useState(null);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('ALL'); // ALL | PENDING | ACCEPTED
-  const [sortBy, setSortBy] = useState('SOONEST'); // SOONEST | URGENCY
 
-  const profileMenuOpen = Boolean(profileMenuAnchor);
+  const [filter, setFilter] = useState('ALL');
+  const [sortBy, setSortBy] = useState('SOONEST');
 
+  const [expandedRequest, setExpandedRequest] =
+    useState(null);
+
+  // -------------------------------
+  // EDIT STATE
+  // -------------------------------
+  const [editRequest, setEditRequest] =
+    useState(null);
+
+  const [editLoading, setEditLoading] =
+    useState(false);
+
+  const [updating, setUpdating] =
+    useState(false);
+
+  const [editError, setEditError] =
+    useState('');
+
+  const [editForm, setEditForm] = useState({
+    title: '',
+    category: '',
+    urgency: '',
+    scheduledAt: '',
+    address: '',
+    latitude: '',
+    longitude: '',
+    description: '',
+  });
+
+  // -------------------------------
+  // CANCEL STATE
+  // -------------------------------
+  const [cancelRequest, setCancelRequest] =
+    useState(null);
+
+  const [cancelling, setCancelling] =
+    useState(false);
+
+  // -------------------------------
+  // LOAD DASHBOARD
+  // -------------------------------
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -180,10 +634,17 @@ export default function RequesterDashboard() {
         setUser(currentUser);
 
         const response = await getHelpRequests();
+
         setRequests(response.data || []);
       } catch (err) {
-        console.error('Failed to load dashboard:', err);
-        setError('Unable to load your requests. Please try again.');
+        console.error(
+          'Failed to load dashboard:',
+          err
+        );
+
+        setError(
+          'Unable to load your requests. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
@@ -192,55 +653,278 @@ export default function RequesterDashboard() {
     loadDashboard();
   }, [navigate]);
 
-  const handleProfileClick = (event) => setProfileMenuAnchor(event.currentTarget);
-  const handleProfileClose = () => setProfileMenuAnchor(null);
-
-  const handleEditProfile = () => {
-    handleProfileClose();
-    navigate('/profile');
+  // -------------------------------
+  // NEW REQUEST
+  // -------------------------------
+  const handleNewRequest = () => {
+    navigate('/helpRequest');
   };
 
-  const handleSignOut = async () => {
-    handleProfileClose();
+  // -------------------------------
+  // EDIT REQUEST
+  // -------------------------------
+  const handleEdit = async (request) => {
     try {
-      await logout();
-      navigate('/login');
+      setEditError('');
+      setEditLoading(true);
+
+      /*
+       * Get the CURRENT request from the backend.
+       * This makes sure the edit form has the latest
+       * database values.
+       */
+      const currentRequest =
+        await getHelpRequestById(request.id);
+
+      setEditRequest(currentRequest);
+
+      setEditForm({
+        title: currentRequest.title || '',
+        category: currentRequest.category || '',
+        urgency: currentRequest.urgency || '',
+        scheduledAt: formatDateTimeLocal(
+          currentRequest.scheduledAt
+        ),
+        address: currentRequest.address || '',
+        latitude:
+          currentRequest.latitude !== null &&
+          currentRequest.latitude !== undefined
+            ? String(currentRequest.latitude)
+            : '',
+        longitude:
+          currentRequest.longitude !== null &&
+          currentRequest.longitude !== undefined
+            ? String(currentRequest.longitude)
+            : '',
+        description:
+          currentRequest.description || '',
+      });
     } catch (err) {
-      console.error('Sign out failed:', err);
+      console.error(
+        'Failed to load request for editing:',
+        err
+      );
+
+      setEditError(
+        'Unable to load this request for editing.'
+      );
+    } finally {
+      setEditLoading(false);
     }
   };
 
-  const handleNewRequest = () => navigate('/helpRequest');
+  // -------------------------------
+  // CLOSE EDIT DIALOG
+  // -------------------------------
+  const handleCloseEditDialog = () => {
+    if (!updating) {
+      setEditRequest(null);
+      setEditError('');
+    }
+  };
 
-  const pendingRequests = useMemo(
-    () => requests.filter((r) => r.status === 'PENDING'),
-    [requests]
-  );
-  const acceptedRequests = useMemo(
-    () => requests.filter((r) => r.status === 'ACCEPTED'),
-    [requests]
-  );
+  // -------------------------------
+  // EDIT FIELD CHANGE
+  // -------------------------------
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
 
-  const urgencyRank = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+    setEditForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  // -------------------------------
+  // UPDATE REQUEST
+  // -------------------------------
+  const handleUpdateRequest = async () => {
+  if (!editRequest) {
+    return;
+  }
+
+  try {
+    setUpdating(true);
+    setEditError('');
+    setError('');
+
+    const updatedData = {
+      title: editForm.title.trim(),
+      category: editForm.category,
+      urgency: editForm.urgency,
+      scheduledAt: new Date(
+        editForm.scheduledAt
+      ).toISOString(),
+      address: editForm.address.trim(),
+      latitude: Number(editForm.latitude),
+      longitude: Number(editForm.longitude),
+      description: editForm.description.trim(),
+    };
+
+    const csrfToken = user?.csrfToken;;
+
+    
+
+    if (!csrfToken) {
+      setEditError(
+        'CSRF token is missing. Please refresh the page and try again.'
+      );
+      return;
+    }
+
+    const updatedRequest = await updateHelpRequest(
+      editRequest.id,
+      updatedData,
+      csrfToken
+    );
+
+    console.log(
+      'Updated request response:',
+      updatedRequest
+    );
+
+    setRequests((currentRequests) =>
+      currentRequests.map((request) =>
+        request.id === editRequest.id
+          ? {
+              ...request,
+              ...(updatedRequest?.data ||
+                updatedRequest),
+            }
+          : request
+      )
+    );
+
+    setEditRequest(null);
+  } catch (err) {
+    console.error(
+      'Failed to update request:',
+      err
+    );
+
+    console.error(
+      'Status:',
+      err?.response?.status
+    );
+
+    console.error(
+      'Server response:',
+      err?.response?.data
+    );
+
+    setEditError(
+      err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        'Unable to update this request. Please try again.'
+    );
+  } finally {
+    setUpdating(false);
+  }
+};
+  // -------------------------------
+  // OPEN CANCEL DIALOG
+  // -------------------------------
+  const handleCancel = (request) => {
+    setCancelRequest(request);
+  };
+
+  // -------------------------------
+  // CLOSE CANCEL DIALOG
+  // -------------------------------
+  const handleCloseCancelDialog = () => {
+    if (!cancelling) {
+      setCancelRequest(null);
+    }
+  };
+
+  // -------------------------------
+  // CONFIRM CANCEL
+  // -------------------------------
+  const handleConfirmCancel = async () => {
+    if (!cancelRequest) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      setError('');
+
+      const csrfToken = user?.csrfToken;
+      await cancelHelpRequest(
+        cancelRequest.id,
+        csrfToken
+      );
+
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === cancelRequest.id
+            ? {
+                ...request,
+                status: 'CANCELLED',
+              }
+            : request
+        )
+      );
+
+      setCancelRequest(null);
+    } catch (err) {
+      console.error(
+        'Failed to cancel request:',
+        err
+      );
+
+      setError(
+        'Unable to cancel this request. Please try again.'
+      );
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const urgencyRank = {
+    HIGH: 0,
+    MEDIUM: 1,
+    LOW: 2,
+  };
 
   const visibleRequests = useMemo(() => {
     let list = requests;
-    if (filter === 'PENDING') list = pendingRequests;
-    if (filter === 'ACCEPTED') list = acceptedRequests;
+
+    if (filter === 'PENDING') {
+      list = requests.filter(
+        (request) => request.status === 'PENDING'
+      );
+    }
+
+    if (filter === 'ACCEPTED') {
+      list = requests.filter(
+        (request) => request.status === 'ACCEPTED'
+      );
+    }
 
     const sorted = [...list];
+
     if (sortBy === 'URGENCY') {
       sorted.sort(
-        (a, b) => (urgencyRank[a.urgency] ?? 3) - (urgencyRank[b.urgency] ?? 3)
+        (a, b) =>
+          (urgencyRank[a.urgency] ?? 3) -
+          (urgencyRank[b.urgency] ?? 3)
       );
     } else {
       sorted.sort(
-        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
+        (a, b) =>
+          new Date(a.scheduledAt || 0) -
+          new Date(b.scheduledAt || 0)
       );
     }
-    return sorted;
-  }, [requests, pendingRequests, acceptedRequests, filter, sortBy]);
 
+    return sorted;
+  }, [requests, filter, sortBy]);
+
+  // -------------------------------
+  // LOADING
+  // -------------------------------
   if (loading) {
     return (
       <Box
@@ -256,207 +940,422 @@ export default function RequesterDashboard() {
     );
   }
 
-  const navItemSx = (active) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1,
-    px: 1.25,
-    py: 1,
-    borderRadius: 2,
-    cursor: 'pointer',
-    backgroundColor: active ? '#EEF2FF' : 'transparent',
-    color: active ? '#1E293B' : 'text.secondary',
-    '&:hover': { backgroundColor: '#F1F5F9' },
-  });
-
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#F8FAFC' }}>
-      
+    <Box>
+      {/* Welcome section */}
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: 1,
-          px: 3,
-          py: 1.5,
-          backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E2E8F0',
+          width: '100%',
+          textAlign: 'center',
+          pt: {
+            xs: 3,
+            md: 4,
+          },
+          pb: {
+            xs: 3,
+            md: 4,
+          },
+          px: 2,
         }}
       >
-        <IconButton>
-          <NotificationsNoneIcon />
-        </IconButton>
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          gutterBottom
+          sx={{
+            fontSize: {
+              xs: '1.75rem',
+              md: '2rem',
+            },
+          }}
+        >
+          Welcome back, {user?.name || 'User'}! 👋
+        </Typography>
 
-        <IconButton onClick={handleProfileClick} sx={{ p: 0.5 }}>
-          <Avatar sx={{ width: 36, height: 36, backgroundColor: '#2563EB' }}>
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </Avatar>
-        </IconButton>
-
-        <Typography variant="body2" fontWeight={600}>
-          {user?.name || 'User'}
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{
+            fontSize: {
+              xs: '1rem',
+              md: '1.1rem',
+            },
+          }}
+        >
+          How can we help you today?
         </Typography>
       </Box>
 
-      <Menu
-        anchorEl={profileMenuAnchor}
-        open={profileMenuOpen}
-        onClose={handleProfileClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <MenuItem disabled>
-          <Typography fontWeight={600}>{user?.name || 'User'}</Typography>
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleEditProfile}>
-          <EditOutlinedIcon sx={{ mr: 1.5 }} fontSize="small" />
-          Edit Profile
-        </MenuItem>
-        <MenuItem onClick={handleSignOut}>
-          <LogoutIcon sx={{ mr: 1.5 }} fontSize="small" />
-          Sign Out
-        </MenuItem>
-      </Menu>
+      {/* Main Content */}
+      <Box>
+        {/* Error message */}
+        {error && (
+          <Typography
+            color="error"
+            sx={{
+              mb: 3,
+              fontSize: '1rem',
+            }}
+          >
+            {error}
+          </Typography>
+        )}
 
-      <Box sx={{ display: 'flex', maxWidth: '1200px', mx: 'auto' }}>
-        
+        {/* Filters */}
         <Box
           sx={{
-            width: SIDEBAR_WIDTH,
-            flexShrink: 0,
-            px: 2,
-            py: 4,
             display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
+            alignItems: 'center',
+            gap: 7,
+            mb: 3,
+            flexWrap: 'wrap',
           }}
         >
-          <Typography variant="subtitle1" fontWeight={700}>
-            🏠 Neighborhood Helper
-          </Typography>
+          {['ALL', 'PENDING', 'ACCEPTED'].map(
+            (key) => (
+              <Chip
+                key={key}
+                label={
+                  key.charAt(0) +
+                  key.slice(1).toLowerCase()
+                }
+                onClick={() => setFilter(key)}
+                sx={{
+                  minHeight: 44,
+                  px: 1,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  backgroundColor:
+                    filter === key
+                      ? '#1E293B'
+                      : 'transparent',
+                  color:
+                    filter === key
+                      ? '#FFFFFF'
+                      : 'text.secondary',
+                  border:
+                    filter === key
+                      ? 'none'
+                      : '1px solid #E2E8F0',
+                  '&:hover': {
+                    backgroundColor:
+                      filter === key
+                        ? '#1E293B'
+                        : '#F1F5F9',
+                  },
+                }}
+              />
+            )
+          )}
+
+          <Select
+            value={sortBy}
+            onChange={(event) =>
+              setSortBy(event.target.value)
+            }
+            sx={{
+              minWidth: 180,
+              minHeight: 44,
+              backgroundColor: '#FFFFFF',
+              fontSize: '1rem',
+            }}
+          >
+            <MenuItem value="SOONEST">
+              Sort: soonest
+            </MenuItem>
+
+            <MenuItem value="URGENCY">
+              Sort: urgency
+            </MenuItem>
+          </Select>
 
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleNewRequest}
-            sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
+            sx={{
+              minHeight: 40,
+              px: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '1rem',
+            }}
           >
             New Request
           </Button>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
-              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">
-                  Pending
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  {pendingRequests.length}
-                </Typography>
-              </CardContent>
-            </Card>
-
-            <Card sx={{ borderRadius: 2, boxShadow: 'none', border: '1px solid #E2E8F0' }}>
-              <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Typography variant="caption" color="text.secondary">
-                  Accepted
-                </Typography>
-                <Typography variant="h5" fontWeight={700}>
-                  {acceptedRequests.length}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1 }}>
-            <Box sx={navItemSx(true)}>
-              <ListAltOutlinedIcon fontSize="small" />
-              <Typography variant="body2">My requests</Typography>
-            </Box>
-            <Box sx={navItemSx(false)} onClick={handleEditProfile}>
-              <PersonOutlineIcon fontSize="small" />
-              <Typography variant="body2">Profile</Typography>
-            </Box>
-          </Box>
         </Box>
 
-        
-        <Box sx={{ flexGrow: 1, minWidth: 0, px: 3, py: 4 }}>
-          <Box   sx={{ mb: 3 }}>
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              Welcome back, {user?.name || 'User'}! 👋
-            </Typography>
-            <Typography color="text.secondary">How can we help you today?</Typography>
-          </Box>
-
-          {error && (
-            <Typography color="error"   sx={{ mb: 3 }}>
-              {error}
-            </Typography>
-          )}
-
-          <Box
+        {/* Request list */}
+        {visibleRequests.length === 0 ? (
+          <Typography
+            color="text.secondary"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              mb: 3,
-              flexWrap: 'wrap',
+              fontSize: '1rem',
             }}
           >
-            {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
-              <Chip
-                key={key}
-                label={key.charAt(0) + key.slice(1).toLowerCase()}
-                onClick={() => setFilter(key)}
-                sx={{
-                  fontWeight: 600,
-                  backgroundColor: filter === key ? '#1E293B' : 'transparent',
-                  color: filter === key ? '#FFFFFF' : 'text.secondary',
-                  border: filter === key ? 'none' : '1px solid #E2E8F0',
-                  '&:hover': {
-                    backgroundColor: filter === key ? '#1E293B' : '#F1F5F9',
-                  },
-                }}
+            You don't have any{' '}
+            {filter !== 'ALL'
+              ? filter.toLowerCase()
+              : ''}{' '}
+            requests.
+          </Typography>
+        ) : (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr',
+                lg: 'repeat(3, 1fr)',
+              },
+              gap: 4,
+            }}
+          >
+            {visibleRequests.map((request) => (
+              <RequestCard
+                key={request.id}
+                request={request}
+                expandedRequest={expandedRequest}
+                setExpandedRequest={
+                  setExpandedRequest
+                }
+                onEdit={handleEdit}
+                onCancel={handleCancel}
               />
             ))}
-
-            <Select
-              size="small"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              sx={{ ml: 'auto', minWidth: 160, backgroundColor: '#FFFFFF' }}
-            >
-              <MenuItem value="SOONEST">Sort: soonest</MenuItem>
-              <MenuItem value="URGENCY">Sort: urgency</MenuItem>
-            </Select>
           </Box>
+        )}
+      </Box>
 
-          {visibleRequests.length === 0 ? (
-            <Typography color="text.secondary">
-              You don't have any {filter !== 'ALL' ? filter.toLowerCase() : ''} requests.
-            </Typography>
+     
+      <Dialog
+        open={Boolean(editRequest)}
+        onClose={handleCloseEditDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            fontSize: '1.5rem',
+          }}
+        >
+          Edit Help Request
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {editLoading ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                py: 5,
+              }}
+            >
+              <CircularProgress color="success" />
+            </Box>
           ) : (
             <Box
               sx={{
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(3, 1fr)',
-                },
-                gap: 2,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2.5,
+                pt: 1,
               }}
             >
-              {visibleRequests.map((request) => (
-                <RequestCard key={request.id} request={request} />
-              ))}
+              {editError && (
+                <Typography
+                  color="error"
+                  sx={{
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  {editError}
+                </Typography>
+              )}
+
+              {/* Title */}
+              <TextField
+                label="Title"
+                name="title"
+                value={editForm.title}
+                onChange={handleEditChange}
+                fullWidth
+                required
+              />
+
+              {/* Category */}
+              <TextField
+                select
+                label="Category"
+                name="category"
+                value={editForm.category}
+                onChange={handleEditChange}
+                fullWidth
+                required
+              >
+                {CATEGORY_OPTIONS.map((category) => (
+                  <MenuItem
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              {/* Urgency */}
+              <TextField
+                select
+                label="Urgency"
+                name="urgency"
+                value={editForm.urgency}
+                onChange={handleEditChange}
+                fullWidth
+                required
+              >
+                {URGENCY_OPTIONS.map((urgency) => (
+                  <MenuItem
+                    key={urgency}
+                    value={urgency}
+                  >
+                    {urgency}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              {/* Date & Time */}
+              <TextField
+                label="Date & Time"
+                name="scheduledAt"
+                type="datetime-local"
+                value={editForm.scheduledAt}
+                onChange={handleEditChange}
+                fullWidth
+                required
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+
+              {/* Address */}
+              <TextField
+                label="Address"
+                name="address"
+                value={editForm.address}
+                onChange={handleEditChange}
+                fullWidth
+                required
+              />
+
+            
+              {/* Description */}
+              <TextField
+                label="Description"
+                name="description"
+                value={editForm.description}
+                onChange={handleEditChange}
+                fullWidth
+                multiline
+                minRows={4}
+              />
             </Box>
           )}
-        </Box>
-      </Box>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            p: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            onClick={handleCloseEditDialog}
+            disabled={updating}
+            sx={{
+              textTransform: 'none',
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleUpdateRequest}
+            variant="contained"
+            disabled={
+              editLoading ||
+              updating ||
+              !editRequest
+            }
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            {updating
+              ? 'Updating...'
+              : 'Update Request'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+    
+      <Dialog
+        open={Boolean(cancelRequest)}
+        onClose={handleCloseCancelDialog}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          Cancel Help Request?
+        </DialogTitle>
+
+        <DialogContent>
+          <Typography
+            color="text.secondary"
+            sx={{ mt: 1 }}
+          >
+            Are you sure you want to cancel this help
+            request?
+          </Typography>
+
+          {cancelRequest && (
+            <Typography
+              fontWeight={600}
+              sx={{ mt: 2 }}
+            >
+              {cancelRequest.title}
+            </Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={handleCloseCancelDialog}
+            disabled={cancelling}
+            sx={{
+              textTransform: 'none',
+            }}
+          >
+            Keep Request
+          </Button>
+
+          <Button
+            onClick={handleConfirmCancel}
+            disabled={cancelling}
+            variant="contained"
+            color="error"
+            sx={{
+              textTransform: 'none',
+            }}
+          >
+            {cancelling
+              ? 'Cancelling...'
+              : 'Cancel Request'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

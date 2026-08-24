@@ -18,17 +18,21 @@ export async function login(email, password) {
       { email, password },
       { withCredentials: true }
     );
+
     return data;
   } catch (err) {
     if (!err.response) {
       throw new Error('NETWORK_ERROR');
     }
+
     if (err.response.status === 423) {
       throw new Error('ACCOUNT_LOCKED');
     }
+
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+
 export async function registerUser(userData) {
   try {
     const { data } = await api.post(
@@ -43,15 +47,20 @@ export async function registerUser(userData) {
       throw new Error('NETWORK_ERROR');
     }
 
-    if (err.response?.status === 400 && err.response?.data?.details) {
-  const validationError = new Error('VALIDATION_FAILED');
-  validationError.details = err.response.data.details;
-  throw validationError;
-}
+    if (
+      err.response.status === 400 &&
+      err.response.data?.details
+    ) {
+      const validationError = new Error('VALIDATION_FAILED');
+      validationError.details = err.response.data.details;
+      throw validationError;
+    }
 
     throw new Error('REGISTRATION_FAILED');
   }
 }
+
+/* Create a new help request */
 export async function createHelpRequest(data, csrfToken) {
   try {
     const { data: responseData } = await api.post(
@@ -67,58 +76,170 @@ export async function createHelpRequest(data, csrfToken) {
 
     return responseData;
   } catch (err) {
-
-    console.error('Error:', err);
+    console.error('Error creating help request:', err);
     throw err;
   }
 }
-export async function getHelpRequests(csrfToken) {
+
+/*Get help requests*/
+export async function getHelpRequests() {
   try {
-    const { data } = await api.get('/api/requests', {
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-      },
-      withCredentials: true,
-    });
+    const { data } = await api.get(
+      '/api/requests/mine',
+      {
+        withCredentials: true,
+      }
+    );
 
     return data;
   } catch (err) {
-    console.error('Error getting help requests:', err);
+    console.error(
+      'Error getting help requests:',
+      err
+    );
+    throw err;
+  }
+}
+/* Get one help request by ID */
+export async function getHelpRequestById(
+  id,
+  csrfToken
+) {
+  try {
+    const { data } = await api.get(
+      `/api/requests/${id}`,
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
+
+    return data;
+  } catch (err) {
+    console.error(
+      'Error getting help request:',
+      err
+    );
     throw err;
   }
 }
 
+/* Update an existing help request */
+export async function updateHelpRequest(
+  id,
+  data,
+  csrfToken
+) {
+  try {
+    const { data: responseData } = await api.patch(
+      `/api/requests/${id}`,
+      data,
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
+
+    return responseData;
+  } catch (err) {
+    console.error(
+      'Error updating help request:',
+      err
+    );
+    throw err;
+  }
+}
+
+/* Cancel a help request */
+export async function cancelHelpRequest(
+  id,
+  csrfToken
+) {
+  try {
+    const { data: responseData } = await api.patch(
+      `/api/requests/${id}/cancel`,
+      {},
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
+
+    return responseData;
+  } catch (err) {
+    console.error(
+      'Error cancelling help request:',
+      err
+    );
+    throw err;
+  }
+}
+
+/**
+ * Logout
+ */
 export async function logout(csrfToken) {
   try {
     await api.post(
       '/api/auth/logoff',
       {},
       {
-        headers: { 'X-CSRF-TOKEN': csrfToken },
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
         withCredentials: true,
       }
     );
   } catch (err) {
-    if (err.response?.status === 401) return;
-    if (err.response?.status === 403) {
-      console.warn('Logout CSRF check failed, session may still be active');
+    if (err.response?.status === 401) {
       return;
     }
+
+    if (err.response?.status === 403) {
+      console.warn(
+        'Logout CSRF check failed, session may still be active'
+      );
+      return;
+    }
+
     throw new Error('Logoff failed');
   }
 }
 
+/**
+ * Get current logged-in user
+ */
 export async function getMe() {
-  
   try {
-    const { data } = await api.get('/api/auth/me', { withCredentials: true });
+    const { data } = await api.get(
+      '/api/auth/me',
+      {
+        withCredentials: true,
+      }
+    );
+
     return data;
   } catch {
     return null;
   }
 }
 
+/**
+ * Get current user's profile
+ */
 export async function getProfile() {
-  const { data } = await api.get('/api/profile', { withCredentials: true });
+  const { data } = await api.get(
+    '/api/profile',
+    {
+      withCredentials: true,
+    }
+  );
+
   return data.data;
 }

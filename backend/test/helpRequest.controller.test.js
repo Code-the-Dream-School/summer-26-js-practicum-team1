@@ -64,7 +64,7 @@ const getHelpRequests = (user) => {
   });
 
   return request(app)
-    .get('/api/requests')
+    .get('/api/requests/mine')
     .set('Cookie', `jwt=${token}`)
     .set('x-csrf-token', CSRF_TOKEN);
 };
@@ -365,7 +365,7 @@ describe('POST /api/requests', () => {
 
 
 
-describe('GET /api/requests', () => {
+describe('GET /api/requests/mine', () => {
   const helpRequests = [
     {
       id: 10,
@@ -460,7 +460,7 @@ describe('GET /api/requests', () => {
 
   it('returns 401 when no JWT is provided', async () => {
     const res = await request(app)
-      .get('/api/requests')
+      .get('/api/requests/mine')
       .set('x-csrf-token', CSRF_TOKEN);
 
     expect(res.status).toBe(401);

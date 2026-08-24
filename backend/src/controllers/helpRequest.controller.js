@@ -34,7 +34,10 @@ const getHelpRequestById = asyncHandler(async (req, res) => {
 const updateHelpRequest = asyncHandler(async (req, res) => {
   const requesterId = req.user.id;
   const { id } = req.params;
-
+  console.log('UPDATE REQUEST');
+  console.log('request id:', id);
+  console.log('requester id:', requesterId);
+  console.log('body:', req.body);
   const updatedRequest =
     await helpRequestService.updateHelpRequest({
       id: Number(id),

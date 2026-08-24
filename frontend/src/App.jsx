@@ -4,6 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+
 import RequestorRegistration from './pages/Register';
 
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
@@ -28,21 +29,25 @@ function App() {
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
+
         <Route path="signup" element={<SignupPage />} />
+        {/*requester routes*/}
+
+
         <Route
           path="requesterRegistration"
           element={<RequestorRegistration />}
         />
 
-        {/* Requester routes */}
-        <Route element={<RequesterProtectedRoute />}>
-          <Route
-            path="requester-dashboard"
-            element={<RequesterDashboard />}
-          />
-          <Route path="helpRequest" element={<NewhelpRequest />} />
-        </Route>
 
+
+        <Route element={<RequesterProtectedRoute />}>
+  <Route
+    path="requester-dashboard"
+    element={<RequesterDashboard />}
+  />
+  <Route path="helpRequest" element={<NewhelpRequest />} />
+</Route>
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
@@ -59,6 +64,8 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
+        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
+        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
       </Route>
     </Routes>
   );
