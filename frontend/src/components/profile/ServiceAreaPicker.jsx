@@ -93,7 +93,12 @@ function ServiceAreaPicker({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
         Search and select a place from the suggestions.
       </Typography>
-
+      {selected && !hasCoords && showExistingLocationWarning && (
+        <Alert severity="info" sx={{ mb: 1.5 }}>
+          Current area: <strong>{selected.label}</strong>. Pick it again from
+          search to confirm the place.
+        </Alert>
+      )}
       {selected ? (
         <Box
           sx={{
@@ -127,12 +132,6 @@ function ServiceAreaPicker({
         </Box>
       ) : (
         <>
-          {selected && !hasCoords && showExistingLocationWarning && (
-            <Alert severity="info" sx={{ mb: 1.5 }}>
-              Current area: <strong>{selected.label}</strong>. Pick it again
-              from search to confirm the place.
-            </Alert>
-          )}
           <Autocomplete
             options={options}
             loading={isSearching}

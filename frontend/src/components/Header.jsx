@@ -101,7 +101,11 @@ function Header() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { user, isCheckingSession, logout } = useAuth();
   const navigate = useNavigate();
-  const { data: profileImage, isLoading, isError } = useGetProfileImage();
+  const {
+    data: profileImage,
+    isLoading,
+    isError,
+  } = useGetProfileImage({ enabled: Boolean(user) });
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
