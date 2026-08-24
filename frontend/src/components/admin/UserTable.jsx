@@ -211,7 +211,9 @@ function UserTable() {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
-          alignItems={{ sm: 'center' }}
+          sx={{
+            alignItems: { sm: 'center' },
+          }}
         >
           <TextField
             sx={filterFieldSx}
@@ -358,7 +360,12 @@ function UserTable() {
             {currentUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
-                  <Stack spacing={1.5} alignItems="center">
+                  <Stack
+                    spacing={1.5}
+                    sx={{
+                      alignItems: 'center',
+                    }}
+                  >
                     <SearchOffOutlinedIcon
                       sx={{ fontSize: 40, color: 'text.disabled' }}
                     />
@@ -402,7 +409,13 @@ function UserTable() {
                   }}
                 >
                   <TableCell sx={{ minWidth: 180, ...bodyCellSx }}>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{
+                        alignItems: 'center',
+                      }}
+                    >
                       <Avatar
                         src={user.profileImage}
                         alt={user.name}
