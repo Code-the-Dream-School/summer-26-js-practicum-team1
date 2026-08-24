@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 jest.mock('../src/config/prisma', () => ({
   user: { findUnique: jest.fn() },
-  helpRequest: { findMany: jest.fn(), create: jest.fn() },
+  helpRequest: { findMany: jest.fn(), create: jest.fn(), count: jest.fn() },
 }));
 
 const prisma = require('../src/config/prisma');
@@ -35,7 +35,12 @@ const asVolunteer = (status) =>
     volunteerProfile: status ? { verificationStatus: status } : null,
   });
 
-beforeEach(() => jest.clearAllMocks());
+const paged = (query = {}) => ({ page: 1, pageSize: 10, ...query });
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  prisma.helpRequest.count.mockResolvedValue(0);
+});
 
 describe('GET /api/requests — authorization', () => {
   it('rejects an unauthenticated request', async () => {
@@ -188,6 +193,84 @@ describe('GET /api/requests — query validation', () => {
     const res = await browse('?madeUpParam=xyz', adminCookie);
     expect(res.status).toBe(200);
   });
+
+  it('rejects a page below 1', async () => {
+    const res = await browse('?page=0', adminCookie);
+    expect(res.status).toBe(400);
+  });
+
+  it('rejects a pageSize above the max', async () => {
+    const res = await browse('?pageSize=26', adminCookie);
+    expect(res.status).toBe(400);
+  });
+
+  it('defaults page and pageSize when omitted', async () => {
+    prisma.helpRequest.count.mockResolvedValue(0);
+
+    const res = await browse('', adminCookie);
+
+    expect(res.status).toBe(200);
+    expect(res.body.meta).toEqual(
+      expect.objectContaining({ page: 1, pageSize: 5 })
+    );
+  });
+});
+
+describe('GET /api/requests — end-to-end wiring (route -> controller -> service -> prisma)', () => {
+  const adminCookie = cookieFor(1);
+
+  beforeEach(() => {
+    prisma.user.findUnique.mockResolvedValue(mockUser());
+  });
+
+  it('translates page/pageSize into skip/take and returns matching meta', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    prisma.helpRequest.count.mockResolvedValue(23);
+
+    const res = await browse('?page=3&pageSize=5', adminCookie);
+
+    expect(res.status).toBe(200);
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 5 })
+    );
+    expect(res.body.meta).toEqual({
+      page: 3,
+      pageSize: 5,
+      totalCount: 23,
+      totalPages: 5,
+    });
+  });
+
+  it('resolves a geo + distance-sorted request end to end, including distanceMi and radius filtering', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.9, longitude: -74, urgency: 'LOW' }, // ~13.8mi away
+      { id: 2, latitude: 40.71, longitude: -74, urgency: 'HIGH' }, // ~0.8mi away
+      { id: 3, latitude: 45, longitude: -74, urgency: 'MEDIUM' }, // way out of radius
+    ]);
+
+    const res = await browse(
+      '?lat=40.7&lng=-74&radiusMi=25&sort=distance&page=1&pageSize=5',
+      adminCookie
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.map((r) => r.id)).toEqual([2, 1]);
+    expect(res.body.data[0].distanceMi).toEqual(expect.any(Number));
+    expect(res.body.meta.totalCount).toBe(2);
+  });
+
+  it('scopes results to the requesting VOLUNTEER when status is not PENDING', async () => {
+    prisma.user.findUnique.mockResolvedValue(asVolunteer('APPROVED'));
+    prisma.helpRequest.findMany.mockResolvedValue([]);
+
+    const res = await browse('?status=ACCEPTED', cookieFor(5));
+
+    expect(res.status).toBe(200);
+    const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
+    expect(where.AND).toEqual(
+      expect.arrayContaining([{ OR: [{ requesterId: 5 }, { volunteerId: 5 }] }])
+    );
+  });
 });
 
 describe('helpRequestService.getBrowseHelpRequests — filters', () => {
@@ -197,7 +280,7 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   beforeEach(() => prisma.helpRequest.findMany.mockResolvedValue([]));
 
   it('defaults to status=PENDING when none is provided', async () => {
-    await helpRequestService.getBrowseHelpRequests({ user: admin, query: {} });
+    await helpRequestService.getBrowseHelpRequests({ user: admin, query: paged() });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -209,7 +292,7 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   it('scopes a VOLUNTEER requesting a non-pending status to their own rows', async () => {
     await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
-      query: { status: 'ACCEPTED' },
+      query: paged({ status: 'ACCEPTED' }),
     });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
@@ -221,7 +304,7 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   it('does NOT scope an ADMIN requesting a non-pending status', async () => {
     await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { status: 'ACCEPTED' },
+      query: paged({ status: 'ACCEPTED' }),
     });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
@@ -229,7 +312,10 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   });
 
   it('does NOT scope a default request', async () => {
-    await helpRequestService.getBrowseHelpRequests({ user: volunteer, query: {} });
+    await helpRequestService.getBrowseHelpRequests({
+      user: volunteer,
+      query: paged(),
+    });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
     expect(where.AND).toBeUndefined();
@@ -238,7 +324,7 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   it('does NOT scope when status is explicitly PENDING only', async () => {
     await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
-      query: { status: 'PENDING' },
+      query: paged({ status: 'PENDING' }),
     });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
@@ -248,7 +334,7 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   it('combines q search AND ownership scoping without one overwriting the other', async () => {
     await helpRequestService.getBrowseHelpRequests({
       user: volunteer,
-      query: { status: 'ACCEPTED', q: 'lawn' },
+      query: paged({ status: 'ACCEPTED', q: 'lawn' }),
     });
 
     const { where } = prisma.helpRequest.findMany.mock.calls[0][0];
@@ -270,13 +356,15 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
 describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
   const admin = { id: 1, role: 'ADMIN' };
 
-  it('passes DB-level orderBy for createdAt', async () => {
+  it('passes DB-level orderBy (with id tie-breaker) for createdAt', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
-    await helpRequestService.getBrowseHelpRequests({ user: admin, query: {} });
+    await helpRequestService.getBrowseHelpRequests({ user: admin, query: paged() });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { createdAt: 'desc' } })
+      expect.objectContaining({
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      })
     );
   });
 
@@ -285,64 +373,43 @@ describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
 
     await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { sort: 'scheduledAt' },
+      query: paged({ sort: 'scheduledAt' }),
     });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { scheduledAt: 'asc' } })
+      expect.objectContaining({
+        orderBy: [{ scheduledAt: 'asc' }, { id: 'asc' }],
+      })
     );
   });
 
-  it('does not pass a DB-level orderBy for urgency (sorted in memory instead)', async () => {
+  it('passes DB-level orderBy for urgency using the default direction (desc)', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
     await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { sort: 'urgency' },
+      query: paged({ sort: 'urgency' }),
     });
 
-    const opts = prisma.helpRequest.findMany.mock.calls[0][0];
-    expect(opts.orderBy).toBeUndefined();
-  });
-
-  it('sorts by urgency rank descending by default (HIGH first)', async () => {
-    prisma.helpRequest.findMany.mockResolvedValue([
-      { id: 1, urgency: 'LOW' },
-      { id: 2, urgency: 'HIGH' },
-      { id: 3, urgency: 'MEDIUM' },
-    ]);
-
-    const result = await helpRequestService.getBrowseHelpRequests({
-      user: admin,
-      query: { sort: 'urgency' },
-    });
-
-    expect(result.map((r) => r.id)).toEqual([2, 3, 1]);
-  });
-
-  it('sorts by urgency ascending when requested', async () => {
-    prisma.helpRequest.findMany.mockResolvedValue([
-      { id: 1, urgency: 'HIGH' },
-      { id: 2, urgency: 'LOW' },
-      { id: 3, urgency: 'MEDIUM' },
-    ]);
-
-    const result = await helpRequestService.getBrowseHelpRequests({
-      user: admin,
-      query: { sort: 'urgency:asc' },
-    });
-
-    expect(result.map((r) => r.id)).toEqual([2, 3, 1]);
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ urgency: 'desc' }, { id: 'asc' }],
+      })
+    );
   });
 
   it('rejects sort=distance when lat/lng were not provided', async () => {
     await expect(
       helpRequestService.getBrowseHelpRequests({
         user: admin,
-        query: { sort: 'distance' },
+        query: paged({ sort: 'distance' }),
       })
     ).rejects.toThrow(/lat, lng, and radiusMi/i);
   });
+});
+
+describe('helpRequestService.getBrowseHelpRequests — sorting (in-memory path: geo or distance)', () => {
+  const admin = { id: 1, role: 'ADMIN' };
 
   it('sorts by distance ascending by default (closest first)', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([
@@ -353,19 +420,122 @@ describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
 
     const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { lat: '40.7', lng: '-74', radiusMi: '50', sort: 'distance' },
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'distance',
+      }),
     });
 
-    expect(result.map((r) => r.id)).toEqual([2, 3, 1]);
+    expect(result.data.map((r) => r.id)).toEqual([2, 3, 1]);
   });
 
-  it('rejects an unrecognized sort field', async () => {
-    await expect(
-      helpRequestService.getBrowseHelpRequests({
-        user: admin,
-        query: { sort: 'title:asc' },
-      })
-    ).rejects.toThrow(/invalid sort field/i);
+  it('sorts by createdAt (not urgency) when combined with a geo radius filter', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      {
+        id: 1,
+        latitude: 40.71,
+        longitude: -74,
+        urgency: 'LOW',
+        createdAt: new Date('2024-01-03'),
+      },
+      {
+        id: 2,
+        latitude: 40.72,
+        longitude: -74,
+        urgency: 'HIGH',
+        createdAt: new Date('2024-01-01'),
+      },
+      {
+        id: 3,
+        latitude: 40.73,
+        longitude: -74,
+        urgency: 'MEDIUM',
+        createdAt: new Date('2024-01-02'),
+      },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'createdAt:asc',
+      }),
+    });
+
+    expect(result.data.map((r) => r.id)).toEqual([2, 3, 1]);
+  });
+
+  it('sorts by scheduledAt when combined with a geo radius filter', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      {
+        id: 1,
+        latitude: 40.71,
+        longitude: -74,
+        scheduledAt: new Date('2024-03-03'),
+      },
+      {
+        id: 2,
+        latitude: 40.72,
+        longitude: -74,
+        scheduledAt: new Date('2024-03-01'),
+      },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'scheduledAt:asc',
+      }),
+    });
+
+    expect(result.data.map((r) => r.id)).toEqual([2, 1]);
+  });
+
+  it('sorts by urgency severity (HIGH first) when combined with a geo radius filter', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.71, longitude: -74, urgency: 'LOW' },
+      { id: 2, latitude: 40.72, longitude: -74, urgency: 'HIGH' },
+      { id: 3, latitude: 40.73, longitude: -74, urgency: 'MEDIUM' },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'urgency',
+      }),
+    });
+
+    expect(result.data.map((r) => r.id)).toEqual([2, 3, 1]);
+  });
+
+  it('sorts by urgency severity ascending (LOW first) when requested', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.71, longitude: -74, urgency: 'HIGH' },
+      { id: 2, latitude: 40.72, longitude: -74, urgency: 'LOW' },
+      { id: 3, latitude: 40.73, longitude: -74, urgency: 'MEDIUM' },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'urgency:asc',
+      }),
+    });
+
+    expect(result.data.map((r) => r.id)).toEqual([2, 3, 1]);
   });
 });
 
@@ -379,10 +549,15 @@ describe('helpRequestService.getBrowseHelpRequests — distanceMi', () => {
 
     const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { lat: '40.7', lng: '-74', radiusMi: '50', sort: 'urgency' },
+      query: paged({
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'urgency',
+      }),
     });
 
-    expect(result[0].distanceMi).toEqual(expect.any(Number));
+    expect(result.data[0].distanceMi).toEqual(expect.any(Number));
   });
 
   it('does not attach distanceMi when no geo params are provided', async () => {
@@ -390,10 +565,10 @@ describe('helpRequestService.getBrowseHelpRequests — distanceMi', () => {
 
     const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: {},
+      query: paged({ sort: 'urgency' }),
     });
 
-    expect(result[0].distanceMi).toBeUndefined();
+    expect(result.data[0].distanceMi).toBeUndefined();
   });
 
   it('excludes results outside the exact radius even if inside the bounding box', async () => {
@@ -404,10 +579,125 @@ describe('helpRequestService.getBrowseHelpRequests — distanceMi', () => {
 
     const result = await helpRequestService.getBrowseHelpRequests({
       user: admin,
-      query: { lat: '40.7', lng: '-74', radiusMi: '5' },
+      query: paged({ lat: '40.7', lng: '-74', radiusMi: '5' }),
     });
 
-    expect(result.map((r) => r.id)).toEqual([2]);
+    expect(result.data.map((r) => r.id)).toEqual([2]);
+  });
+});
+
+describe('helpRequestService.getBrowseHelpRequests — pagination', () => {
+  const admin = { id: 1, role: 'ADMIN' };
+
+  it('computes skip/take from page and pageSize on the DB fast path', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([]);
+    prisma.helpRequest.count.mockResolvedValue(0);
+
+    await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: { page: 3, pageSize: 5 },
+    });
+
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 10, take: 5 })
+    );
+  });
+
+  it('runs findMany and count in parallel on the fast path and returns pagination meta', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+    prisma.helpRequest.count.mockResolvedValue(23);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: { page: 2, pageSize: 5 },
+    });
+
+    expect(prisma.helpRequest.count).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.any(Object) })
+    );
+    expect(result.meta).toEqual({
+      page: 2,
+      pageSize: 5,
+      totalCount: 23,
+      totalPages: 5,
+    });
+  });
+
+  it('does not call prisma.count on the in-memory (geo/distance) path', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.71, longitude: -74 },
+    ]);
+
+    await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged({ lat: '40.7', lng: '-74', radiusMi: '50' }),
+    });
+
+    expect(prisma.helpRequest.count).not.toHaveBeenCalled();
+  });
+
+  it('paginates the in-memory sorted set with slice, not DB skip/take', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.9, longitude: -74 },
+      { id: 2, latitude: 40.71, longitude: -74 },
+      { id: 3, latitude: 40.72, longitude: -74 },
+      { id: 4, latitude: 40.73, longitude: -74 },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: {
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        sort: 'distance',
+        page: 2,
+        pageSize: 2,
+      },
+    });
+
+    expect(result.data.map((r) => r.id)).toEqual([4, 1]);
+    expect(result.meta).toEqual({
+      page: 2,
+      pageSize: 2,
+      totalCount: 4,
+      totalPages: 2,
+    });
+  });
+
+  it('computes totalCount/totalPages after geo filtering removes out-of-radius rows', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.71, longitude: -74 }, // in radius
+      { id: 2, latitude: 41.9, longitude: -74 }, // out of radius
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: { lat: '40.7', lng: '-74', radiusMi: '5', page: 1, pageSize: 5 },
+    });
+
+    expect(result.meta.totalCount).toBe(1);
+    expect(result.meta.totalPages).toBe(1);
+  });
+
+  it('returns an empty data array for a page past the end of the result set', async () => {
+    prisma.helpRequest.findMany.mockResolvedValue([
+      { id: 1, latitude: 40.71, longitude: -74 },
+    ]);
+
+    const result = await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: {
+        lat: '40.7',
+        lng: '-74',
+        radiusMi: '50',
+        page: 5,
+        pageSize: 5,
+      },
+    });
+
+    expect(result.data).toEqual([]);
+    expect(result.meta.totalCount).toBe(1);
   });
 });
 
@@ -419,6 +709,22 @@ describe('browseHelpRequestQuerySchema', () => {
   it('passes with an empty query object', () => {
     const { error } = browseHelpRequestQuerySchema.validate({});
     expect(error).toBeUndefined();
+  });
+
+  it('defaults page to 1 and pageSize to 5', () => {
+    const { value } = browseHelpRequestQuerySchema.validate({});
+    expect(value.page).toBe(1);
+    expect(value.pageSize).toBe(5);
+  });
+
+  it('rejects a page below 1', () => {
+    const { error } = browseHelpRequestQuerySchema.validate({ page: 0 });
+    expect(error).toBeDefined();
+  });
+
+  it('rejects a pageSize above 25', () => {
+    const { error } = browseHelpRequestQuerySchema.validate({ pageSize: 26 });
+    expect(error).toBeDefined();
   });
 
   it('uppercases and validates a lowercase category list', () => {
