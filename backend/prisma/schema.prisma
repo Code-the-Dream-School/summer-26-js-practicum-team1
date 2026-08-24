@@ -133,6 +133,7 @@ model HelpRequest {
 
   requester User @relation(fields: [requesterId], references: [id])
   volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [userId])
+  @@index([scheduledDayOfWeek])
 }
 
 model RequesterProfile {

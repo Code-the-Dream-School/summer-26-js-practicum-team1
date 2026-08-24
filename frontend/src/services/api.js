@@ -109,12 +109,14 @@ export async function getMe() {
   }
 }
 
-function buildHelpRequestParams(filters = {}) {
+function buildFilterParams(filters = {}) {
   const params = {};
 
   if (filters.category?.length) params.category = filters.category.join(',');
   if (filters.urgency?.length) params.urgency = filters.urgency.join(',');
   if (filters.status?.length) params.status = filters.status.join(',');
+  if (filters.daysOfWeek?.length)
+    params.daysOfWeek = filters.daysOfWeek.join(',');
   if (filters.q) params.q = filters.q;
 
   if (filters.scheduledAfter) params.scheduledAfter = filters.scheduledAfter;
@@ -130,11 +132,26 @@ function buildHelpRequestParams(filters = {}) {
     params.radiusMi = filters.radiusMi;
   }
 
+  return params;
+}
+
+function buildHelpRequestParams(filters = {}) {
+  const params = buildFilterParams(filters);
+
   if (filters.sortField) {
     params.sort = `${filters.sortField}:${filters.sortDir || 'desc'}`;
   }
 
+  if (filters.page) params.page = filters.page;
+  if (filters.pageSize) params.pageSize = filters.pageSize;
+
   return params;
+}
+
+function buildFacetsParams(filters = {}) {
+  // eslint-disable-next-line no-unused-vars
+  const { category, ...rest } = filters;
+  return buildFilterParams(rest);
 }
 
 export async function getBrowseHelpRequests(filters) {
@@ -143,7 +160,7 @@ export async function getBrowseHelpRequests(filters) {
       params: buildHelpRequestParams(filters),
       withCredentials: true,
     });
-    return data.data;
+    return { data: data.data, meta: data.meta };
   } catch (err) {
     if (!err.response) {
       throw new Error('NETWORK_ERROR');
@@ -152,6 +169,24 @@ export async function getBrowseHelpRequests(filters) {
       throw new Error(err.response.data?.message || 'INVALID_REQUEST');
     }
     throw new Error('FETCH_HELP_REQUESTS_FAILED');
+  }
+}
+
+export async function getCategoryFacets(filters) {
+  try {
+    const { data } = await api.get('/api/requests/facets', {
+      params: buildFacetsParams(filters),
+      withCredentials: true,
+    });
+    return data.categoryCounts;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+    if (err.response.status === 400) {
+      throw new Error(err.response.data?.message || 'INVALID_REQUEST');
+    }
+    throw new Error('FETCH_CATEGORY_FACETS_FAILED');
   }
 }
 
