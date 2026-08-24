@@ -23,6 +23,9 @@ import {
   toggleInArray,
   friendlyErrorMessage,
   viewToggleSx,
+  mapInterestsToCategoryKeys,
+  mapSlotsToDays,
+  buildLocationOptionFromProfile,
 } from '../utils/browse.utils.js';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
@@ -33,6 +36,7 @@ import {
 } from '../hooks/useHelpRequests.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useLocationAutocomplete } from '../hooks/useLocationAutocomplete.js';
+import { useVolunteerProfile } from '../hooks/useVolunteerProfile.js';
 import SortControl from '../components/browse/SortControl.jsx';
 import FilterSidebar from '../components/browse/FilterSidebar.jsx';
 import RequestCard from '../components/browse/RequestCard.jsx';
@@ -52,12 +56,52 @@ function Browse() {
   const [locationQuery, setLocationQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(null);
 
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [prefilledForProfileId, setPrefilledForProfileId] = useState(null);
+
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const { results: autocompleteResults, isLoading: isAutocompleting } =
     useLocationAutocomplete(locationQuery);
 
+  const {
+    profile,
+    volunteer,
+    isLoading: isProfileLoading,
+  } = useVolunteerProfile();
+
+  const markInteracted = () => {
+    setHasInteracted(true);
+  };
+
+  if (
+    !hasInteracted &&
+    !isProfileLoading &&
+    profile?.role === 'VOLUNTEER' &&
+    volunteer &&
+    prefilledForProfileId !== profile.id
+  ) {
+    setPrefilledForProfileId(profile.id);
+
+    const locationOption = buildLocationOptionFromProfile(volunteer);
+    if (locationOption) {
+      setSelectedLocation(locationOption);
+      setLocationQuery(locationOption.formatted);
+    }
+
+    const categoryKeys = mapInterestsToCategoryKeys(volunteer.interests);
+    if (categoryKeys.length > 0) {
+      setSelectedCategories(categoryKeys);
+    }
+
+    const dayKeys = mapSlotsToDays(volunteer.availability?.slots);
+    if (dayKeys.length > 0) {
+      setSelectedDays(dayKeys);
+    }
+  }
+
   const handleClearAll = () => {
+    markInteracted();
     setSelectedCategories([]);
     setSelectedUrgencies([]);
     setSelectedDays([]);
@@ -67,6 +111,7 @@ function Browse() {
   };
 
   const handleSortChange = (key, dir) => {
+    markInteracted();
     if (key === 'distance' && !selectedLocation) {
       setSortKey('createdAt');
       setSortDir('desc');
@@ -77,6 +122,7 @@ function Browse() {
   };
 
   const handleLocationInputChange = (_, value, reason) => {
+    markInteracted();
     setLocationQuery(value);
 
     if (reason === 'clear') {
@@ -90,6 +136,7 @@ function Browse() {
   };
 
   const handleLocationSelect = (_, result) => {
+    markInteracted();
     if (!result) {
       setSelectedLocation(null);
       setLocationQuery('');
@@ -265,20 +312,26 @@ function Browse() {
         <Box sx={{ width: '250px', flexShrink: 0 }}>
           <FilterSidebar
             selectedCategories={selectedCategories}
-            onToggleCategory={(key) =>
-              setSelectedCategories((prev) => toggleInArray(prev, key))
-            }
+            onToggleCategory={(key) => {
+              markInteracted();
+              setSelectedCategories((prev) => toggleInArray(prev, key));
+            }}
             categoryCounts={categoryCounts}
             selectedUrgencies={selectedUrgencies}
-            onToggleUrgency={(key) =>
-              setSelectedUrgencies((prev) => toggleInArray(prev, key))
-            }
+            onToggleUrgency={(key) => {
+              markInteracted();
+              setSelectedUrgencies((prev) => toggleInArray(prev, key));
+            }}
             distance={distance}
-            onDistanceChange={setDistance}
+            onDistanceChange={() => {
+              markInteracted();
+              setDistance;
+            }}
             selectedDays={selectedDays}
-            onToggleDay={(day) =>
-              setSelectedDays((prev) => toggleInArray(prev, day))
-            }
+            onToggleDay={(day) => {
+              markInteracted();
+              setSelectedDays((prev) => toggleInArray(prev, day));
+            }}
             onClearAll={handleClearAll}
           />
         </Box>
