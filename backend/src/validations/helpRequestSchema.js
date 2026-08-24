@@ -74,7 +74,7 @@ const commaList = (allowedValues, label) =>
     })
     .messages({ 'string.empty': `${label} cannot be empty` });
 
-const browseHelpRequestQuerySchema = Joi.object({
+const commonFilterFields = {
   category: commaList(CATEGORY_VALUES, 'category'),
   urgency: commaList(URGENCY_VALUES, 'urgency'),
   status: commaList(STATUS_VALUES, 'status'),
@@ -84,11 +84,24 @@ const browseHelpRequestQuerySchema = Joi.object({
   createdAfter: Joi.date().iso(),
   createdBefore: Joi.date().iso(),
 
+  daysOfWeek: Joi.string()
+    .pattern(/^[0-6](,[0-6])*$/)
+    .messages({
+      'string.pattern.base': 'daysOfWeek must be a comma list of integers 0-6',
+    }),
+
   lat: Joi.number().min(-90).max(90),
   lng: Joi.number().min(-180).max(180),
   radiusMi: Joi.number().positive(),
 
   q: Joi.string().trim().max(200),
+};
+
+const browseHelpRequestQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).max(25).default(5),
+
+  ...commonFilterFields,
 
   sort: Joi.string()
     .custom((value, helpers) => {
@@ -106,7 +119,14 @@ const browseHelpRequestQuerySchema = Joi.object({
   .and('lat', 'lng', 'radiusMi')
   .unknown(true);
 
+const facetsQuerySchema = Joi.object({
+  ...commonFilterFields,
+})
+  .and('lat', 'lng', 'radiusMi')
+  .unknown(true);
+
 module.exports = {
   createHelpRequestSchema,
   browseHelpRequestQuerySchema,
+  facetsQuerySchema,
 };

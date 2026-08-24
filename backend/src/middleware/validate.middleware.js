@@ -1,7 +1,9 @@
 const validate =
   (schema, source = 'body') =>
   (req, res, next) => {
-    const { error, value } = schema.validate(req[source], { abortEarly: false });
+    const { error, value } = schema.validate(req[source], {
+      abortEarly: false,
+    });
 
     if (error) {
       return res.status(400).json({
@@ -13,7 +15,12 @@ const validate =
       });
     }
 
-    req[source] = value;
+    Object.defineProperty(req, source, {
+      value,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
     next();
   };
 

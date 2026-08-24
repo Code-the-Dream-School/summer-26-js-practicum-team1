@@ -8,11 +8,13 @@ import {
   CircularProgress,
   Alert,
   Autocomplete,
+  Pagination,
 } from '@mui/material';
 import {
   DEFAULT_DISTANCE_MI,
-  CATEGORY_BY_API_VALUE,
+  CATEGORIES,
   URGENCY_LEVELS,
+  PAGE_SIZE,
   fieldSx,
   inputLabelSx,
 } from '../utils/browse.constants.js';
@@ -25,7 +27,10 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
 import { useMemo, useState } from 'react';
-import { useBrowseHelpRequests } from '../hooks/useHelpRequests.js';
+import {
+  useBrowseHelpRequests,
+  useCategoryFacets,
+} from '../hooks/useHelpRequests.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useLocationAutocomplete } from '../hooks/useLocationAutocomplete.js';
 import SortControl from '../components/browse/SortControl.jsx';
@@ -38,6 +43,7 @@ function Browse() {
   const [sortKey, setSortKey] = useState('createdAt');
   const [sortDir, setSortDir] = useState('desc');
   const [view, setView] = useState('list');
+  const [page, setPage] = useState(1);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedUrgencies, setSelectedUrgencies] = useState([]);
@@ -103,9 +109,13 @@ function Browse() {
   const filters = useMemo(() => {
     const f = {
       q: debouncedSearch || undefined,
+      category: selectedCategories.map(
+        (key) => CATEGORIES.find((c) => c.key === key)?.apiValue
+      ),
       urgency: selectedUrgencies.map(
         (key) => URGENCY_LEVELS.find((u) => u.key === key)?.apiValue
       ),
+      daysOfWeek: selectedDays,
       sortField: sortKey,
       sortDir,
     };
@@ -122,39 +132,31 @@ function Browse() {
     return f;
   }, [
     debouncedSearch,
+    selectedCategories,
     selectedUrgencies,
+    selectedDays,
     sortKey,
     sortDir,
     selectedLocation,
     distance,
   ]);
 
-  const { helpRequests, isLoading, isFetching, isError, error } =
-    useBrowseHelpRequests(filters);
+  const filtersKey = JSON.stringify(filters);
+  const [prevFiltersKey, setPrevFiltersKey] = useState(filtersKey);
+  if (filtersKey !== prevFiltersKey) {
+    setPrevFiltersKey(filtersKey);
+    setPage(1);
+  }
 
-  const categoryCounts = useMemo(() => {
-    return helpRequests.reduce((acc, r) => {
-      acc[r.category] = (acc[r.category] || 0) + 1;
-      return acc;
-    }, {});
-  }, [helpRequests]);
+  const browseFilters = useMemo(
+    () => ({ ...filters, page, pageSize: PAGE_SIZE }),
+    [filters, page]
+  );
 
-  const displayedRequests = useMemo(() => {
-    return helpRequests.filter((r) => {
-      const matchesCategory =
-        selectedCategories.length === 0 ||
-        selectedCategories.some(
-          (key) => CATEGORY_BY_API_VALUE[r.category]?.key === key
-        );
+  const { helpRequests, meta, isLoading, isFetching, isError, error } =
+    useBrowseHelpRequests(browseFilters);
 
-      const matchesDay =
-        selectedDays.length === 0 ||
-        !r.scheduledAt ||
-        selectedDays.includes(new Date(r.scheduledAt).getDay());
-
-      return matchesCategory && matchesDay;
-    });
-  }, [helpRequests, selectedCategories, selectedDays]);
+  const { categoryCounts } = useCategoryFacets(filters);
 
   if (isLoading) {
     return (
@@ -292,7 +294,7 @@ function Browse() {
           >
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                Showing {displayedRequests.length} open requests
+                Showing {meta?.totalCount ?? 0} open requests
               </Typography>
 
               {isFetching && <CircularProgress size={14} />}
@@ -323,10 +325,23 @@ function Browse() {
                 'Something went wrong loading help requests.'}
             </Alert>
           ) : view === 'list' ? (
-            displayedRequests.length > 0 ? (
-              displayedRequests.map((request) => (
-                <RequestCard key={request.id} request={request} />
-              ))
+            helpRequests.length > 0 ? (
+              <>
+                {helpRequests.map((request) => (
+                  <RequestCard key={request.id} request={request} />
+                ))}
+
+                {meta?.totalPages > 1 && (
+                  <Stack sx={{ mt: 3, alignItems: 'center' }}>
+                    <Pagination
+                      page={page}
+                      count={meta.totalPages}
+                      onChange={(_, value) => setPage(value)}
+                      color="primary"
+                    />
+                  </Stack>
+                )}
+              </>
             ) : (
               <Typography
                 variant="body2"

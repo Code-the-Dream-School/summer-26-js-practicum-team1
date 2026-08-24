@@ -91,6 +91,7 @@ model VolunteerProfile {
   serviceLatitude    Float?   @map("service_latitude")
   serviceLongitude   Float?   @map("service_longitude")
   supportCategories  UserSupportCategory[]
+  helpRequests       HelpRequest[]
 
   @@index([serviceArea])
   @@index([verificationStatus])
@@ -119,6 +120,7 @@ model HelpRequest {
   category    Category
   urgency     Urgency
   scheduledAt DateTime
+  scheduledDayOfWeek Int    @default(dbgenerated())
   address     String
   latitude    Float
   longitude   Float
@@ -128,6 +130,8 @@ model HelpRequest {
   completedAt DateTime?
 
   requester User @relation(fields: [requesterId], references: [id])
+  volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [userId])
+  @@index([scheduledDayOfWeek])
 }
 
 model RequesterProfile {

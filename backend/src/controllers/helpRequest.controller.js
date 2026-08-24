@@ -10,6 +10,7 @@ const createHelpRequest = asyncHandler(async (req, res) => {
 
   return res.status(201).json({ success: true, data: helpRequest });
 });
+
 const getHelpRequests = asyncHandler(async (req, res) => {
   const helpRequests = await helpRequestService.getHelpRequests({
     requesterId: req.user.id,
@@ -22,11 +23,24 @@ const getHelpRequests = asyncHandler(async (req, res) => {
 });
 
 const getBrowseHelpRequests = asyncHandler(async (req, res) => {
-  const helpRequests = await helpRequestService.getBrowseHelpRequests({
+  const { data, meta } = await helpRequestService.getBrowseHelpRequests({
     user: req.user,
     query: req.query,
   });
-  return res.status(200).json({ success: true, data: helpRequests });
+  return res.status(200).json({ success: true, data, meta });
 });
 
-module.exports = { createHelpRequest, getHelpRequests, getBrowseHelpRequests };
+const getBrowseHelpRequestsFacets = asyncHandler(async (req, res) => {
+  const categoryCounts = await helpRequestService.getCategoryFacets({
+    user: req.user,
+    query: req.query,
+  });
+  return res.status(200).json({ success: true, categoryCounts });
+});
+
+module.exports = {
+  createHelpRequest,
+  getHelpRequests,
+  getBrowseHelpRequests,
+  getBrowseHelpRequestsFacets,
+};
