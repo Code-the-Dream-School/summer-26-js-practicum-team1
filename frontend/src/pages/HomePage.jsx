@@ -53,12 +53,12 @@ const trustItems = [
   {
     icon: <BoltOutlinedIcon sx={{ fontSize: 32, color: COLORS.forest }} />,
     title: 'Easy to use',
-    body: 'Post a request or offer to help in a few taps.',
+    body: 'Post a request or offer to help in a few clicks.',
   },
   {
     icon: <ShieldOutlinedIcon sx={{ fontSize: 32, color: COLORS.forest }} />,
     title: 'Safe and secure',
-    body: 'Background checks, in-app messaging, and 24/7 support keep every visit safe.',
+    body: 'Background checks, in-app messaging, and staff support keeps every visit safe.',
   },
 ];
 
