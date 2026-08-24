@@ -4,9 +4,8 @@ import logo from '../assets/logo.png';
 import { COLORS } from '../utils/constants';
 
 const productLinks = [
-  { label: 'About', href: '#about' },
-  { label: 'How it works', href: '#how-it-works' },
-  { label: 'Contact us', href: '#contact' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact us', to: '/contact' },
 ];
 
 const accountLinks = [
@@ -71,7 +70,8 @@ export default function Footer() {
               {productLinks.map((link) => (
                 <Link
                   key={link.label}
-                  href={link.href}
+                  component={RouterLink}
+                  to={link.to}
                   underline="none"
                   sx={{
                     fontSize: 15,
