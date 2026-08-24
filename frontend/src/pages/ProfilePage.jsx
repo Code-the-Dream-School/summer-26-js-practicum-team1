@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Alert, Box, IconButton, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  IconButton,
+  Typography,
+  Paper,
+  Stack,
+} from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 
 import { useAuth } from '../hooks/useAuth';
@@ -123,6 +130,8 @@ function ProfilePage() {
     (isRequester && !isRequesterEditing) ||
     (isVolunteer && !isVolunteerEditing);
 
+  const verificationStatus = profile.volunteer?.verificationStatus;
+
   return (
     <>
       <Typography
@@ -180,6 +189,68 @@ function ProfilePage() {
             ) : null
           }
         />
+
+        {isVolunteer && verificationStatus && (
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 3,
+              p: 2,
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor:
+                verificationStatus === 'APPROVED'
+                  ? 'success.light'
+                  : verificationStatus === 'REJECTED'
+                    ? 'error.light'
+                    : 'warning.light',
+            }}
+          >
+            <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor:
+                    verificationStatus === 'APPROVED'
+                      ? 'success.light'
+                      : verificationStatus === 'REJECTED'
+                        ? 'error.light'
+                        : 'warning.light',
+                  flexShrink: 0,
+                }}
+              >
+                {verificationStatus === 'APPROVED'
+                  ? '✓'
+                  : verificationStatus === 'REJECTED'
+                    ? '!'
+                    : '⏳'}
+              </Box>
+
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="subtitle1" fontWeight={700}>
+                  {verificationStatus === 'APPROVED'
+                    ? 'Volunteer profile approved'
+                    : verificationStatus === 'REJECTED'
+                      ? 'Volunteer profile not approved'
+                      : 'Verification pending'}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {verificationStatus === 'APPROVED'
+                    ? 'You can now help requesters in your community.'
+                    : verificationStatus === 'REJECTED'
+                      ? 'Please contact the administrator if you have questions.'
+                      : 'Your volunteer profile is currently being reviewed.'}
+                </Typography>
+              </Box>
+            </Stack>
+          </Paper>
+        )}
 
         {isRequester && (
           <>
