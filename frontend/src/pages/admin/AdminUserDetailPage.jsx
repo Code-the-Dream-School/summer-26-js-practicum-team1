@@ -138,8 +138,13 @@ function AdminUserDetailPage() {
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
         spacing={2}
-        alignItems={{ xs: 'center', sm: 'flex-start' }}
-        sx={{ mb: 3, pb: 3, borderBottom: 1, borderColor: 'divider' }}
+        sx={{
+          alignItems: { xs: 'center', sm: 'flex-start' },
+          mb: 3,
+          pb: 3,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
       >
         <Avatar
           src={profileImageUrl || undefined}
