@@ -33,13 +33,12 @@ export async function login(email, password) {
   }
 }
 
+
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post(
-      '/api/auth/register',
-      userData,
-      { withCredentials: true }
-    );
+    const { data } = await api.post('/api/auth/register', userData, {
+      withCredentials: true,
+    });
 
     return data;
   } catch (err) {
@@ -63,16 +62,12 @@ export async function registerUser(userData) {
 /* Create a new help request */
 export async function createHelpRequest(data, csrfToken) {
   try {
-    const { data: responseData } = await api.post(
-      '/api/requests',
-      data,
-      {
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-        },
-        withCredentials: true,
-      }
-    );
+    const { data: responseData } = await api.post('/api/requests', data, {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    });
 
     return responseData;
   } catch (err) {

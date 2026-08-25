@@ -1,3 +1,4 @@
+
 const express = require('express');
 
 const router = express.Router();
@@ -8,16 +9,24 @@ const {
   getHelpRequestById,
   updateHelpRequest,
   cancelHelpRequest,
-  getAcceptedVolunteerProfile
+  getAcceptedVolunteerProfile,
+  getBrowseHelpRequests,
+  getBrowseHelpRequestsFacets,
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
 const csrfMiddleware = require('../middleware/csrf.middleware');
 const validate = require('../middleware/validate.middleware');
-const { requireRole } = require('../middleware/authorize');
+
+const {
+  requireRole,
+  requireApprovedIfVolunteer,
+} = require('../middleware/authorize');
 
 const {
   createHelpRequestSchema,
+  browseHelpRequestQuerySchema,
+  facetsQuerySchema,
 } = require('../validations/helpRequestSchema');
 
 
@@ -31,18 +40,33 @@ router.post(
   createHelpRequest
 );
 
-router.get(
-  '/:id/volunteer',
-  jwtMiddleware,
-  requireRole('REQUESTER'),
-  getAcceptedVolunteerProfile
-);
+
 // Get requester's help requests
 router.get(
   '/mine',
   jwtMiddleware,
   requireRole('REQUESTER'),
   getHelpRequests
+);
+
+
+// Get browse help request facets
+router.get(
+  '/facets',
+  jwtMiddleware,
+  requireRole(['VOLUNTEER', 'ADMIN']),
+  requireApprovedIfVolunteer,
+  validate(facetsQuerySchema, 'query'),
+  getBrowseHelpRequestsFacets
+);
+
+
+// Get accepted volunteer profile for a help request
+router.get(
+  '/:id/volunteer',
+  jwtMiddleware,
+  requireRole('REQUESTER'),
+  getAcceptedVolunteerProfile
 );
 
 
@@ -77,5 +101,16 @@ router.patch(
 );
 
 
+// Browse help requests
+router.get(
+  '/',
+  jwtMiddleware,
+  requireRole(['VOLUNTEER', 'ADMIN']),
+  requireApprovedIfVolunteer,
+  validate(browseHelpRequestQuerySchema, 'query'),
+  getBrowseHelpRequests
+);
+
 
 module.exports = router;
+

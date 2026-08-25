@@ -45,9 +45,7 @@ export async function searchPlaces(query) {
 
       const label =
         props.formatted ||
-        [props.city, props.state, props.country]
-          .filter(Boolean)
-          .join(', ');
+        [props.city, props.state, props.country].filter(Boolean).join(', ');
 
       if (lat == null || lon == null || !label) {
         return null;
@@ -63,6 +61,21 @@ export async function searchPlaces(query) {
     .filter(Boolean);
 }
 
+export async function getLocationAutoCompleteSuggestions(query, signal) {
+  const response = await fetch(
+    `${GEOAPIFY_BASE}/autocomplete?text=${encodeURIComponent(query)}&limit=5&lang=en&bias=countrycode%3Aus&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
+    { signal }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch location suggestions');
+  }
+
+  const data = await response.json();
+
+  return data.results ?? [];
+}
+
 export async function reverseGeocode(latitude, longitude) {
   const apiKey = getApiKey();
 
@@ -76,9 +89,7 @@ export async function reverseGeocode(latitude, longitude) {
     apiKey,
   });
 
-  const response = await fetch(
-    `${GEOAPIFY_BASE}/reverse?${params.toString()}`
-  );
+  const response = await fetch(`${GEOAPIFY_BASE}/reverse?${params.toString()}`);
 
   if (!response.ok) {
     throw new Error('Reverse geocoding failed');
