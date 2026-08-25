@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
   Avatar,
@@ -58,6 +58,7 @@ function displayValue(value) {
 function AdminUserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isEditingVolunteer, setIsEditingVolunteer] = useState(false);
@@ -92,6 +93,17 @@ function AdminUserDetailPage() {
       setIsEditingVolunteer(false);
     },
   });
+
+  const fromPendingVolunteers =
+    searchParams.get('from') === 'pending-volunteers';
+
+  const handleBack = () => {
+    if (fromPendingVolunteers) {
+      navigate('/admin/volunteers');
+    } else {
+      navigate('/admin/users');
+    }
+  };
 
   if (isLoadingUser) {
     return (
@@ -130,8 +142,8 @@ function AdminUserDetailPage() {
         <Typography variant="h5" sx={{ fontWeight: 700, color: '#52462A' }}>
           User Profile
         </Typography>
-        <Button variant="outlined" onClick={() => navigate('/admin/users')}>
-          Back to users
+        <Button variant="outlined" onClick={handleBack}>
+          Back
         </Button>
       </Box>
 

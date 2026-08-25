@@ -1,5 +1,5 @@
 import {
-  CardContent,
+  IconButton,
   Typography,
   Card,
   CardHeader,
@@ -10,6 +10,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { red, grey } from '@mui/material/colors';
 import { useApproveVolunteer } from '../../hooks/admin/useApproveVolunteer';
 import { useRejectVolunteer } from '../../hooks/admin/useRejectVolunteer';
@@ -24,6 +25,8 @@ function VolunteerCard({
   gender,
   profileImage,
 }) {
+  const navigate = useNavigate();
+
   const approveMutation = useApproveVolunteer();
   const rejectMutation = useRejectVolunteer();
   return (
@@ -37,18 +40,33 @@ function VolunteerCard({
     >
       <CardHeader
         avatar={
-          <Avatar
-            src={profileImage}
-            alt={name}
-
+          <IconButton
+            onClick={() =>
+              navigate(`/admin/users/${userId}?from=pending-volunteers`)
+            }
+            aria-label={`View ${name}'s profile`}
             sx={{
-              width: 56,
-              height: 56,
-              bgcolor: red[500],
+              p: 0,
+              borderRadius: '50%',
             }}
           >
-            {name?.charAt(0)}
-          </Avatar>
+            <Avatar
+              src={profileImage}
+              alt={name}
+              sx={{
+                width: 56,
+                height: 56,
+                bgcolor: red[500],
+                transition: '0.2s',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: 3,
+                },
+              }}
+            >
+              {name?.charAt(0)}
+            </Avatar>
+          </IconButton>
         }
 
         title={<Typography variant="h6">{name}</Typography>}
@@ -85,44 +103,64 @@ function VolunteerCard({
       />
       <Divider />
 
-      <CardActions sx={{ gap: 2, p: 2 }}>
+      <CardActions sx={{ gap: 2, p: 2, justifyContent: 'space-between' }}>
         <Button
-          color="success"
-          variant="contained"
-
-          onClick={() => approveMutation.mutate(userId)}
-          sx={{
-            borderRadius: 3,
-            boxShadow: 3,
-            transition: '0.3s',
-
-            '&:hover': {
-              boxShadow: 8,
-              transform: 'translateY(-4px)',
-            },
-          }}
-        >
-          Approve
-        </Button>
-
-        <Button
-          color="error"
           variant="outlined"
-
-          onClick={() => rejectMutation.mutate(userId)}
+          onClick={() =>
+            navigate(`/admin/users/${userId}?from=pending-volunteers`)
+          }
           sx={{
             borderRadius: 3,
-            boxShadow: 3,
+            boxShadow: 2,
             transition: '0.3s',
-
             '&:hover': {
-              boxShadow: 8,
-              transform: 'translateY(-4px)',
+              boxShadow: 5,
+              transform: 'translateY(-2px)',
             },
           }}
         >
-          Reject
+          View Profile
         </Button>
+
+        <Stack direction="row" spacing={2}>
+          <Button
+            color="success"
+            variant="contained"
+
+            onClick={() => approveMutation.mutate(userId)}
+            sx={{
+              borderRadius: 3,
+              boxShadow: 3,
+              transition: '0.3s',
+
+              '&:hover': {
+                boxShadow: 8,
+                transform: 'translateY(-4px)',
+              },
+            }}
+          >
+            Approve
+          </Button>
+
+          <Button
+            color="error"
+            variant="outlined"
+
+            onClick={() => rejectMutation.mutate(userId)}
+            sx={{
+              borderRadius: 3,
+              boxShadow: 3,
+              transition: '0.3s',
+
+              '&:hover': {
+                boxShadow: 8,
+                transform: 'translateY(-4px)',
+              },
+            }}
+          >
+            Reject
+          </Button>
+        </Stack>
       </CardActions>
     </Card>
   );
