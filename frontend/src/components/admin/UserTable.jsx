@@ -23,6 +23,8 @@ import {
   Chip,
 } from '@mui/material';
 
+import { useAdminUserProfileImage } from '../../hooks/admin/useAdminUserProfileImage';
+
 import { grey } from '@mui/material/colors';
 import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
 import { useUsers } from '../../hooks/admin/useUsers';
@@ -138,6 +140,25 @@ const SORT_LABELS = {
   newest: 'Newest',
   oldest: 'Oldest',
 };
+
+function AdminUserAvatar({ user }) {
+  const { data: profileImageUrl } = useAdminUserProfileImage(user.id);
+
+  return (
+    <Avatar
+      src={profileImageUrl || undefined}
+      alt={user.name}
+      sx={{
+        width: 34,
+        height: 34,
+        fontSize: '0.8125rem',
+        bgcolor: grey[400],
+      }}
+    >
+      {user.name?.charAt(0)?.toUpperCase()}
+    </Avatar>
+  );
+}
 
 function UserTable() {
   const navigate = useNavigate();
@@ -417,17 +438,7 @@ function UserTable() {
                         alignItems: 'center',
                       }}
                     >
-                      <Avatar
-                        alt={user.name}
-                        sx={{
-                          width: 34,
-                          height: 34,
-                          fontSize: '0.8125rem',
-                          bgcolor: grey[400],
-                        }}
-                      >
-                        {user.name?.charAt(0)?.toUpperCase()}
-                      </Avatar>
+                      <AdminUserAvatar user={user} />
                       <Typography
                         variant="body2"
                         sx={{
