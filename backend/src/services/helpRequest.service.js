@@ -126,11 +126,14 @@ function buildRequestWhere({ user, query, excludeCategory = false }) {
   return { where, hasGeo, lat, lng, radiusMi };
 }
 
+const MAX_MAP_RESULTS = 500;
+
 const getBrowseHelpRequests = async ({ user, query }) => {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
     query,
   });
+  const isMapView = query.view === 'map';
 
   const [sortField, sortDirRaw] = (query.sort || 'createdAt:desc').split(':');
   const sortDir = sortDirRaw || DEFAULT_SORT_DIR[sortField] || 'desc';
@@ -142,11 +145,25 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   const options = { where };
   const page = query.page;
   const pageSize = query.pageSize;
-
   const requiresInMemoryProcessing = hasGeo || sortField === 'distance';
 
   if (!requiresInMemoryProcessing) {
     options.orderBy = [{ [sortField]: sortDir }, { id: 'asc' }];
+
+    if (isMapView) {
+      const [data, totalCount] = await Promise.all([
+        prisma.helpRequest.findMany({ ...options, take: MAX_MAP_RESULTS }),
+        prisma.helpRequest.count({ where }),
+      ]);
+      return {
+        data,
+        meta: {
+          totalCount,
+          returnedCount: data.length,
+          capped: totalCount > MAX_MAP_RESULTS,
+        },
+      };
+    }
 
     const [data, totalCount] = await Promise.all([
       prisma.helpRequest.findMany({
@@ -194,13 +211,26 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   data.sort((a, b) => {
     const diff = compareBy[sortField](a, b);
     if (diff !== 0) return sortDir === 'asc' ? diff : -diff;
-    return a.id - b.id;  
+    return a.id - b.id;
   });
 
   const totalCount = data.length;
+
+  if (isMapView) {
+    const capped = data.slice(0, MAX_MAP_RESULTS);
+    return {
+      data: capped,
+      meta: {
+        totalCount,
+        returnedCount: capped.length,
+        capped: totalCount > MAX_MAP_RESULTS,
+      },
+    };
+  }
+
   const start = (page - 1) * pageSize;
   const paginated = data.slice(start, start + pageSize);
-
+  
   return {
     data: paginated,
     meta: {
