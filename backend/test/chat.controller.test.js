@@ -68,6 +68,14 @@ describe('Chat Controller', () => {
 
       expect(next).not.toHaveBeenCalled();
     });
+    it('should pass an error to next for an invalid request ID', async () => {
+      req.params.requestId = 'abc';
+
+      await getMessages(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(chatService.getMessages).not.toHaveBeenCalled();
+    });
   });
 
   describe('sendMessage', () => {
@@ -104,6 +112,14 @@ describe('Chat Controller', () => {
 
       expect(next).not.toHaveBeenCalled();
     });
+    it('should pass an error to next for an invalid request ID', async () => {
+      req.params.requestId = 'abc';
+
+      await sendMessage(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(chatService.sendMessage).not.toHaveBeenCalled();
+    });
   });
 
   describe('markMessagesRead', () => {
@@ -126,6 +142,14 @@ describe('Chat Controller', () => {
       });
 
       expect(next).not.toHaveBeenCalled();
+    });
+    it('should pass an error to next for an invalid request ID', async () => {
+      req.params.requestId = 'abc';
+
+      await markMessagesRead(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(chatService.markMessagesRead).not.toHaveBeenCalled();
     });
   });
 
