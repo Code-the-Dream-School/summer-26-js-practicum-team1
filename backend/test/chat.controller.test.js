@@ -62,6 +62,7 @@ describe('Chat Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
 
       expect(res.json).toHaveBeenCalledWith({
+        success: true,
         data: messages,
       });
 
@@ -97,6 +98,7 @@ describe('Chat Controller', () => {
       expect(res.status).toHaveBeenCalledWith(201);
 
       expect(res.json).toHaveBeenCalledWith({
+        success: true,
         data: message,
       });
 
@@ -119,6 +121,7 @@ describe('Chat Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
 
       expect(res.json).toHaveBeenCalledWith({
+        success: true,
         data: result,
       });
 

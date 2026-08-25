@@ -18,6 +18,7 @@ const getMessages = asyncHandler(async (req, res) => {
   const messages = await chatService.getMessages(requestId, req.user.id);
 
   return res.status(200).json({
+    success: true,
     data: messages,
   });
 });
@@ -32,6 +33,7 @@ const sendMessage = asyncHandler(async (req, res) => {
   );
 
   return res.status(201).json({
+    success: true,
     data: message,
   });
 });
@@ -42,6 +44,7 @@ const markMessagesRead = asyncHandler(async (req, res) => {
   const result = await chatService.markMessagesRead(requestId, req.user.id);
 
   return res.status(200).json({
+    success: true,
     data: result,
   });
 });
