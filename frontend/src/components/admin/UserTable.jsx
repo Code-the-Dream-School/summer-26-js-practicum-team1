@@ -22,6 +22,7 @@ import {
   Box,
   Chip,
 } from '@mui/material';
+
 import { grey } from '@mui/material/colors';
 import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
 import { useUsers } from '../../hooks/admin/useUsers';
@@ -417,7 +418,6 @@ function UserTable() {
                       }}
                     >
                       <Avatar
-                        src={user.profileImage}
                         alt={user.name}
                         sx={{
                           width: 34,

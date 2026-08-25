@@ -10,25 +10,18 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+import { useAdminUserProfileImage } from '../../hooks/admin/useAdminUserProfileImage';
 import { useNavigate } from 'react-router-dom';
 import { red, grey } from '@mui/material/colors';
 import { useApproveVolunteer } from '../../hooks/admin/useApproveVolunteer';
 import { useRejectVolunteer } from '../../hooks/admin/useRejectVolunteer';
 
-function VolunteerCard({
-  userId,
-  name,
-  email,
-  status,
-  phone,
-  dob,
-  gender,
-  profileImage,
-}) {
+function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
   const navigate = useNavigate();
 
   const approveMutation = useApproveVolunteer();
   const rejectMutation = useRejectVolunteer();
+  const { data: profileImageUrl } = useAdminUserProfileImage(userId);
   return (
     <Card
       sx={{
@@ -51,7 +44,7 @@ function VolunteerCard({
             }}
           >
             <Avatar
-              src={profileImage}
+              src={profileImageUrl || undefined}
               alt={name}
               sx={{
                 width: 56,
