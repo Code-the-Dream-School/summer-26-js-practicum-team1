@@ -41,22 +41,17 @@ function App() {
 
 
 
-        <Route element={<RequesterProtectedRoute />}>
-  <Route
-    path="requester-dashboard"
-    element={<RequesterDashboard />}
-  />
+  <Route element={<RequesterProtectedRoute />}>
+  <Route path="requester-dashboard" element={<RequesterDashboard />}/>
   <Route path="helpRequest" element={<NewhelpRequest />} />
-</Route>
+  </Route>
+  
         {/* Admin routes */}
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
-          <Route
-            path="admin/users/:id"
-            element={<AdminUserDetailPage />}
-          />
+          <Route path="admin/users/:id"element={<AdminUserDetailPage />}/>
         </Route>
 
         {/* General authenticated routes */}

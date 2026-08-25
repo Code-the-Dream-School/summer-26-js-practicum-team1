@@ -446,7 +446,7 @@ function NewHelpRequest() {
             variant="h4"
             fontWeight={700}
             sx={{
-              color: '#1B5E20',
+              color: '#050505ff',
               mb: 1,
             }}
           >
@@ -842,7 +842,7 @@ function NewHelpRequest() {
                 color: '#2E7D32',
                 fontWeight: 600,
                 '&:hover': {
-                  backgroundColor: '#E8F5E9',
+               
                 },
               }}
             >
@@ -858,8 +858,8 @@ function NewHelpRequest() {
                     mt: 1,
                     px: 2,
                     py: 1,
-                    backgroundColor: '#E8F5E9',
-                    borderRadius: 1.5,
+                  
+                 
                   }}
                 >
                   <Typography

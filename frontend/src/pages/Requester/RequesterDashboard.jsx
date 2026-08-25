@@ -36,6 +36,8 @@ import {
   cancelHelpRequest,
 } from '../../services/api';
 
+import { useAcceptedVolunteerProfile } from '../../hooks/useAcceptedVolunteerProfile';
+
 const URGENCY_STYLES = {
   HIGH: {
     border: '#9b1518ff',
@@ -105,7 +107,6 @@ function getStatusStyle(status) {
   return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
 }
 
-
 function formatDateTimeLocal(dateValue) {
   if (!dateValue) {
     return '';
@@ -126,19 +127,30 @@ function formatDateTimeLocal(dateValue) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+/* 
+   REQUEST CARD
+ */
+
 function RequestCard({
   request,
   expandedRequest,
   setExpandedRequest,
   onEdit,
   onCancel,
+  onVolunteerProfile,
 }) {
   const accepted = request.status === 'ACCEPTED';
   const isPending = request.status === 'PENDING';
+
   const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(request.status);
 
   const isExpanded = expandedRequest === request.id;
+
+  const { volunteer } = useAcceptedVolunteerProfile(
+    request.id,
+    accepted
+  );
 
   const handleToggleDetails = () => {
     setExpandedRequest(isExpanded ? null : request.id);
@@ -148,9 +160,6 @@ function RequestCard({
     <Card
       sx={{
         borderRadius: 3,
-        borderLeft: `4px solid ${urgencyStyle.border}`,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-        display: 'flex',
         flexDirection: 'column',
         alignSelf: 'start',
       }}
@@ -175,7 +184,7 @@ function RequestCard({
             label={statusStyle.label}
             size="small"
             sx={{
-              fontWeight: 600,
+              fontWeight: 400,
               flexShrink: 0,
               minHeight: 32,
               backgroundColor: statusStyle.bg,
@@ -199,77 +208,61 @@ function RequestCard({
 
         {/* Date and Time */}
         <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 1,
-            mb: 1.5,
-          }}
-        >
-          <CalendarMonthOutlinedIcon
-            sx={{
-              fontSize: 20,
-              mt: 0.2,
-            }}
-            color="action"
-          />
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 3,
+  }}
+>
+  <Typography
+    variant="body2"
+    sx={{
+      color: '#166534',
+      fontSize: '1rem',
+      fontWeight: 700,
+      mt: 0.5,
+    }}
+  >
+    Date:{' '}
+    <Box
+      component="span"
+      sx={{
+        color: '#aa7b23',
+        fontWeight: 700,
+      }}
+    >
+      {request.scheduledAt
+        ? new Date(request.scheduledAt).toLocaleDateString()
+        : 'Date not available'}
+    </Box>
+  </Typography>
 
-          <Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#166534',
-                fontSize: '1rem',
-                fontWeight: 700,
-                mt: 0.5,
-              }}
-            >
-              Date:{' '}
-              <Box
-                component="span"
-                sx={{
-                  color: '#aa7b23',
-                  fontWeight: 700,
-                }}
-              >
-                {request.scheduledAt
-                  ? new Date(
-                      request.scheduledAt
-                    ).toLocaleDateString()
-                  : 'Date not available'}
-              </Box>
-            </Typography>
-
-            <Typography
-              variant="body2"
-              sx={{
-                color: '#166534',
-                fontSize: '1rem',
-                fontWeight: 700,
-                mt: 0.5,
-              }}
-            >
-              Time:{' '}
-              <Box
-                component="span"
-                sx={{
-                  color: '#aa7b23',
-                  fontWeight: 700,
-                }}
-              >
-                {request.scheduledAt
-                  ? new Date(
-                      request.scheduledAt
-                    ).toLocaleTimeString([], {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })
-                  : 'Time not available'}
-              </Box>
-            </Typography>
-          </Box>
-        </Box>
-
+  <Typography
+    variant="body2"
+    sx={{
+      color: '#166534',
+      fontSize: '1rem',
+      fontWeight: 700,
+      mt: 0.5,
+    }}
+  >
+    Time:{' '}
+    <Box
+      component="span"
+      sx={{
+        color: '#aa7b23',
+        fontWeight: 700,
+      }}
+    >
+      {request.scheduledAt
+        ? new Date(request.scheduledAt).toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+          })
+        : 'Time not available'}
+    </Box>
+  </Typography>
+</Box>
         {/* Urgency */}
         <Box
           sx={{
@@ -303,9 +296,7 @@ function RequestCard({
           />
         </Box>
 
-       
-
-        {/* View Details */}
+        {/* View Details + Edit + Cancel */}
         <Box
           sx={{
             display: 'flex',
@@ -327,43 +318,44 @@ function RequestCard({
           >
             {isExpanded ? 'Hide Details' : 'View Details'}
           </Button>
-        {isPending &&(
-          <>
-            <Tooltip title="Edit request">
-              <IconButton
-                onClick={() => onEdit(request)}
-                aria-label="Edit help request"
-                size="small"
-                sx={{
-                  color: '#318ce7ff',
-                  '&:hover': {
-                    backgroundColor: '#DCFCE7',
-                  },
-                }}
-              >
-                <EditOutlinedIcon />
-              </IconButton>
-            </Tooltip>
 
-            <Tooltip title="Cancel request">
-              <IconButton
-                onClick={() => onCancel(request)}
-                aria-label="Cancel help request"
-                size="small"
-                sx={{
-                  color: '#991B1B',
-                  '&:hover': {
-                    backgroundColor: '#FEE2E2',
-                  },
-                }}
-              >
-                <DeleteForeverOutlinedIcon />
-              </IconButton>
-            </Tooltip>
+          {isPending && (
+            <>
+              <Tooltip title="Edit request">
+                <IconButton
+                  onClick={() => onEdit(request)}
+                  aria-label="Edit help request"
+                  size="small"
+                  sx={{
+                    color: '#318ce7ff',
+                    '&:hover': {
+                      backgroundColor: '#DCFCE7',
+                    },
+                  }}
+                >
+                  <EditOutlinedIcon />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Cancel request">
+                <IconButton
+                  onClick={() => onCancel(request)}
+                  aria-label="Cancel help request"
+                  size="small"
+                  sx={{
+                    color: '#991B1B',
+                    '&:hover': {
+                      backgroundColor: '#FEE2E2',
+                    },
+                  }}
+                >
+                  <DeleteForeverOutlinedIcon />
+                </IconButton>
+              </Tooltip>
             </>
-        )}
-          </Box>
-      
+          )}
+        </Box>
+
         {/* Expanded Details */}
         <Collapse
           in={isExpanded}
@@ -468,7 +460,8 @@ function RequestCard({
               {statusStyle.label}
             </Typography>
 
-            {accepted && request.volunteer && (
+            {/* Volunteer */}
+            {accepted && volunteer && (
               <Box
                 sx={{
                   mt: 2,
@@ -494,14 +487,26 @@ function RequestCard({
                     gap: 1.5,
                   }}
                 >
+                  {/* CLICKABLE AVATAR */}
                   <Avatar
+                    onClick={() =>
+                      onVolunteerProfile(volunteer)
+                    }
                     sx={{
-                      width: 40,
-                      height: 40,
-                      fontSize: 16,
+                      width: 48,
+                      height: 48,
+                      fontSize: 18,
+                      cursor: 'pointer',
+                      bgcolor: '#E8F5E9',
+                      color: '#166534',
+                      fontWeight: 700,
+                      '&:hover': {
+                        boxShadow:
+                          '0 0 0 3px #DCFCE7',
+                      },
                     }}
                   >
-                    {request.volunteer.name
+                    {volunteer.name
                       ?.charAt(0)
                       ?.toUpperCase()}
                   </Avatar>
@@ -517,20 +522,30 @@ function RequestCard({
                       Volunteer
                     </Typography>
 
+                    {/* CLICKABLE NAME */}
                     <Typography
                       variant="body1"
                       fontWeight={600}
+                      onClick={() =>
+                        onVolunteerProfile(volunteer)
+                      }
                       sx={{
                         fontSize: '1rem',
+                        cursor: 'pointer',
+                        color: '#166534',
+                        '&:hover': {
+                          textDecoration:
+                            'underline',
+                        },
                       }}
                     >
-                      {request.volunteer.name ||
+                      {volunteer.name ||
                         'Not available'}
                     </Typography>
                   </Box>
                 </Box>
 
-                {request.volunteer.phone && (
+                {volunteer.phone && (
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -540,11 +555,11 @@ function RequestCard({
                     }}
                   >
                     <strong>Phone:</strong>{' '}
-                    {request.volunteer.phone}
+                    {volunteer.phone}
                   </Typography>
                 )}
 
-                {request.volunteer.email && (
+                {volunteer.email && (
                   <Typography
                     variant="body2"
                     color="text.secondary"
@@ -554,7 +569,7 @@ function RequestCard({
                     }}
                   >
                     <strong>Email:</strong>{' '}
-                    {request.volunteer.email}
+                    {volunteer.email}
                   </Typography>
                 )}
               </Box>
@@ -565,6 +580,10 @@ function RequestCard({
     </Card>
   );
 }
+
+/*
+   REQUESTER DASHBOARD
+*/
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
@@ -580,9 +599,18 @@ export default function RequesterDashboard() {
   const [expandedRequest, setExpandedRequest] =
     useState(null);
 
-  // -------------------------------
+ 
+  // VOLUNTEER PROFILE DIALOG STATE
+  
+  const [volunteerDialogOpen, setVolunteerDialogOpen] =
+    useState(false);
+
+  const [selectedVolunteer, setSelectedVolunteer] =
+    useState(null);
+
+ 
   // EDIT STATE
-  // -------------------------------
+  
   const [editRequest, setEditRequest] =
     useState(null);
 
@@ -606,18 +634,18 @@ export default function RequesterDashboard() {
     description: '',
   });
 
-  // -------------------------------
+  
   // CANCEL STATE
-  // -------------------------------
+  
   const [cancelRequest, setCancelRequest] =
     useState(null);
 
   const [cancelling, setCancelling] =
     useState(false);
 
-  // -------------------------------
+  
   // LOAD DASHBOARD
-  // -------------------------------
+ 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -633,7 +661,8 @@ export default function RequesterDashboard() {
 
         setUser(currentUser);
 
-        const response = await getHelpRequests();
+        const response =
+          await getHelpRequests();
 
         setRequests(response.data || []);
       } catch (err) {
@@ -653,26 +682,39 @@ export default function RequesterDashboard() {
     loadDashboard();
   }, [navigate]);
 
-  // -------------------------------
+  
   // NEW REQUEST
-  // -------------------------------
+  
   const handleNewRequest = () => {
     navigate('/helpRequest');
   };
 
-  // -------------------------------
+ 
+  // VOLUNTEER PROFILE
+  
+
+  const handleVolunteerProfile = (volunteer) => {
+    if (!volunteer) {
+      return;
+    }
+
+    setSelectedVolunteer(volunteer);
+    setVolunteerDialogOpen(true);
+  };
+
+  const handleCloseVolunteerDialog = () => {
+    setVolunteerDialogOpen(false);
+    setSelectedVolunteer(null);
+  };
+
+  
   // EDIT REQUEST
-  // -------------------------------
+  
   const handleEdit = async (request) => {
     try {
       setEditError('');
       setEditLoading(true);
 
-      /*
-       * Get the CURRENT request from the backend.
-       * This makes sure the edit form has the latest
-       * database values.
-       */
       const currentRequest =
         await getHelpRequestById(request.id);
 
@@ -680,12 +722,15 @@ export default function RequesterDashboard() {
 
       setEditForm({
         title: currentRequest.title || '',
-        category: currentRequest.category || '',
-        urgency: currentRequest.urgency || '',
+        category:
+          currentRequest.category || '',
+        urgency:
+          currentRequest.urgency || '',
         scheduledAt: formatDateTimeLocal(
           currentRequest.scheduledAt
         ),
-        address: currentRequest.address || '',
+        address:
+          currentRequest.address || '',
         latitude:
           currentRequest.latitude !== null &&
           currentRequest.latitude !== undefined
@@ -713,9 +758,9 @@ export default function RequesterDashboard() {
     }
   };
 
-  // -------------------------------
+  
   // CLOSE EDIT DIALOG
-  // -------------------------------
+ 
   const handleCloseEditDialog = () => {
     if (!updating) {
       setEditRequest(null);
@@ -723,9 +768,10 @@ export default function RequesterDashboard() {
     }
   };
 
-  // -------------------------------
+  
   // EDIT FIELD CHANGE
-  // -------------------------------
+  
+
   const handleEditChange = (event) => {
     const { name, value } = event.target;
 
@@ -735,103 +781,106 @@ export default function RequesterDashboard() {
     }));
   };
 
-  // -------------------------------
+ 
   // UPDATE REQUEST
-  // -------------------------------
+  
   const handleUpdateRequest = async () => {
-  if (!editRequest) {
-    return;
-  }
-
-  try {
-    setUpdating(true);
-    setEditError('');
-    setError('');
-
-    const updatedData = {
-      title: editForm.title.trim(),
-      category: editForm.category,
-      urgency: editForm.urgency,
-      scheduledAt: new Date(
-        editForm.scheduledAt
-      ).toISOString(),
-      address: editForm.address.trim(),
-      latitude: Number(editForm.latitude),
-      longitude: Number(editForm.longitude),
-      description: editForm.description.trim(),
-    };
-
-    const csrfToken = user?.csrfToken;;
-
-    
-
-    if (!csrfToken) {
-      setEditError(
-        'CSRF token is missing. Please refresh the page and try again.'
-      );
+    if (!editRequest) {
       return;
     }
 
-    const updatedRequest = await updateHelpRequest(
-      editRequest.id,
-      updatedData,
-      csrfToken
-    );
+    try {
+      setUpdating(true);
+      setEditError('');
+      setError('');
 
-    console.log(
-      'Updated request response:',
-      updatedRequest
-    );
+      const updatedData = {
+        title: editForm.title.trim(),
+        category: editForm.category,
+        urgency: editForm.urgency,
+        scheduledAt: new Date(
+          editForm.scheduledAt
+        ).toISOString(),
+        address: editForm.address.trim(),
+        latitude: Number(editForm.latitude),
+        longitude: Number(
+          editForm.longitude
+        ),
+        description:
+          editForm.description.trim(),
+      };
 
-    setRequests((currentRequests) =>
-      currentRequests.map((request) =>
-        request.id === editRequest.id
-          ? {
-              ...request,
-              ...(updatedRequest?.data ||
-                updatedRequest),
-            }
-          : request
-      )
-    );
+      const csrfToken = user?.csrfToken;
 
-    setEditRequest(null);
-  } catch (err) {
-    console.error(
-      'Failed to update request:',
-      err
-    );
+      if (!csrfToken) {
+        setEditError(
+          'CSRF token is missing. Please refresh the page and try again.'
+        );
+        return;
+      }
 
-    console.error(
-      'Status:',
-      err?.response?.status
-    );
+      const updatedRequest =
+        await updateHelpRequest(
+          editRequest.id,
+          updatedData,
+          csrfToken
+        );
 
-    console.error(
-      'Server response:',
-      err?.response?.data
-    );
+      console.log(
+        'Updated request response:',
+        updatedRequest
+      );
 
-    setEditError(
-      err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        'Unable to update this request. Please try again.'
-    );
-  } finally {
-    setUpdating(false);
-  }
-};
-  // -------------------------------
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === editRequest.id
+            ? {
+                ...request,
+                ...(updatedRequest?.data ||
+                  updatedRequest),
+              }
+            : request
+        )
+      );
+
+      setEditRequest(null);
+    } catch (err) {
+      console.error(
+        'Failed to update request:',
+        err
+      );
+
+      console.error(
+        'Status:',
+        err?.response?.status
+      );
+
+      console.error(
+        'Server response:',
+        err?.response?.data
+      );
+
+      setEditError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          'Unable to update this request. Please try again.'
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+ 
   // OPEN CANCEL DIALOG
-  // -------------------------------
+  
   const handleCancel = (request) => {
     setCancelRequest(request);
   };
 
-  // -------------------------------
+  
   // CLOSE CANCEL DIALOG
-  // -------------------------------
+  
   const handleCloseCancelDialog = () => {
     if (!cancelling) {
       setCancelRequest(null);
@@ -841,6 +890,7 @@ export default function RequesterDashboard() {
   // -------------------------------
   // CONFIRM CANCEL
   // -------------------------------
+
   const handleConfirmCancel = async () => {
     if (!cancelRequest) {
       return;
@@ -851,6 +901,7 @@ export default function RequesterDashboard() {
       setError('');
 
       const csrfToken = user?.csrfToken;
+
       await cancelHelpRequest(
         cancelRequest.id,
         csrfToken
@@ -882,6 +933,10 @@ export default function RequesterDashboard() {
     }
   };
 
+ 
+  // FILTER + SORT
+ 
+
   const urgencyRank = {
     HIGH: 0,
     MEDIUM: 1,
@@ -893,13 +948,15 @@ export default function RequesterDashboard() {
 
     if (filter === 'PENDING') {
       list = requests.filter(
-        (request) => request.status === 'PENDING'
+        (request) =>
+          request.status === 'PENDING'
       );
     }
 
     if (filter === 'ACCEPTED') {
       list = requests.filter(
-        (request) => request.status === 'ACCEPTED'
+        (request) =>
+          request.status === 'ACCEPTED'
       );
     }
 
@@ -922,9 +979,9 @@ export default function RequesterDashboard() {
     return sorted;
   }, [requests, filter, sortBy]);
 
-  // -------------------------------
-  // LOADING
-  // -------------------------------
+  
+
+
   if (loading) {
     return (
       <Box
@@ -943,6 +1000,7 @@ export default function RequesterDashboard() {
   return (
     <Box>
       {/* Welcome section */}
+
       <Box
         sx={{
           width: '100%',
@@ -969,7 +1027,7 @@ export default function RequesterDashboard() {
             },
           }}
         >
-          Welcome back, {user?.name || 'User'}! 👋
+          Welcome back, {user?.name || 'User'}!
         </Typography>
 
         <Typography
@@ -987,8 +1045,10 @@ export default function RequesterDashboard() {
       </Box>
 
       {/* Main Content */}
+
       <Box>
         {/* Error message */}
+
         {error && (
           <Typography
             color="error"
@@ -1002,6 +1062,7 @@ export default function RequesterDashboard() {
         )}
 
         {/* Filters */}
+
         <Box
           sx={{
             display: 'flex',
@@ -1019,7 +1080,9 @@ export default function RequesterDashboard() {
                   key.charAt(0) +
                   key.slice(1).toLowerCase()
                 }
-                onClick={() => setFilter(key)}
+                onClick={() =>
+                  setFilter(key)
+                }
                 sx={{
                   minHeight: 44,
                   px: 1,
@@ -1087,6 +1150,7 @@ export default function RequesterDashboard() {
         </Box>
 
         {/* Request list */}
+
         {visibleRequests.length === 0 ? (
           <Typography
             color="text.secondary"
@@ -1107,28 +1171,233 @@ export default function RequesterDashboard() {
               gridTemplateColumns: {
                 xs: '1fr',
                 sm: '1fr',
-                lg: 'repeat(3, 1fr)',
+                lg: 'repeat(1, 1fr)',
               },
-              gap: 4,
+              gap: 3,
             }}
           >
-            {visibleRequests.map((request) => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                expandedRequest={expandedRequest}
-                setExpandedRequest={
-                  setExpandedRequest
-                }
-                onEdit={handleEdit}
-                onCancel={handleCancel}
-              />
-            ))}
+            {visibleRequests.map(
+              (request) => (
+                <RequestCard
+                  key={request.id}
+                  request={request}
+                  expandedRequest={
+                    expandedRequest
+                  }
+                  setExpandedRequest={
+                    setExpandedRequest
+                  }
+                  onEdit={handleEdit}
+                  onCancel={handleCancel}
+                  onVolunteerProfile={
+                    handleVolunteerProfile
+                  }
+                />
+              )
+            )}
           </Box>
         )}
       </Box>
 
-     
+      {/*   VOLUNTEER PROFILE DIALOG */}
+
+      <Dialog
+  open={volunteerDialogOpen}
+  onClose={handleCloseVolunteerDialog}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle
+    sx={{
+      fontWeight: 700,
+      fontSize: '1.5rem',
+      color: '#52462A',
+    }}
+  >
+    Volunteer Profile
+  </DialogTitle>
+
+  <DialogContent dividers>
+    {selectedVolunteer ? (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          py: 2,
+        }}
+      >
+        {/* Profile Image */}
+        <Avatar
+          src={selectedVolunteer.profileImage || undefined}
+          alt={selectedVolunteer.name || 'Volunteer'}
+          sx={{
+            width: 110,
+            height: 110,
+            mb: 2,
+            fontSize: '2.5rem',
+            bgcolor: '#E8F5E9',
+            color: '#166534',
+            fontWeight: 700,
+          }}
+        >
+          {!selectedVolunteer.profileImage &&
+            selectedVolunteer.name
+              ?.charAt(0)
+              ?.toUpperCase()}
+        </Avatar>
+
+        {/* Name */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            color: '#166534',
+            mb: 3,
+          }}
+        >
+          {selectedVolunteer.name || 'Name not available'}
+        </Typography>
+
+        {/* Profile Information */}
+        <Box
+          sx={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          {/* Email */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              Email
+            </Typography>
+
+            <Typography variant="body1">
+              {selectedVolunteer.email ||
+                'Not available'}
+            </Typography>
+          </Box>
+
+          {/* Phone */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              Phone
+            </Typography>
+
+            <Typography variant="body1">
+              {selectedVolunteer.phone ||
+                'Not available'}
+            </Typography>
+          </Box>
+
+          {/* Bio */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              About
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                lineHeight: 1.6,
+              }}
+            >
+              {selectedVolunteer.volunteerProfile?.bio ||
+                'No bio available'}
+            </Typography>
+          </Box>
+
+          {/* Service Area */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              Service Area
+            </Typography>
+
+            <Typography variant="body1">
+              {selectedVolunteer.volunteerProfile
+                ?.serviceArea || 'Not available'}
+            </Typography>
+          </Box>
+
+          {/* Availability */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              Availability
+            </Typography>
+
+            <Typography variant="body1">
+              {selectedVolunteer.volunteerProfile
+                ?.availability || 'Not available'}
+            </Typography>
+          </Box>
+
+          {/* Interests */}
+          <Box>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              fontWeight={600}
+            >
+              Interests
+            </Typography>
+
+            <Typography variant="body1">
+              {Array.isArray(
+                selectedVolunteer.volunteerProfile
+                  ?.interests
+              )
+                ? selectedVolunteer.volunteerProfile.interests.join(
+                    ', '
+                  )
+                : selectedVolunteer.volunteerProfile
+                    ?.interests ||
+                  'Not available'}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    ) : (
+      <Typography color="text.secondary">
+        Volunteer information is not available.
+      </Typography>
+    )}
+  </DialogContent>
+
+  <DialogActions sx={{ p: 2 }}>
+    <Button
+      onClick={handleCloseVolunteerDialog}
+      sx={{
+        textTransform: 'none',
+      }}
+    >
+      Close
+    </Button>
+  </DialogActions>
+</Dialog>
+      {/*   EDIT  */}
+
       <Dialog
         open={Boolean(editRequest)}
         onClose={handleCloseEditDialog}
@@ -1175,7 +1444,6 @@ export default function RequesterDashboard() {
                 </Typography>
               )}
 
-              {/* Title */}
               <TextField
                 label="Title"
                 name="title"
@@ -1185,7 +1453,6 @@ export default function RequesterDashboard() {
                 required
               />
 
-              {/* Category */}
               <TextField
                 select
                 label="Category"
@@ -1195,17 +1462,18 @@ export default function RequesterDashboard() {
                 fullWidth
                 required
               >
-                {CATEGORY_OPTIONS.map((category) => (
-                  <MenuItem
-                    key={category}
-                    value={category}
-                  >
-                    {category}
-                  </MenuItem>
-                ))}
+                {CATEGORY_OPTIONS.map(
+                  (category) => (
+                    <MenuItem
+                      key={category}
+                      value={category}
+                    >
+                      {category}
+                    </MenuItem>
+                  )
+                )}
               </TextField>
 
-              {/* Urgency */}
               <TextField
                 select
                 label="Urgency"
@@ -1215,22 +1483,25 @@ export default function RequesterDashboard() {
                 fullWidth
                 required
               >
-                {URGENCY_OPTIONS.map((urgency) => (
-                  <MenuItem
-                    key={urgency}
-                    value={urgency}
-                  >
-                    {urgency}
-                  </MenuItem>
-                ))}
+                {URGENCY_OPTIONS.map(
+                  (urgency) => (
+                    <MenuItem
+                      key={urgency}
+                      value={urgency}
+                    >
+                      {urgency}
+                    </MenuItem>
+                  )
+                )}
               </TextField>
 
-              {/* Date & Time */}
               <TextField
                 label="Date & Time"
                 name="scheduledAt"
                 type="datetime-local"
-                value={editForm.scheduledAt}
+                value={
+                  editForm.scheduledAt
+                }
                 onChange={handleEditChange}
                 fullWidth
                 required
@@ -1239,7 +1510,6 @@ export default function RequesterDashboard() {
                 }}
               />
 
-              {/* Address */}
               <TextField
                 label="Address"
                 name="address"
@@ -1249,12 +1519,12 @@ export default function RequesterDashboard() {
                 required
               />
 
-            
-              {/* Description */}
               <TextField
                 label="Description"
                 name="description"
-                value={editForm.description}
+                value={
+                  editForm.description
+                }
                 onChange={handleEditChange}
                 fullWidth
                 multiline
@@ -1271,7 +1541,9 @@ export default function RequesterDashboard() {
           }}
         >
           <Button
-            onClick={handleCloseEditDialog}
+            onClick={
+              handleCloseEditDialog
+            }
             disabled={updating}
             sx={{
               textTransform: 'none',
@@ -1281,7 +1553,9 @@ export default function RequesterDashboard() {
           </Button>
 
           <Button
-            onClick={handleUpdateRequest}
+            onClick={
+              handleUpdateRequest
+            }
             variant="contained"
             disabled={
               editLoading ||
@@ -1300,10 +1574,15 @@ export default function RequesterDashboard() {
         </DialogActions>
       </Dialog>
 
-    
+      {/* =====================================================
+          CANCEL REQUEST DIALOG
+      ===================================================== */}
+
       <Dialog
         open={Boolean(cancelRequest)}
-        onClose={handleCloseCancelDialog}
+        onClose={
+          handleCloseCancelDialog
+        }
         maxWidth="xs"
         fullWidth
       >
@@ -1316,8 +1595,8 @@ export default function RequesterDashboard() {
             color="text.secondary"
             sx={{ mt: 1 }}
           >
-            Are you sure you want to cancel this help
-            request?
+            Are you sure you want to cancel
+            this help request?
           </Typography>
 
           {cancelRequest && (
@@ -1332,7 +1611,9 @@ export default function RequesterDashboard() {
 
         <DialogActions sx={{ p: 2 }}>
           <Button
-            onClick={handleCloseCancelDialog}
+            onClick={
+              handleCloseCancelDialog
+            }
             disabled={cancelling}
             sx={{
               textTransform: 'none',
@@ -1342,7 +1623,9 @@ export default function RequesterDashboard() {
           </Button>
 
           <Button
-            onClick={handleConfirmCancel}
+            onClick={
+              handleConfirmCancel
+            }
             disabled={cancelling}
             variant="contained"
             color="error"

@@ -8,6 +8,7 @@ const {
   getHelpRequestById,
   updateHelpRequest,
   cancelHelpRequest,
+  getAcceptedVolunteerProfile
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
@@ -30,7 +31,12 @@ router.post(
   createHelpRequest
 );
 
-
+router.get(
+  '/:id/volunteer',
+  jwtMiddleware,
+  requireRole('REQUESTER'),
+  getAcceptedVolunteerProfile
+);
 // Get requester's help requests
 router.get(
   '/mine',
@@ -69,6 +75,7 @@ router.patch(
   requireRole('REQUESTER'),
   cancelHelpRequest
 );
+
 
 
 module.exports = router;

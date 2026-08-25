@@ -125,7 +125,25 @@ export async function getHelpRequestById(
     throw err;
   }
 }
+/* Get volunteer profile for an accepted help request */
+export async function getAcceptedVolunteerProfile(requestId) {
+  try {
+    const { data } = await api.get(
+      `/api/requests/${requestId}/volunteer`,
+      {
+        withCredentials: true,
+      }
+    );
 
+    return data;
+  } catch (err) {
+    console.error(
+      'Error getting accepted volunteer profile:',
+      err
+    );
+    throw err;
+  }
+}
 /* Update an existing help request */
 export async function updateHelpRequest(
   id,
