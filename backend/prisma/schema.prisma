@@ -122,6 +122,7 @@ model HelpRequest {
   category     Category
   urgency      Urgency
   scheduledAt  DateTime
+  scheduledDayOfWeek Int    @default(dbgenerated())
   address      String
   latitude     Float
   longitude    Float
