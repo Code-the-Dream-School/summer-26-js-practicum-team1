@@ -10,6 +10,8 @@ export const COLORS = {
 
 export const DEFAULT_DISTANCE_MI = 5;
 
+export const PAGE_SIZE = 5;
+
 export const CATEGORIES = [
   { key: 'groceries', apiValue: 'GROCERY', label: 'Groceries' },
   {
