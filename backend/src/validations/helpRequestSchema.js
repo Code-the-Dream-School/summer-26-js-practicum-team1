@@ -56,6 +56,77 @@ const createHelpRequestSchema = Joi.object({
   description: Joi.string().trim().allow('').optional(),
 }).unknown(false);
 
+const { Category, Urgency, RequestStatus } = require('@prisma/client');
+const CATEGORY_VALUES = Object.values(Category);
+const URGENCY_VALUES = Object.values(Urgency);
+const STATUS_VALUES = Object.values(RequestStatus);
+const SORTABLE_FIELDS = ['createdAt', 'scheduledAt', 'urgency', 'distance'];
+
+const commaList = (allowedValues, label) =>
+  Joi.string()
+    .custom((value, helpers) => {
+      const parts = value.split(',').map((v) => v.trim().toUpperCase());
+      const invalid = parts.filter((v) => !allowedValues.includes(v));
+      if (invalid.length) {
+        return helpers.message(`Invalid ${label}: ${invalid.join(', ')}`);
+      }
+      return parts.join(',');
+    })
+    .messages({ 'string.empty': `${label} cannot be empty` });
+
+const commonFilterFields = {
+  category: commaList(CATEGORY_VALUES, 'category'),
+  urgency: commaList(URGENCY_VALUES, 'urgency'),
+  status: commaList(STATUS_VALUES, 'status'),
+
+  scheduledAfter: Joi.date().iso(),
+  scheduledBefore: Joi.date().iso(),
+  createdAfter: Joi.date().iso(),
+  createdBefore: Joi.date().iso(),
+
+  daysOfWeek: Joi.string()
+    .pattern(/^[0-6](,[0-6])*$/)
+    .messages({
+      'string.pattern.base': 'daysOfWeek must be a comma list of integers 0-6',
+    }),
+
+  lat: Joi.number().min(-90).max(90),
+  lng: Joi.number().min(-180).max(180),
+  radiusMi: Joi.number().positive(),
+
+  q: Joi.string().trim().max(200),
+};
+
+const browseHelpRequestQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1),
+  pageSize: Joi.number().integer().min(1).max(25).default(5),
+
+  ...commonFilterFields,
+
+  sort: Joi.string()
+    .custom((value, helpers) => {
+      const [field, dir] = value.split(':');
+      if (!SORTABLE_FIELDS.includes(field)) {
+        return helpers.message(`Invalid sort field: ${field}`);
+      }
+      if (dir && !['asc', 'desc'].includes(dir)) {
+        return helpers.message(`Invalid sort direction: ${dir}`);
+      }
+      return value;
+    })
+    .messages({ 'string.empty': 'sort cannot be empty' }),
+})
+  .and('lat', 'lng', 'radiusMi')
+  .unknown(true);
+
+const facetsQuerySchema = Joi.object({
+  ...commonFilterFields,
+})
+  .and('lat', 'lng', 'radiusMi')
+  .unknown(true);
+
 module.exports = {
   createHelpRequestSchema,
+  browseHelpRequestQuerySchema,
+  facetsQuerySchema,
 };

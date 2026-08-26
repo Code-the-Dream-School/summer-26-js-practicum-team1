@@ -35,7 +35,7 @@ const GENDER_OPTIONS = [
 const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Something went wrong. Please try again',
   VALIDATION_FAILED: 'Please check your information and try again',
-  REGISTER_FAILED: 'Registration failed. Please try again',
+ REGISTRATION_FAILED: 'Registration failed. Please try again',
 };
 const textFieldSx = {
   mb: 2,
@@ -94,7 +94,7 @@ function Register() {
   const errorMessage =
     registerError &&
     (ERROR_MESSAGES[registerError.message] ?? 
-      ERROR_MESSAGES.REGISTER_FAILED);
+      ERROR_MESSAGES.REGISTRATION_FAILED);
 
   return (
     <Box

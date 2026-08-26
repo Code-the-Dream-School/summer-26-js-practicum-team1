@@ -131,6 +131,11 @@ const getAdminUserProfileImage = asyncHandler(async (req, res) => {
   }
 
   const profileImage = await requesterProfileService.getProfileImage(userId);
+
+  if (!profileImage) {
+    throw new ApiError(404, 'Profile picture not found');
+  }
+
   res.set('Content-Type', profileImage.profileImageType);
   return res.status(200).send(Buffer.from(profileImage.profileImage));
 });

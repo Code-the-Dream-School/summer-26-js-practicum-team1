@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-function RequesterProtectedRoute() {
+function RoleProtectedRoute({ allowedRoles }) {
   const { user, isCheckingSession } = useAuth();
 
   if (isCheckingSession) {
@@ -9,14 +9,14 @@ function RequesterProtectedRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
-  if (user?.role?.toLowerCase() !== 'requester') {
-    return <Navigate to="/" />;
+  if (!allowedRoles.includes(user.role?.toLowerCase())) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;
 }
 
-export default RequesterProtectedRoute;
+export default RoleProtectedRoute;

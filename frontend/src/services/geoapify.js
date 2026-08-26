@@ -42,6 +42,7 @@ export async function searchPlaces(query) {
       const props = feature.properties || {};
       const lat = props.lat;
       const lon = props.lon;
+
       const label =
         props.formatted ||
         [props.city, props.state, props.country].filter(Boolean).join(', ');
@@ -58,4 +59,41 @@ export async function searchPlaces(query) {
       };
     })
     .filter(Boolean);
+}
+
+export async function getLocationAutoCompleteSuggestions(query, signal) {
+  const response = await fetch(
+    `${GEOAPIFY_BASE}/autocomplete?text=${encodeURIComponent(query)}&limit=5&lang=en&bias=countrycode%3Aus&format=json&apiKey=${import.meta.env.VITE_GEOAPIFY_API_KEY}`,
+    { signal }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch location suggestions');
+  }
+
+  const data = await response.json();
+
+  return data.results ?? [];
+}
+
+export async function reverseGeocode(latitude, longitude) {
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    throw new Error('Geoapify API key is missing');
+  }
+
+  const params = new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+    apiKey,
+  });
+
+  const response = await fetch(`${GEOAPIFY_BASE}/reverse?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error('Reverse geocoding failed');
+  }
+
+  return response.json();
 }
