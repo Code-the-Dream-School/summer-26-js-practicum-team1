@@ -6,6 +6,7 @@ import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
 import RequesterProtectedRoute from './components/auth/RequesterProtectedRoute';
 import UsersList from './pages/admin/UsersList';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import VolunteerRegistrationPage from './pages/VolunteerRegistrationPage';
@@ -24,9 +25,14 @@ function App() {
         <Route element={<AdminProtectedRoute />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
+          <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
           <Route path="admin/users" element={<UsersList />} />
         </Route>
         <Route path="signup" element={<SignupPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
+
         <Route
           path="volunteerRegistration"
           element={<VolunteerRegistrationPage />}
@@ -36,7 +42,10 @@ function App() {
           {/* TODO: Move profile route inside requester dashboard once ready */}
           <Route path="profile" element={<RequesterProfile />} />
         </Route>
-        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
+        <Route
+          path="requesterRegistration"
+          element={<RequestorRegistration />}
+        />
       </Route>
     </Routes>
   );
