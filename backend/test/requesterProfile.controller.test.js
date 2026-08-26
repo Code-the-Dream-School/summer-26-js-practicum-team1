@@ -28,14 +28,19 @@ jest.mock('../src/middleware/csrf.middleware', () => {
   return (req, res, next) => next();
 });
 
-jest.mock('../src/services/requesterProfile.service', () => ({
+jest.mock('../src/services/profile.service', () => ({
   getProfile: jest.fn(),
   updateProfile: jest.fn(),
   updateProfileImage: jest.fn(),
   getProfileImage: jest.fn(),
 }));
 
-const profileService = require('../src/services/requesterProfile.service');
+jest.mock('../src/services/requesterProfile.service', () => ({
+  updateProfile: jest.fn(),
+}));
+
+const profileService = require('../src/services/profile.service');
+const requesterService = require('../src/services/requesterProfile.service');
 const jwtMiddleware = require('../src/middleware/jwt.middleware');
 const app = require('../src/app');
 
@@ -153,7 +158,7 @@ describe('PATCH/api/profile', () => {
       },
     };
 
-    profileService.updateProfile.mockResolvedValue(updatedProfile);
+    requesterService.updateProfile.mockResolvedValue(updatedProfile);
 
     const res = await request(app).patch('/api/profile').send(updateData);
 
@@ -163,7 +168,7 @@ describe('PATCH/api/profile', () => {
       data: updatedProfile,
     });
 
-    expect(profileService.updateProfile).toHaveBeenCalledWith(1, updateData);
+    expect(requesterService.updateProfile).toHaveBeenCalledWith(1, updateData);
   });
 
   it('rejects invalid profile data', async () => {
@@ -175,7 +180,7 @@ describe('PATCH/api/profile', () => {
 
     expect(res.body.error).toBe('Validation failed');
 
-    expect(profileService.updateProfile).not.toHaveBeenCalled();
+    expect(requesterService.updateProfile).not.toHaveBeenCalled();
   });
 
   it('rejects volunteer updates on the requester profile path', async () => {
@@ -186,7 +191,7 @@ describe('PATCH/api/profile', () => {
     });
 
     expect(res.status).toBe(403);
-    expect(profileService.updateProfile).not.toHaveBeenCalled();
+    expect(requesterService.updateProfile).not.toHaveBeenCalled();
   });
 });
 

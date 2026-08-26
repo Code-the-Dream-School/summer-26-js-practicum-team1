@@ -1,13 +1,14 @@
 import { Box, CardContent, Typography, Card } from '@mui/material';
+import { grey } from '@mui/material/colors';
 
-function DashboardCard({ title, value, bgColor = 'background.paper' }) {
+function DashboardCard({ title, value }) {
   return (
     <Box sx={{ minWidth: 275 }}>
       <Card
         sx={{
           borderRadius: 3,
           boxShadow: 3,
-          bgcolor: bgColor,
+          bgcolor: grey[100],
           display: 'flex',
           justifyContent: 'center',
           flexDirection: 'column',
@@ -22,7 +23,15 @@ function DashboardCard({ title, value, bgColor = 'background.paper' }) {
             textAlign: 'center',
           }}
         >
-          <Typography sx={{ color: 'text.secondary', fontSize: 15 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              color: 'text.secondary',
+              fontSize: 15,
+              fontWeight: 700,
+              mb: 3,
+            }}
+          >
             {title}
           </Typography>
           <Typography variant="h5">{value}</Typography>

@@ -5,7 +5,7 @@ const helloRoutes = require('./routes/hello.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const helpRequestRoutes = require('./routes/helpRequest.routes');
-const requesterProfileRoutes = require('./routes/requesterProfile.routes');
+const profileRoutes = require('./routes/profile.routes');
 const chatRoutes = require('./routes/chat.routes');
 const volunteerProfileRoutes = require('./routes/volunteerProfile.routes');
 const supportCategoriesRoutes = require('./routes/supportCategories.routes');
@@ -19,7 +19,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', helpRequestRoutes);
 app.use('/api/profile/volunteer', volunteerProfileRoutes);
-app.use('/api/profile', requesterProfileRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/support-categories', supportCategoriesRoutes);
 
