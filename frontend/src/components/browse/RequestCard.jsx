@@ -6,21 +6,7 @@ import {
 } from '../../utils/browse.constants';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { COLORS } from '../../utils/constants';
-
-function formatScheduledLabel(scheduledAt) {
-  if (!scheduledAt) return 'Flexible anytime';
-  const d = new Date(scheduledAt);
-  const datePart = d.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-  const timePart = d.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${datePart} · ${timePart}`;
-}
+import { formatScheduledLabel } from '../../utils/browse.utils';
 
 function formatPostedLabel(createdAt) {
   if (!createdAt) return '';
