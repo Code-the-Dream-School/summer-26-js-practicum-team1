@@ -6,6 +6,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { COLORS } from './utils/constants';
+import 'leaflet/dist/leaflet.css';
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
+import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import App from './App';
 
 const queryClient = new QueryClient();
