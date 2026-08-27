@@ -14,6 +14,7 @@ import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewhelpRequest from './pages/Requester/helpRequest';
+import ChatPage from './pages/ChatPage';
 
 function App() {
   return (
@@ -47,6 +48,15 @@ function App() {
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
           <Route path="admin/users" element={<UsersList />} />
           <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
+        </Route>
+
+        {/* Chat routes */}
+        <Route
+          element={
+            <RoleProtectedRoute allowedRoles={['volunteer', 'requester']} />
+          }
+        >
+          <Route path="/chat/:requestId" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
