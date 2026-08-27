@@ -123,6 +123,7 @@ function buildFilterParams(filters = {}) {
   if (filters.scheduledBefore) params.scheduledBefore = filters.scheduledBefore;
   if (filters.createdAfter) params.createdAfter = filters.createdAfter;
   if (filters.createdBefore) params.createdBefore = filters.createdBefore;
+  if (filters.view) params.view = filters.view;
 
   const hasGeo =
     filters.lat != null && filters.lng != null && filters.radiusMi != null;
