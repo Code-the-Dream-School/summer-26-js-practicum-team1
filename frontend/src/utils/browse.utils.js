@@ -4,6 +4,7 @@ import {
   CATEGORIES,
   DAYS_OF_WEEK,
 } from './browse.constants';
+import L from 'leaflet';
 
 export function toggleInArray(arr, val) {
   return arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
@@ -59,4 +60,37 @@ export function buildLocationOptionFromProfile(volunteer) {
     lat: volunteer.serviceLatitude,
     lon: volunteer.serviceLongitude,
   };
+}
+
+export function formatScheduledLabel(scheduledAt) {
+  if (!scheduledAt) return 'Flexible anytime';
+  const d = new Date(scheduledAt);
+  const datePart = d.toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+  const timePart = d.toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  return `${datePart} · ${timePart}`;
+}
+
+const DEFAULT_ICON = L.divIcon({
+  className: 'category-marker',
+  html: `
+    <div style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#3F6B4E" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+      </svg>
+    </div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -30],
+});
+
+export function categoryIcon() {
+  return DEFAULT_ICON;
 }
