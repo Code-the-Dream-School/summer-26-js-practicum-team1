@@ -235,7 +235,10 @@ function Browse() {
           variant="outlined"
           fullWidth
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            markInteracted();
+            setSearch(e.target.value);
+          }}
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <SearchIcon />
@@ -389,7 +392,10 @@ function Browse() {
                     <Pagination
                       page={page}
                       count={meta.totalPages}
-                      onChange={(_, value) => setPage(value)}
+                      onChange={(_, value) => {
+                        markInteracted();
+                        setPage(value);
+                      }}
                       color="primary"
                     />
                   </Stack>
