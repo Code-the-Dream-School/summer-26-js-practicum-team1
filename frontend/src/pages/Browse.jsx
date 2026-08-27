@@ -378,9 +378,9 @@ function Browse() {
               setSelectedUrgencies((prev) => toggleInArray(prev, key));
             }}
             distance={distance}
-            onDistanceChange={() => {
+            onDistanceChange={(newDistance) => {
               markInteracted();
-              setDistance;
+              setDistance(newDistance);
             }}
             selectedDays={selectedDays}
             onToggleDay={(day) => {
