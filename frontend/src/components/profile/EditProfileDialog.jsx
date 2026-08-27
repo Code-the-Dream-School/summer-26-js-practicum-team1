@@ -10,13 +10,11 @@ import {
   TextField,
 } from '@mui/material';
 
+import ServiceAreaPicker from '../profile/ServiceAreaPicker';
 import { useUpdateProfile } from '../../hooks/requesterProfile/useUpdateProfile';
 
-function EditProfileDialog({ open, onClose, formData }) {
+function EditProfileDialog({ open, onClose, form, setForm }) {
   const updateProfile = useUpdateProfile();
-
-  const [form, setForm] = useState(formData);
-
   const [errors, setErrors] = useState({});
 
   const handleChange = (event) => {
@@ -34,10 +32,36 @@ function EditProfileDialog({ open, onClose, formData }) {
     }));
   };
 
+  const handleAddressChange = (location) => {
+    setForm((previous) => ({
+      ...previous,
+      address: location?.label ?? '',
+      city: location?.city ?? '',
+      latitude: location?.latitude ?? null,
+      longitude: location?.longitude ?? null,
+      placeId: location?.placeId ?? null,
+    }));
+
+    setErrors((previous) => ({
+      ...previous,
+      address: '',
+      city: '',
+      general: '',
+    }));
+  };
+
   const handleSubmit = () => {
     setErrors({});
 
-    updateProfile.mutate(form, {
+    const profileData = {
+      phone: form.phone,
+      address: form.address,
+      city: form.city,
+      bio: form.bio,
+      emergencyContact: form.emergencyContact,
+    };
+
+    updateProfile.mutate(profileData, {
       onSuccess: () => {
         onClose();
       },
@@ -68,7 +92,6 @@ function EditProfileDialog({ open, onClose, formData }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle
-        variant="h5"
         sx={{
           fontWeight: 700,
           fontSize: {
@@ -94,14 +117,15 @@ function EditProfileDialog({ open, onClose, formData }) {
             fullWidth
           />
 
-          <TextField
-            name="address"
-            label="Address"
-            value={form.address}
-            onChange={handleChange}
-            error={Boolean(errors.address)}
-            helperText={errors.address}
-            fullWidth
+          <ServiceAreaPicker
+            value={{
+              label: form.address,
+              city: form.city,
+              latitude: form.latitude,
+              longitude: form.longitude,
+              placeId: form.placeId,
+            }}
+            onChange={handleAddressChange}
           />
 
           <TextField
@@ -146,7 +170,6 @@ function EditProfileDialog({ open, onClose, formData }) {
             borderRadius: 1,
             boxShadow: 3,
             transition: '0.3s',
-
             '&:hover': {
               boxShadow: 8,
               transform: 'translateY(-4px)',
@@ -164,7 +187,6 @@ function EditProfileDialog({ open, onClose, formData }) {
             borderRadius: 1,
             boxShadow: 3,
             transition: '0.3s',
-
             '&:hover': {
               boxShadow: 8,
               transform: 'translateY(-4px)',

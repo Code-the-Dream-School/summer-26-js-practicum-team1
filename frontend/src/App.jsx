@@ -78,6 +78,10 @@ function App() {
           />
         </Route>
 
+        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
+        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
+
         {/* Volunteer Routes */}
         <Route
           element={

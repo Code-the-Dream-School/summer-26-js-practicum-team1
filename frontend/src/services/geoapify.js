@@ -8,10 +8,18 @@ export function hasGeoapifyKey() {
   return Boolean(getApiKey());
 }
 
-/**
- * Shared Geoapify autocomplete helper (profile service area, help-request address, etc.).
- * Returns stable labeled results with coordinates (not free-text).
- */
+function getCity(props) {
+  return (
+    props.city ||
+    props.town ||
+    props.village ||
+    props.municipality ||
+    props.suburb ||
+    props.district ||
+    ''
+  );
+}
+
 export async function searchPlaces(query) {
   const apiKey = getApiKey();
   const text = query?.trim();
@@ -35,17 +43,26 @@ export async function searchPlaces(query) {
   }
 
   const data = await response.json();
-  const results = data.features || [];
 
-  return results
+  return (data.features || [])
     .map((feature) => {
       const props = feature.properties || {};
+
+      const city = getCity(props);
       const lat = props.lat;
       const lon = props.lon;
 
       const label =
         props.formatted ||
-        [props.city, props.state, props.country].filter(Boolean).join(', ');
+        [
+          props.address_line1,
+          props.address_line2,
+          props.city,
+          props.state,
+          props.country,
+        ]
+          .filter(Boolean)
+          .join(', ');
 
       if (lat == null || lon == null || !label) {
         return null;
@@ -53,6 +70,10 @@ export async function searchPlaces(query) {
 
       return {
         label,
+        city,
+        state: props.state || '',
+        postcode: props.postcode || '',
+        country: props.country || '',
         latitude: Number(lat),
         longitude: Number(lon),
         placeId: props.place_id || null,

@@ -70,11 +70,14 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  volunteerProfile       VolunteerProfile?
-  requesterProfile       RequesterProfile?
+  volunteerProfile VolunteerProfile?
+  requesterProfile RequesterProfile?
+
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
   helpRequests           HelpRequest[]           @relation("RequesterHelpRequests")
   acceptedHelpRequests   HelpRequest[]           @relation("VolunteerHelpRequests")
+  sentMessages           Message[]
+
 
   @@map("users")
 }
@@ -114,13 +117,13 @@ model VolunteerVerification {
 }
 
 model HelpRequest {
-  id          Int           @id @default(autoincrement())
-  requesterId Int
-  volunteerId Int?
-  title       String        @db.VarChar(100)
-  category    Category
-  urgency     Urgency
-  scheduledAt DateTime
+  id           Int           @id @default(autoincrement())
+  requesterId  Int
+  volunteerId  Int?
+  title        String        @db.VarChar(100)
+  category     Category
+  urgency      Urgency
+  scheduledAt  DateTime
   scheduledDayOfWeek Int    @default(dbgenerated())
   address     String
   latitude    Float
@@ -130,8 +133,7 @@ model HelpRequest {
   createdAt   DateTime      @default(now())
   completedAt DateTime?
   requester   User          @relation("RequesterHelpRequests", fields: [requesterId], references: [id])
-
-  requester User @relation(fields: [requesterId], references: [id])
+ conversation Conversation?
   volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [userId])
   @@index([scheduledDayOfWeek])
 }
@@ -146,6 +148,33 @@ model RequesterProfile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("requester_profiles")
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  requestId Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  request  HelpRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  content        String    @db.VarChar(1000)
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
 }
 
 model SupportCategory {
