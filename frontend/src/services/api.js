@@ -6,17 +6,104 @@ const api = axios.create({
   withCredentials: true,
 });
 
+/**
+ * Build common filter parameters for browse help requests.
+ */
+function buildFilterParams(filters = {}) {
+  const params = {};
+
+  if (filters.category) {
+    params.category = filters.category;
+  }
+
+  if (filters.urgency) {
+    params.urgency = filters.urgency;
+  }
+
+  if (filters.status) {
+    params.status = filters.status;
+  }
+
+  if (filters.search) {
+    params.search = filters.search;
+  }
+
+  if (filters.latitude !== undefined && filters.latitude !== null) {
+    params.latitude = filters.latitude;
+  }
+
+  if (filters.longitude !== undefined && filters.longitude !== null) {
+    params.longitude = filters.longitude;
+  }
+
+  if (filters.radius !== undefined && filters.radius !== null) {
+    params.radius = filters.radius;
+  }
+
+  if (filters.startDate) {
+    params.startDate = filters.startDate;
+  }
+
+  if (filters.endDate) {
+    params.endDate = filters.endDate;
+  }
+
+  return params;
+}
+
+/**
+ * Build parameters for browse help requests.
+ */
+function buildHelpRequestParams(filters = {}) {
+  const params = buildFilterParams(filters);
+
+  if (filters.sortField) {
+    params.sort = `${filters.sortField}:${filters.sortDir || 'desc'}`;
+  }
+
+  if (filters.page) {
+    params.page = filters.page;
+  }
+
+  if (filters.pageSize) {
+    params.pageSize = filters.pageSize;
+  }
+
+  return params;
+}
+
+/**
+ * Build parameters for category facets.
+ *
+ * Category itself is excluded because the facet endpoint
+ * should return category counts for the other active filters.
+ */
+function buildFacetsParams(filters = {}) {
+  const { category, ...rest } = filters;
+
+  return buildFilterParams(rest);
+}
+
+/**
+ * Get hello message.
+ */
 export async function getHello() {
   const { data } = await api.get('/api/hello');
+
   return data.message;
 }
 
+/**
+ * Login.
+ */
 export async function login(email, password) {
   try {
     const { data } = await api.post(
       '/api/auth/logon',
       { email, password },
-      { withCredentials: true }
+      {
+        withCredentials: true,
+      }
     );
 
     return data;
@@ -33,12 +120,18 @@ export async function login(email, password) {
   }
 }
 
-
+/**
+ * Register a new user.
+ */
 export async function registerUser(userData) {
   try {
-    const { data } = await api.post('/api/auth/register', userData, {
-      withCredentials: true,
-    });
+    const { data } = await api.post(
+      '/api/auth/register',
+      userData,
+      {
+        withCredentials: true,
+      }
+    );
 
     return data;
   } catch (err) {
@@ -50,8 +143,13 @@ export async function registerUser(userData) {
       err.response.status === 400 &&
       err.response.data?.details
     ) {
-      const validationError = new Error('VALIDATION_FAILED');
-      validationError.details = err.response.data.details;
+      const validationError = new Error(
+        'VALIDATION_FAILED'
+      );
+
+      validationError.details =
+        err.response.data.details;
+
       throw validationError;
     }
 
@@ -59,24 +157,39 @@ export async function registerUser(userData) {
   }
 }
 
-/* Create a new help request */
-export async function createHelpRequest(data, csrfToken) {
+/**
+ * Create a new help request.
+ */
+export async function createHelpRequest(
+  data,
+  csrfToken
+) {
   try {
-    const { data: responseData } = await api.post('/api/requests', data, {
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-      },
-      withCredentials: true,
-    });
+    const { data: responseData } = await api.post(
+      '/api/requests',
+      data,
+      {
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        withCredentials: true,
+      }
+    );
 
     return responseData;
   } catch (err) {
-    console.error('Error creating help request:', err);
+    console.error(
+      'Error creating help request:',
+      err
+    );
+
     throw err;
   }
 }
 
-/*Get help requests*/
+/**
+ * Get help requests belonging to the current user.
+ */
 export async function getHelpRequests() {
   try {
     const { data } = await api.get(
@@ -92,10 +205,92 @@ export async function getHelpRequests() {
       'Error getting help requests:',
       err
     );
+
     throw err;
   }
 }
-/* Get one help request by ID */
+
+/**
+ * Get help requests for Browse page.
+ */
+export async function getBrowseHelpRequests(
+  filters = {}
+) {
+  try {
+    const { data } = await api.get(
+      '/api/requests',
+      {
+        params: buildHelpRequestParams(filters),
+        withCredentials: true,
+      }
+    );
+
+    /*
+     * Supports an API response like:
+     * {
+     *   data: [...],
+     *   meta: {...}
+     * }
+     */
+    return {
+      data: data.data,
+      meta: data.meta,
+    };
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+
+    if (err.response.status === 400) {
+      throw new Error(
+        err.response.data?.message ||
+          'INVALID_REQUEST'
+      );
+    }
+
+    throw new Error(
+      'FETCH_HELP_REQUESTS_FAILED'
+    );
+  }
+}
+
+/**
+ * Get category facet counts for Browse page.
+ */
+export async function getCategoryFacets(
+  filters = {}
+) {
+  try {
+    const { data } = await api.get(
+      '/api/requests/facets',
+      {
+        params: buildFacetsParams(filters),
+        withCredentials: true,
+      }
+    );
+
+    return data.categoryCounts;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+
+    if (err.response.status === 400) {
+      throw new Error(
+        err.response.data?.message ||
+          'INVALID_REQUEST'
+      );
+    }
+
+    throw new Error(
+      'FETCH_CATEGORY_FACETS_FAILED'
+    );
+  }
+}
+
+/**
+ * Get one help request by ID.
+ */
 export async function getHelpRequestById(
   id,
   csrfToken
@@ -111,17 +306,23 @@ export async function getHelpRequestById(
       }
     );
 
-    return data;
+    return data.data;
   } catch (err) {
     console.error(
       'Error getting help request:',
       err
     );
+
     throw err;
   }
 }
-/* Get volunteer profile for an accepted help request */
-export async function getAcceptedVolunteerProfile(requestId) {
+
+/**
+ * Get volunteer profile for an accepted help request.
+ */
+export async function getAcceptedVolunteerProfile(
+  requestId
+) {
   try {
     const { data } = await api.get(
       `/api/requests/${requestId}/volunteer`,
@@ -136,26 +337,31 @@ export async function getAcceptedVolunteerProfile(requestId) {
       'Error getting accepted volunteer profile:',
       err
     );
+
     throw err;
   }
 }
-/* Update an existing help request */
+
+/**
+ * Update an existing help request.
+ */
 export async function updateHelpRequest(
   id,
   data,
   csrfToken
 ) {
   try {
-    const { data: responseData } = await api.patch(
-      `/api/requests/${id}`,
-      data,
-      {
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-        },
-        withCredentials: true,
-      }
-    );
+    const { data: responseData } =
+      await api.patch(
+        `/api/requests/${id}`,
+        data,
+        {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          withCredentials: true,
+        }
+      );
 
     return responseData;
   } catch (err) {
@@ -163,26 +369,30 @@ export async function updateHelpRequest(
       'Error updating help request:',
       err
     );
+
     throw err;
   }
 }
 
-/* Cancel a help request */
+/**
+ * Cancel a help request.
+ */
 export async function cancelHelpRequest(
   id,
   csrfToken
 ) {
   try {
-    const { data: responseData } = await api.patch(
-      `/api/requests/${id}/cancel`,
-      {},
-      {
-        headers: {
-          'X-CSRF-TOKEN': csrfToken,
-        },
-        withCredentials: true,
-      }
-    );
+    const { data: responseData } =
+      await api.patch(
+        `/api/requests/${id}/cancel`,
+        {},
+        {
+          headers: {
+            'X-CSRF-TOKEN': csrfToken,
+          },
+          withCredentials: true,
+        }
+      );
 
     return responseData;
   } catch (err) {
@@ -190,12 +400,13 @@ export async function cancelHelpRequest(
       'Error cancelling help request:',
       err
     );
+
     throw err;
   }
 }
 
 /**
- * Logout
+ * Logout.
  */
 export async function logout(csrfToken) {
   try {
@@ -218,6 +429,7 @@ export async function logout(csrfToken) {
       console.warn(
         'Logout CSRF check failed, session may still be active'
       );
+
       return;
     }
 
@@ -226,7 +438,7 @@ export async function logout(csrfToken) {
 }
 
 /**
- * Get current logged-in user
+ * Get current logged-in user.
  */
 export async function getMe() {
   try {
@@ -244,7 +456,7 @@ export async function getMe() {
 }
 
 /**
- * Get current user's profile
+ * Get current user's profile.
  */
 export async function getProfile() {
   const { data } = await api.get(

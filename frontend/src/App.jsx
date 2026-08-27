@@ -19,7 +19,7 @@ import NewhelpRequest from './pages/Requester/helpRequest';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
-import AdminProtectedRoute from './components/auth/AdminProtectedRoute';
+
 
 function App() {
   return (
