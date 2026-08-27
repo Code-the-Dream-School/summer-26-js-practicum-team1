@@ -29,11 +29,23 @@ export function viewToggleSx(active) {
 export function mapInterestsToCategoryKeys(interests = []) {
   if (!Array.isArray(interests)) return [];
   const interestNames = new Set(
-    interests.map((interest) => interest?.name).filter(Boolean)
+    interests
+      .map((interest) =>
+        typeof interest === 'string' ? interest : interest?.name
+      )
+      .filter(Boolean)
+      .map((name) => name.toLowerCase().replace(/[^a-z0-9]/g, ''))
   );
-  return CATEGORIES.filter((c) => interestNames.has(c.apiValue)).map(
-    (c) => c.key
-  );
+  return CATEGORIES.filter((c) => {
+    const apiValNormalized = c.apiValue.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const labelNormalized = c.label.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const keyNormalized = c.key.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return (
+      interestNames.has(apiValNormalized) ||
+      interestNames.has(labelNormalized) ||
+      interestNames.has(keyNormalized)
+    );
+  }).map((c) => c.key);
 }
 
 export function mapSlotsToDays(slots = []) {
