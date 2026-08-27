@@ -64,7 +64,11 @@ export function mapSlotsToDays(slots = []) {
 }
 
 export function buildLocationOptionFromProfile(volunteer) {
-  if (!volunteer?.serviceArea || volunteer.serviceLatitude == null) {
+  if (
+    !volunteer?.serviceArea ||
+    volunteer.serviceLatitude == null ||
+    volunteer.serviceLongitude == null
+  ) {
     return null;
   }
   return {
