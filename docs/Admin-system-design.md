@@ -62,17 +62,17 @@ Frontend redirects improve user experience, but access permissions must always b
 
 ## When Volunteer Application Is Submitted
 
-- User account exists.
+- User account exists with role `VOLUNTEER`.
 - `VolunteerProfile` record is created.
 - `verificationStatus` is set to `PENDING`.
-- User role remains `REQUESTER`.
+- Access to volunteer features stays blocked until approval (`requireApprovedIfVolunteer`).
 
 ---
 
 ## After Approval
 
 - `VolunteerProfile.verificationStatus` changes to `APPROVED`.
-- User role changes from `REQUESTER` to `VOLUNTEER`.
+- User role remains `VOLUNTEER` (already set at signup).
 - A `VolunteerVerification` record is created for approval history.
 - User gains access to volunteer features.
 
@@ -81,7 +81,7 @@ Frontend redirects improve user experience, but access permissions must always b
 ## After Rejection
 
 - `VolunteerProfile.verificationStatus` changes to `REJECTED`.
-- User role remains unchanged.
+- User role remains `VOLUNTEER`.
 - A `VolunteerVerification` record is created for rejection history.
 - User cannot access volunteer features.
 
