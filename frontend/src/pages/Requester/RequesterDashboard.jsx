@@ -18,7 +18,6 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-
 import { getMe, getHelpRequests } from '../../services/api';
 
 const URGENCY_STYLES = {
@@ -72,11 +71,7 @@ function getStatusStyle(status) {
   return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
 }
 
-function RequestCard({
-  request,
-  expandedRequest,
-  setExpandedRequest,
-}) {
+function RequestCard({ request, expandedRequest, setExpandedRequest }) {
   const accepted = request.status === 'ACCEPTED';
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
@@ -90,22 +85,22 @@ function RequestCard({
 
   return (
     <Card
-  sx={{
-    borderRadius: 3,
-    borderLeft: `4px solid ${urgencyStyle.border}`,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignSelf: 'start',
-  }}
->
-  <CardContent
-    sx={{
-      p: { xs: 2.5, md: 3 },
-      display: 'flex',
-      flexDirection: 'column',
-    }}
-  >
+      sx={{
+        borderRadius: 3,
+        borderLeft: `4px solid ${urgencyStyle.border}`,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignSelf: 'start',
+      }}
+    >
+      <CardContent
+        sx={{
+          p: { xs: 2.5, md: 3 },
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {/* Status */}
         <Box
           sx={{
@@ -162,48 +157,45 @@ function RequestCard({
             {/* Date */}
             <Typography
               variant="body2"
-            
-               sx={{
-    color: '#166534',
-    fontSize: '1rem',
-    fontWeight: 700,
-    mt: 0.5,
-  }}
+
+              sx={{
+                color: '#166534',
+                fontSize: '1rem',
+                fontWeight: 700,
+                mt: 0.5,
+              }}
             >
               Date:{' '}
-  <Box
-    component="span"
-    sx={{ color: '#aa7b23', fontWeight: 700 }}
-  >
-    {request.scheduledAt
-      ? new Date(request.scheduledAt).toLocaleDateString()
-      : 'Date not available'}
-  </Box>
-</Typography>
+              <Box component="span" sx={{ color: '#aa7b23', fontWeight: 700 }}>
+                {request.scheduledAt
+                  ? new Date(request.scheduledAt).toLocaleDateString()
+                  : 'Date not available'}
+              </Box>
+            </Typography>
 
             {/* Time */}
             <Typography
               variant="body2"
-            
-               sx={{
-    color: '#166534',
-    fontSize: '1rem',
-    fontWeight: 700,
-    mt: 0.5,
-  }}
+
+              sx={{
+                color: '#166534',
+                fontSize: '1rem',
+                fontWeight: 700,
+                mt: 0.5,
+              }}
             >
               Time:{' '}
-             <Box
-    component="span"
-    sx={{ color: '#aa7b23ff', fontWeight: 700 }}
-  >
-    {request.scheduledAt
-      ? new Date(request.scheduledAt).toLocaleTimeString([], {
-          hour: 'numeric',
-          minute: '2-digit',
-        })
-      : 'Time not available'}
-  </Box>
+              <Box
+                component="span"
+                sx={{ color: '#aa7b23ff', fontWeight: 700 }}
+              >
+                {request.scheduledAt
+                  ? new Date(request.scheduledAt).toLocaleTimeString([], {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })
+                  : 'Time not available'}
+              </Box>
             </Typography>
           </Box>
         </Box>
@@ -266,11 +258,7 @@ function RequestCard({
         </Box>
 
         {/* Expanded Details */}
-        <Collapse
-          in={isExpanded}
-          timeout="auto"
-          unmountOnExit
-        >
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
           <Box
             sx={{
               mt: 2,
@@ -300,8 +288,7 @@ function RequestCard({
               }}
             >
               <strong>Description:</strong>{' '}
-              {request.description ||
-                'No description provided.'}
+              {request.description || 'No description provided.'}
             </Typography>
 
             {/* Location */}
@@ -331,8 +318,7 @@ function RequestCard({
                 }}
               >
                 <strong>Location:</strong>{' '}
-                {request.address ||
-                  'Address not available'}
+                {request.address || 'Address not available'}
               </Typography>
             </Box>
 
@@ -345,8 +331,7 @@ function RequestCard({
                 fontSize: '1rem',
               }}
             >
-              <strong>Category:</strong>{' '}
-              {request.category}
+              <strong>Category:</strong> {request.category}
             </Typography>
 
             {/* Urgency */}
@@ -358,8 +343,7 @@ function RequestCard({
                 fontSize: '1rem',
               }}
             >
-              <strong>Urgency:</strong>{' '}
-              {request.urgency}
+              <strong>Urgency:</strong> {request.urgency}
             </Typography>
 
             {/* Status */}
@@ -371,8 +355,7 @@ function RequestCard({
                 fontSize: '1rem',
               }}
             >
-              <strong>Status:</strong>{' '}
-              {statusStyle.label}
+              <strong>Status:</strong> {statusStyle.label}
             </Typography>
 
             {/* Volunteer Information */}
@@ -409,9 +392,7 @@ function RequestCard({
                       fontSize: 16,
                     }}
                   >
-                    {request.volunteer.name
-                      ?.charAt(0)
-                      ?.toUpperCase()}
+                    {request.volunteer.name?.charAt(0)?.toUpperCase()}
                   </Avatar>
 
                   <Box>
@@ -432,8 +413,7 @@ function RequestCard({
                         fontSize: '1rem',
                       }}
                     >
-                      {request.volunteer.name ||
-                        'Not available'}
+                      {request.volunteer.name || 'Not available'}
                     </Typography>
                   </Box>
                 </Box>
@@ -448,8 +428,7 @@ function RequestCard({
                       fontSize: '1rem',
                     }}
                   >
-                    <strong>Phone:</strong>{' '}
-                    {request.volunteer.phone}
+                    <strong>Phone:</strong> {request.volunteer.phone}
                   </Typography>
                 )}
 
@@ -463,8 +442,7 @@ function RequestCard({
                       fontSize: '1rem',
                     }}
                   >
-                    <strong>Email:</strong>{' '}
-                    {request.volunteer.email}
+                    <strong>Email:</strong> {request.volunteer.email}
                   </Typography>
                 )}
               </Box>
@@ -486,8 +464,7 @@ export default function RequesterDashboard() {
   const [filter, setFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('SOONEST');
 
-  const [expandedRequest, setExpandedRequest] =
-    useState(null);
+  const [expandedRequest, setExpandedRequest] = useState(null);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -507,14 +484,9 @@ export default function RequesterDashboard() {
         const response = await getHelpRequests();
         setRequests(response.data || []);
       } catch (err) {
-        console.error(
-          'Failed to load dashboard:',
-          err
-        );
+        console.error('Failed to load dashboard:', err);
 
-        setError(
-          'Unable to load your requests. Please try again.'
-        );
+        setError('Unable to load your requests. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -537,30 +509,22 @@ export default function RequesterDashboard() {
     let list = requests;
 
     if (filter === 'PENDING') {
-      list = requests.filter(
-        (request) => request.status === 'PENDING'
-      );
+      list = requests.filter((request) => request.status === 'PENDING');
     }
 
     if (filter === 'ACCEPTED') {
-      list = requests.filter(
-        (request) => request.status === 'ACCEPTED'
-      );
+      list = requests.filter((request) => request.status === 'ACCEPTED');
     }
 
     const sorted = [...list];
 
     if (sortBy === 'URGENCY') {
       sorted.sort(
-        (a, b) =>
-          (urgencyRank[a.urgency] ?? 3) -
-          (urgencyRank[b.urgency] ?? 3)
+        (a, b) => (urgencyRank[a.urgency] ?? 3) - (urgencyRank[b.urgency] ?? 3)
       );
     } else {
       sorted.sort(
-        (a, b) =>
-          new Date(a.scheduledAt || 0) -
-          new Date(b.scheduledAt || 0)
+        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
       );
     }
 
@@ -583,9 +547,7 @@ export default function RequesterDashboard() {
   }
 
   return (
-    <Box
-      
-    >
+    <Box>
       {/* Welcome section - centered across the full page */}
       <Box
         sx={{
@@ -631,9 +593,7 @@ export default function RequesterDashboard() {
       </Box>
 
       {/* Main Content */}
-      <Box
-        
-      >
+      <Box>
         {/* Error message */}
         {error && (
           <Typography
@@ -648,75 +608,51 @@ export default function RequesterDashboard() {
         )}
 
         {/* Filters, sorting, and New Request */}
-       <Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 7,
-    mb: 3,
-    flexWrap: 'wrap',
-  }}
->
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            mb: 3,
+            flexWrap: 'wrap',
+          }}
+        >
           {/* Filter chips */}
-          {['ALL', 'PENDING', 'ACCEPTED'].map(
-            (key) => (
-              <Chip
-                key={key}
-                
-                label={
-                  key.charAt(0) +
-                  key.slice(1).toLowerCase()
-                }
-                onClick={() => setFilter(key)}
-                sx={{
-                  minHeight: 44,
-                  px: 1,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  backgroundColor:
-                    filter === key
-                      ? '#1E293B'
-                      : 'transparent',
-                  color:
-                    filter === key
-                      ? '#FFFFFF'
-                      : 'text.secondary',
-                  border:
-                    filter === key
-                      ? 'none'
-                      : '1px solid #E2E8F0',
-                  '&:hover': {
-                    backgroundColor:
-                      filter === key
-                        ? '#1E293B'
-                        : '#F1F5F9',
-                  },
-                }}
-              />
-            )
-          )}
+          {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
+            <Chip
+              key={key}
+
+              label={key.charAt(0) + key.slice(1).toLowerCase()}
+              onClick={() => setFilter(key)}
+              sx={{
+                minHeight: 44,
+                px: 1,
+                fontSize: '1rem',
+                fontWeight: 600,
+                backgroundColor: filter === key ? '#1E293B' : 'transparent',
+                color: filter === key ? '#FFFFFF' : 'text.secondary',
+                border: filter === key ? 'none' : '1px solid #E2E8F0',
+                '&:hover': {
+                  backgroundColor: filter === key ? '#1E293B' : '#F1F5F9',
+                },
+              }}
+            />
+          ))}
 
           {/* Sorting */}
           <Select
-  value={sortBy}
-  onChange={(event) =>
-    setSortBy(event.target.value)
-  }
-  sx={{
-  
-    minWidth: 180,
-    minHeight: 44,
-    backgroundColor: '#FFFFFF',
-    fontSize: '1rem',
-  }}
->
-            <MenuItem value="SOONEST">
-              Sort: soonest
-            </MenuItem>
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value)}
+            sx={{
+              minWidth: 180,
+              minHeight: 44,
+              backgroundColor: '#FFFFFF',
+              fontSize: '1rem',
+            }}
+          >
+            <MenuItem value="SOONEST">Sort: soonest</MenuItem>
 
-            <MenuItem value="URGENCY">
-              Sort: urgency
-            </MenuItem>
+            <MenuItem value="URGENCY">Sort: urgency</MenuItem>
           </Select>
 
           {/* New Request */}
@@ -745,10 +681,7 @@ export default function RequesterDashboard() {
               fontSize: '1rem',
             }}
           >
-            You don't have any{' '}
-            {filter !== 'ALL'
-              ? filter.toLowerCase()
-              : ''}{' '}
+            You don't have any {filter !== 'ALL' ? filter.toLowerCase() : ''}{' '}
             requests.
           </Typography>
         ) : (
@@ -768,9 +701,7 @@ export default function RequesterDashboard() {
                 key={request.id}
                 request={request}
                 expandedRequest={expandedRequest}
-                setExpandedRequest={
-                  setExpandedRequest
-                }
+                setExpandedRequest={setExpandedRequest}
               />
             ))}
           </Box>
