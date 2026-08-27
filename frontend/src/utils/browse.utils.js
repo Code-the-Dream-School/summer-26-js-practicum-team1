@@ -52,8 +52,14 @@ export function mapSlotsToDays(slots = []) {
   if (!Array.isArray(slots)) return [];
   const days = slots
     .map((slot) => {
+      const rawDay = slot?.dayOfWeek;
+      if (!rawDay) return undefined;
+      const normalizedDay = String(rawDay).toUpperCase();
       const match = DAYS_OF_WEEK.find(
-        (d) => d.full.toUpperCase() === slot?.dayOfWeek
+        (d) =>
+          d.full.toUpperCase() === normalizedDay ||
+          normalizedDay.startsWith(d.full.toUpperCase()) ||
+          d.short.toUpperCase() === normalizedDay
       );
       return match?.day;
     })
