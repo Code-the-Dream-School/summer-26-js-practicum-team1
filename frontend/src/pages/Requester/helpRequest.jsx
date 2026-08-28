@@ -1,46 +1,43 @@
-import { searchPlaces, reverseGeocode } from '../../services/geoapify';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Box,
-  Button,
-  MenuItem,
-  TextField,
   Typography,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
+
+import {
+  searchPlaces,
+  reverseGeocode,
+} from '../../services/geoapify';
 
 import { useHelpRequests } from '../../hooks/useHelpRequests';
 import { useAuth } from '../../hooks/useAuth';
 
-const categories = [
-  { label: 'Grocery', value: 'GROCERY' },
-  { label: 'Transportation', value: 'TRANSPORTATION' },
-  { label: 'Household Chores', value: 'HOUSEHOLD_CHORES' },
-  { label: 'Yard Work', value: 'YARD_WORK' },
-  { label: 'Pet Care', value: 'PET_CARE' },
-  { label: 'Tech Support', value: 'TECH_SUPPORT' },
-  { label: 'Companionship', value: 'COMPANIONSHIP' },
-  { label: 'Meal Prep', value: 'MEAL_PREP' },
-  { label: 'Medical Errand', value: 'MEDICAL_ERRAND' },
-  { label: 'Other', value: 'OTHER' },
-];
+import HelpRequestForm from '../../components/newRequest/HelpRequestForm';
+import RequestLocationField from '../../components/newRequest/RequestLocationField';
+import RequestFormActions from '../../components/newRequest/RequestFormActions';
 
-const urgencies = [
-  { label: 'Low', value: 'LOW' },
-  { label: 'Medium', value: 'MEDIUM' },
-  { label: 'High', value: 'HIGH' },
-];
+import {
+  CATEGORY,
+  URGENCY_OPTIONS,
+} from '../../utils/requester.constants';
 
 function NewHelpRequest() {
   const navigate = useNavigate();
+
   const { user } = useAuth();
 
-  const { createHelpRequest, isCreating } = useHelpRequests();
+  const {
+    createHelpRequest,
+    isCreating,
+  } = useHelpRequests();
 
   const addressSearchTimeoutRef = useRef(null);
+
+  /* =========================================================
+     FORM DATA
+  ========================================================= */
 
   const [formData, setFormData] = useState({
     title: '',
@@ -52,17 +49,34 @@ function NewHelpRequest() {
     address: '',
   });
 
+  /* =========================================================
+     LOCATION
+  ========================================================= */
+
   const [coordinates, setCoordinates] = useState({
     latitude: null,
     longitude: null,
   });
 
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [locationSuggestions, setLocationSuggestions] =
+    useState([]);
+
+  const [isSearchingLocation, setIsSearchingLocation] =
+    useState(false);
+
+  const [isGettingLocation, setIsGettingLocation] =
+    useState(false);
+
+  /* =========================================================
+     MESSAGES
+  ========================================================= */
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  /* =========================================================
+     FIELD ERRORS
+  ========================================================= */
 
   const [fieldErrors, setFieldErrors] = useState({
     title: '',
@@ -73,6 +87,10 @@ function NewHelpRequest() {
     address: '',
   });
 
+  /* =========================================================
+     CLEAN UP ADDRESS SEARCH TIMER
+  ========================================================= */
+
   useEffect(() => {
     return () => {
       if (addressSearchTimeoutRef.current) {
@@ -80,6 +98,10 @@ function NewHelpRequest() {
       }
     };
   }, []);
+
+  /* =========================================================
+     FORM FIELD CHANGE
+  ========================================================= */
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -96,6 +118,10 @@ function NewHelpRequest() {
       [name]: '',
     }));
   };
+
+  /* =========================================================
+     ADDRESS CHANGE
+  ========================================================= */
 
   const handleAddressChange = (event) => {
     const value = event.target.value;
@@ -129,26 +155,36 @@ function NewHelpRequest() {
 
     setIsSearchingLocation(true);
 
-    addressSearchTimeoutRef.current = setTimeout(async () => {
-      try {
-        const results = await searchPlaces(value);
+    addressSearchTimeoutRef.current = setTimeout(
+      async () => {
+        try {
+          const results = await searchPlaces(value);
 
-        setLocationSuggestions(results);
-      } catch (locationError) {
-        console.error('Location search failed:', locationError);
+          setLocationSuggestions(results);
+        } catch (locationError) {
+          console.error(
+            'Location search failed:',
+            locationError
+          );
 
-        setLocationSuggestions([]);
+          setLocationSuggestions([]);
 
-        setFieldErrors((previous) => ({
-          ...previous,
-          address:
-            'We could not search for this address. Please try again or use your current location.',
-        }));
-      } finally {
-        setIsSearchingLocation(false);
-      }
-    }, 300);
+          setFieldErrors((previous) => ({
+            ...previous,
+            address:
+              'We could not search for this address. Please try again or use your current location.',
+          }));
+        } finally {
+          setIsSearchingLocation(false);
+        }
+      },
+      300
+    );
   };
+
+  /* =========================================================
+     SELECT ADDRESS SUGGESTION
+  ========================================================= */
 
   const handleSelectAddress = (location) => {
     setFormData((previous) => ({
@@ -170,11 +206,16 @@ function NewHelpRequest() {
     }));
   };
 
+  /* =========================================================
+     GET CURRENT LOCATION
+  ========================================================= */
+
   const handleGetCurrentAddress = () => {
     if (!navigator.geolocation) {
       setError(
         'Geolocation is not supported by this browser. Please enter your address manually.'
       );
+
       return;
     }
 
@@ -184,7 +225,10 @@ function NewHelpRequest() {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const { latitude, longitude } = position.coords;
+        const {
+          latitude,
+          longitude,
+        } = position.coords;
 
         setCoordinates({
           latitude,
@@ -197,9 +241,13 @@ function NewHelpRequest() {
         }));
 
         try {
-          const data = await reverseGeocode(latitude, longitude);
+          const data = await reverseGeocode(
+            latitude,
+            longitude
+          );
 
-          const currentAddress = data.features?.[0]?.properties?.formatted;
+          const currentAddress =
+            data.features?.[0]?.properties?.formatted;
 
           setFormData((previous) => ({
             ...previous,
@@ -208,7 +256,10 @@ function NewHelpRequest() {
               `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
           }));
         } catch (locationError) {
-          console.error('Unable to get current address:', locationError);
+          console.error(
+            'Unable to get current address:',
+            locationError
+          );
 
           setFormData((previous) => ({
             ...previous,
@@ -219,7 +270,10 @@ function NewHelpRequest() {
         }
       },
       (locationError) => {
-        console.error('Geolocation error:', locationError);
+        console.error(
+          'Geolocation error:',
+          locationError
+        );
 
         setError(
           'Unable to get your current location. Please allow location access and try again.'
@@ -230,40 +284,83 @@ function NewHelpRequest() {
     );
   };
 
+  /* =========================================================
+     SUBMIT FORM
+  ========================================================= */
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError('');
     setSuccess('');
-    setFieldErrors({});
+    setFieldErrors({
+      title: '',
+      category: '',
+      urgency: '',
+      date: '',
+      time: '',
+      address: '',
+    });
+
     setLocationSuggestions([]);
 
     const errors = {};
 
+    /* =======================================================
+       TITLE
+    ======================================================= */
+
     if (!formData.title.trim()) {
-      errors.title = 'Please enter a title for your help request.';
-    } else if (formData.title.trim().length > 100) {
-      errors.title = 'Title must be 100 characters or less.';
+      errors.title =
+        'Please enter a title for your help request.';
+    } else if (
+      formData.title.trim().length > 100
+    ) {
+      errors.title =
+        'Title must be 100 characters or less.';
     }
+
+    /* =======================================================
+       CATEGORY
+    ======================================================= */
 
     if (!formData.category) {
-      errors.category = 'Please select a category.';
+      errors.category =
+        'Please select a category.';
     }
 
+    /* =======================================================
+       URGENCY
+    ======================================================= */
+
     if (!formData.urgency) {
-      errors.urgency = 'Please select an urgency level.';
+      errors.urgency =
+        'Please select an urgency level.';
     }
+
+    /* =======================================================
+       DATE
+    ======================================================= */
 
     if (!formData.date) {
       errors.date = 'Please select a date.';
     }
 
+    /* =======================================================
+       TIME
+    ======================================================= */
+
     if (!formData.time) {
       errors.time = 'Please select a time.';
     }
 
+    /* =======================================================
+       ADDRESS
+    ======================================================= */
+
     if (!formData.address.trim()) {
-      errors.address = 'Please enter the address where help is needed.';
+      errors.address =
+        'Please enter the address where help is needed.';
     } else if (
       coordinates.latitude === null ||
       coordinates.longitude === null
@@ -272,13 +369,27 @@ function NewHelpRequest() {
         'Please select an address from the suggestions or use your current location.';
     }
 
+    /* =======================================================
+       DISPLAY VALIDATION ERRORS
+    ======================================================= */
+
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      setError('Please correct the highlighted fields and try again.');
+
+      setError(
+        'Please correct the highlighted fields and try again.'
+      );
+
       return;
     }
 
-    const scheduledAt = new Date(`${formData.date}T${formData.time}`);
+    /* =======================================================
+       CREATE DATE/TIME
+    ======================================================= */
+
+    const scheduledAt = new Date(
+      `${formData.date}T${formData.time}`
+    );
 
     if (Number.isNaN(scheduledAt.getTime())) {
       setFieldErrors({
@@ -286,9 +397,16 @@ function NewHelpRequest() {
         time: 'Please enter a valid time.',
       });
 
-      setError('Please enter a valid date and time.');
+      setError(
+        'Please enter a valid date and time.'
+      );
+
       return;
     }
+
+    /* =======================================================
+       FUTURE DATE VALIDATION
+    ======================================================= */
 
     if (scheduledAt <= new Date()) {
       setFieldErrors({
@@ -296,9 +414,16 @@ function NewHelpRequest() {
         time: 'Please select a future time.',
       });
 
-      setError('The help request date and time must be in the future.');
+      setError(
+        'The help request date and time must be in the future.'
+      );
+
       return;
     }
+
+    /* =======================================================
+       REQUEST PAYLOAD
+    ======================================================= */
 
     const request = {
       title: formData.title.trim(),
@@ -311,6 +436,10 @@ function NewHelpRequest() {
       description: formData.description.trim(),
     };
 
+    /* =======================================================
+       CREATE REQUEST
+    ======================================================= */
+
     try {
       await createHelpRequest({
         data: request,
@@ -320,6 +449,10 @@ function NewHelpRequest() {
       setSuccess(
         'Your help request has been submitted successfully! Our volunteers will review your request, and someone will be in touch with you soon.'
       );
+
+      /* =====================================================
+         RESET FORM
+      ===================================================== */
 
       setFormData({
         title: '',
@@ -336,16 +469,35 @@ function NewHelpRequest() {
         longitude: null,
       });
 
-      setFieldErrors({});
+      setFieldErrors({
+        title: '',
+        category: '',
+        urgency: '',
+        date: '',
+        time: '',
+        address: '',
+      });
+
+      /* =====================================================
+         RETURN TO DASHBOARD
+      ===================================================== */
 
       setTimeout(() => {
         navigate('/requester-dashboard');
       }, 3000);
     } catch (submitError) {
-      console.error('Create help request error:', submitError);
+      console.error(
+        'Create help request error:',
+        submitError
+      );
+
+      /* =====================================================
+         400 VALIDATION ERROR
+      ===================================================== */
 
       if (submitError.response?.status === 400) {
-        const serverDetails = submitError.response?.data?.details;
+        const serverDetails =
+          submitError.response?.data?.details;
 
         if (Array.isArray(serverDetails)) {
           const serverFieldErrors = {};
@@ -353,11 +505,14 @@ function NewHelpRequest() {
           serverDetails.forEach((detail) => {
             if (detail.field) {
               serverFieldErrors[detail.field] =
-                detail.message || 'This field is invalid.';
+                detail.message ||
+                'This field is invalid.';
             }
           });
 
-          if (Object.keys(serverFieldErrors).length > 0) {
+          if (
+            Object.keys(serverFieldErrors).length > 0
+          ) {
             setFieldErrors(serverFieldErrors);
           }
         }
@@ -369,6 +524,10 @@ function NewHelpRequest() {
         return;
       }
 
+      /* =====================================================
+         401 UNAUTHORIZED
+      ===================================================== */
+
       if (submitError.response?.status === 401) {
         setError(
           'Your session has expired. Please sign in again before submitting a help request.'
@@ -376,6 +535,10 @@ function NewHelpRequest() {
 
         return;
       }
+
+      /* =====================================================
+         403 FORBIDDEN
+      ===================================================== */
 
       if (submitError.response?.status === 403) {
         setError(
@@ -385,6 +548,10 @@ function NewHelpRequest() {
         return;
       }
 
+      /* =====================================================
+         409 CONFLICT
+      ===================================================== */
+
       if (submitError.response?.status === 409) {
         setError(
           'This help request could not be created because it conflicts with an existing request.'
@@ -392,6 +559,10 @@ function NewHelpRequest() {
 
         return;
       }
+
+      /* =====================================================
+         500 SERVER ERROR
+      ===================================================== */
 
       if (submitError.response?.status >= 500) {
         setError(
@@ -401,6 +572,10 @@ function NewHelpRequest() {
         return;
       }
 
+      /* =====================================================
+         NETWORK ERROR
+      ===================================================== */
+
       if (!submitError.response) {
         setError(
           'We could not connect to the server. Please check your internet connection and try again.'
@@ -409,11 +584,29 @@ function NewHelpRequest() {
         return;
       }
 
+      /* =====================================================
+         DEFAULT ERROR
+      ===================================================== */
+
       setError(
         'We could not create your help request. Please check your information and try again.'
       );
     }
   };
+
+  /* =========================================================
+     CANCEL
+  ========================================================= */
+
+  const handleCancel = () => {
+    if (!isCreating) {
+      navigate('/requester-dashboard');
+    }
+  };
+
+  /* =========================================================
+     PAGE UI
+  ========================================================= */
 
   return (
     <Box
@@ -436,6 +629,8 @@ function NewHelpRequest() {
           },
         }}
       >
+        {/* PAGE HEADER */}
+
         <Box
           sx={{
             textAlign: 'center',
@@ -446,7 +641,7 @@ function NewHelpRequest() {
             variant="h4"
             fontWeight={700}
             sx={{
-              color: '#050505ff',
+              color: '#050505',
               mb: 1,
             }}
           >
@@ -463,6 +658,8 @@ function NewHelpRequest() {
           </Typography>
         </Box>
 
+        {/* FORM CONTAINER */}
+
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -478,9 +675,12 @@ function NewHelpRequest() {
               sm: 5,
             },
             border: '1px solid #D7E5D8',
-            boxShadow: '0 4px 16px rgba(46, 125, 50, 0.08)',
+            boxShadow:
+              '0 4px 16px rgba(46, 125, 50, 0.08)',
           }}
         >
+          {/* ERROR */}
+
           {error && (
             <Alert
               severity="error"
@@ -492,6 +692,8 @@ function NewHelpRequest() {
               {error}
             </Alert>
           )}
+
+          {/* SUCCESS */}
 
           {success && (
             <Alert
@@ -505,424 +707,52 @@ function NewHelpRequest() {
             </Alert>
           )}
 
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            sx={{
-              color: '#1F2937',
-              mb: 2.5,
-            }}
-          >
-            What do you need help with?
-          </Typography>
+          {/* MAIN FORM */}
 
-          <TextField
-            fullWidth
-            required
-            label="Request Title"
-            name="title"
-            value={formData.title}
+          <HelpRequestForm
+            formData={formData}
+            fieldErrors={fieldErrors}
             onChange={handleChange}
-            placeholder="What help do you need?"
-            inputProps={{
-              maxLength: 100,
-            }}
-            error={Boolean(fieldErrors.title)}
-            helperText={fieldErrors.title}
-            sx={{
-              mb: 3,
-              '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                borderColor: '#2E7D32',
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#2E7D32',
-              },
-            }}
-          />
-
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr 1fr',
-              },
-              gap: 2,
-              mb: 4,
-            }}
-          >
-            <TextField
-              select
-              fullWidth
-              required
-              label="Category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              error={Boolean(fieldErrors.category)}
-              helperText={fieldErrors.category}
-              sx={{
-                '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                  borderColor: '#2E7D32',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#2E7D32',
-                },
-              }}
-            >
-              {categories.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </TextField>
-
-            <TextField
-              select
-              fullWidth
-              required
-              label="Urgency"
-              name="urgency"
-              value={formData.urgency}
-              onChange={handleChange}
-              error={Boolean(fieldErrors.urgency)}
-              helperText={fieldErrors.urgency}
-              sx={{
-                '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                  borderColor: '#2E7D32',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#2E7D32',
-                },
-              }}
-            >
-              {urgencies.map((item) => (
-                <MenuItem key={item.value} value={item.value}>
-                  {item.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            sx={{
-              color: '#1F2937',
-              mb: 2.5,
-            }}
-          >
-            📅 When do you need help?
-          </Typography>
-
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr 1fr',
-              },
-              gap: 2,
-              mb: 4,
-            }}
-          >
-            <Box>
-              <Typography
-                component="label"
-                htmlFor="date"
-                sx={{
-                  display: 'block',
-                  mb: 0.8,
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: '#334155',
-                }}
-              >
-                Date <span style={{ color: '#d32f2f' }}>*</span>
-              </Typography>
-
-              <TextField
-                id="date"
-                fullWidth
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                error={Boolean(fieldErrors.date)}
-                helperText={fieldErrors.date}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    height: '56px',
-                  },
-                  '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                    borderColor: '#2E7D32',
-                  },
-                }}
-              />
-            </Box>
-
-            <Box>
-              <Typography
-                component="label"
-                htmlFor="time"
-                sx={{
-                  display: 'block',
-                  mb: 0.8,
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: '#334155',
-                }}
-              >
-                Time <span style={{ color: '#d32f2f' }}>*</span>
-              </Typography>
-
-              <TextField
-                id="time"
-                fullWidth
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                error={Boolean(fieldErrors.time)}
-                helperText={fieldErrors.time}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    height: '56px',
-                  },
-                  '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                    borderColor: '#2E7D32',
-                  },
-                }}
-              />
-            </Box>
-          </Box>
-
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            sx={{
-              color: '#1F2937',
-              mb: 2.5,
-            }}
-          >
-            Tell us more
-          </Typography>
-
-          <TextField
-            fullWidth
-            label="Description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            multiline
-            minRows={4}
-            placeholder="Describe the help you need..."
-            sx={{
-              mb: 4,
-              '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                borderColor: '#2E7D32',
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#2E7D32',
-              },
-            }}
-          />
-
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            sx={{
-              color: '#1F2937',
-              mb: 2.5,
-            }}
-          >
-            📍 Where do you need help?
-          </Typography>
-
-          <Box sx={{ mb: 4 }}>
-            <TextField
-              fullWidth
-              required
-              label="Current Address"
-              name="address"
-              value={formData.address}
-              onChange={handleAddressChange}
-              placeholder="Enter your current address"
-              multiline
-              minRows={2}
-              error={Boolean(fieldErrors.address)}
-              helperText={fieldErrors.address}
-              InputProps={{
-                startAdornment: (
-                  <LocationOnOutlinedIcon
-                    sx={{
-                      mr: 1,
-                      color: '#2E7D32',
-                    }}
-                  />
+            categories={CATEGORY.map((item) => ({
+              value: item,
+              label: item
+                .replaceAll('_', ' ')
+                .toLowerCase()
+                .replace(/\b\w/g, (char) =>
+                  char.toUpperCase()
                 ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root.Mui-focused fieldset': {
-                  borderColor: '#2E7D32',
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#2E7D32',
-                },
-              }}
-            />
+            }))}
+            urgencies={URGENCY_OPTIONS.map((item) => ({
+              value: item,
+              label:
+                item.charAt(0) +
+                item.slice(1).toLowerCase(),
+            }))}
+          />
 
-            {locationSuggestions.length > 0 && (
-              <Box
-                sx={{
-                  border: '1px solid #D7E5D8',
-                  borderRadius: 2,
-                  mt: 1,
-                  backgroundColor: '#FFFFFF',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                }}
-              >
-                {locationSuggestions.map((location) => (
-                  <Button
-                    key={
-                      location.placeId ||
-                      `${location.latitude}-${location.longitude}`
-                    }
-                    type="button"
-                    fullWidth
-                    onClick={() => handleSelectAddress(location)}
-                    sx={{
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      px: 2,
-                      py: 1.5,
-                      color: '#1E293B',
-                      textTransform: 'none',
-                      borderRadius: 0,
-                      '&:hover': {
-                        backgroundColor: '#E8F5E9',
-                      },
-                    }}
-                  >
-                    <LocationOnOutlinedIcon
-                      sx={{
-                        mr: 1,
-                        color: '#2E7D32',
-                      }}
-                    />
+          {/* LOCATION */}
 
-                    {location.label}
-                  </Button>
-                ))}
-              </Box>
-            )}
+          <RequestLocationField
+            formData={formData}
+            fieldErrors={fieldErrors}
+            coordinates={coordinates}
+            locationSuggestions={locationSuggestions}
+            isSearchingLocation={isSearchingLocation}
+            isGettingLocation={isGettingLocation}
+            isCreating={isCreating}
+            onAddressChange={handleAddressChange}
+            onSelectAddress={handleSelectAddress}
+            onGetCurrentAddress={
+              handleGetCurrentAddress
+            }
+          />
 
-            {isSearchingLocation && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{
-                  display: 'block',
-                  mt: 1,
-                }}
-              >
-                Searching for addresses...
-              </Typography>
-            )}
+          {/* FORM ACTIONS */}
 
-            <Button
-              type="button"
-              startIcon={<MyLocationIcon />}
-              onClick={handleGetCurrentAddress}
-              disabled={isGettingLocation || isCreating}
-              sx={{
-                mt: 1,
-                textTransform: 'none',
-                color: '#2E7D32',
-                fontWeight: 600,
-                '&:hover': {
-               
-                },
-              }}
-            >
-              {isGettingLocation
-                ? 'Getting current location...'
-                : 'Use my current location'}
-            </Button>
-
-            {coordinates.latitude !== null &&
-              coordinates.longitude !== null && (
-                <Box
-                  sx={{
-                    mt: 1,
-                    px: 2,
-                    py: 1,
-                  
-                 
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: '#2E7D32',
-                      fontWeight: 600,
-                    }}
-                  >
-                    ✓ Location coordinates captured
-                  </Typography>
-                </Box>
-              )}
-          </Box>
-
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 2,
-              pt: 1,
-            }}
-          >
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={() => navigate('/requester-dashboard')}
-              disabled={isCreating}
-              sx={{
-                px: 4,
-                py: 1.3,
-                borderRadius: 2,
-                textTransform: 'none',
-                borderColor: '#A5B8A7',
-                color: '#475569',
-                '&:hover': {
-                  borderColor: '#2E7D32',
-                  backgroundColor: '#F1F8F2',
-                },
-              }}
-            >
-              Cancel
-            </Button>
-
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isCreating}
-              sx={{
-                px: 4,
-                py: 1.3,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                backgroundColor: '#2E7D32',
-                '&:hover': {
-                  backgroundColor: '#1B5E20',
-                },
-              }}
-            >
-              {isCreating ? 'Creating...' : 'Create My Request'}
-            </Button>
-          </Box>
+          <RequestFormActions
+            isCreating={isCreating}
+            onCancel={handleCancel}
+          />
         </Box>
       </Box>
     </Box>
