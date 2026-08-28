@@ -20,7 +20,6 @@ import RequesterProfileView from '../components/requesterProfile/RequesterProfil
 import VolunteerPreferencesForm from '../components/profile/VolunteerPreferencesForm';
 import VolunteerPreferencesView from '../components/profile/VolunteerPreferencesView';
 import EditProfileDialog from '../components/profile/EditProfileDialog';
-import VolunteerPendingNotice from '../components/profile/VolunteerPendingNotice';
 
 function ProfilePage() {
   const { user } = useAuth();
@@ -62,7 +61,6 @@ function ProfilePage() {
   } = useGetProfileImage();
 
   const updateProfileImage = useUpdateProfileImage();
-  const isPending = volunteer?.verificationStatus === 'PENDING';
 
   if (!user) {
     return null;

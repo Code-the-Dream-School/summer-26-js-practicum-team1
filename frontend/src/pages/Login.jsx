@@ -39,6 +39,11 @@ function Login() {
     try {
       const data = await login(formData);
 
+      if(data.role?.toLowerCase() === 'volunteer' && data.verificationStatus === 'pending') {
+        navigate('/volunteer-pending');
+        return;
+      }
+
       navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
     } catch (err) {
       console.error(err);

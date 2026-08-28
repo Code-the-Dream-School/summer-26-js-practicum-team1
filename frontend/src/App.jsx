@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
+import RequireApprovedVolunteer from './components/auth/RequireApprovedVolunteer';
 import UsersList from './pages/admin/UsersList';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
@@ -15,6 +16,7 @@ import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewhelpRequest from './pages/Requester/helpRequest';
+import VolunteerPendingPage from './pages/VolunteerPendingPage';
 
 function App() {
   return (
@@ -33,9 +35,12 @@ function App() {
           element={<RequestorRegistration />}
         />
 
-        {/* Protected Routes */}
+        {/* Volunteer Routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="profile" element={<ProfilePage />} />
+          <Route path="volunteer-pending" element={<VolunteerPendingPage />} />
+          <Route element={<RequireApprovedVolunteer />}>
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
         </Route>
 
         {/* Requester Routes */}
@@ -60,7 +65,9 @@ function App() {
         <Route
           element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}
         >
-          <Route path="browse" element={<Browse />} />
+          <Route element={<RequireApprovedVolunteer />}>
+            <Route path="browse" element={<Browse />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
