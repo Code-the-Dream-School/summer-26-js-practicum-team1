@@ -6,28 +6,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
+import { COLORS } from './utils/constants';
 import App from './App';
 
 const queryClient = new QueryClient();
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1B741B',
-      dark: '#165D16',
+      main: COLORS.forest,
+      dark: COLORS.forestDark,
     },
     secondary: {
-      main: '#E8F0E7',
-      dark: '#D9E6D8',
-      contrastText: '#3A5A39',
+      main: COLORS.sage,
+      dark: COLORS.sageLine,
+      contrastText: COLORS.forestDark,
     },
     background: {
       default: '#FFFFFF',
       paper: '#F8F8F6',
     },
     text: {
-      secondary: '#6B6B66',
+      secondary: COLORS.grayText,
     },
-    divider: '#E5E5E3',
+    divider: COLORS.border,
   },
   shape: {
     borderRadius: 8,

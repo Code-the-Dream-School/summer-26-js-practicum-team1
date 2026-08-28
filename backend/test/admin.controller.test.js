@@ -1,6 +1,6 @@
 const ApiError = require('../src/utils/ApiError');
 
-jest.mock('../src/services/requesterProfile.service');
+jest.mock('../src/services/profile.service');
 jest.mock('../src/services/admin.service');
 jest.mock('../src/services/volunteerProfile.service', () => ({
   getVolunteerProfile: jest.fn(),
@@ -36,7 +36,7 @@ const app = require('../src/app');
 
 const adminService = require('../src/services/admin.service');
 const volunteerProfileService = require('../src/services/volunteerProfile.service');
-const requesterProfileService = require('../src/services/requesterProfile.service');
+const profileService = require('../src/services/profile.service');
 
 const {
   getAdminUserProfileImage,
@@ -334,7 +334,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
   it('should return the profile image for an admin', async () => {
     const imageBuffer = Buffer.from('fake-png-image-data');
 
-    requesterProfileService.getProfileImage.mockResolvedValue({
+    profileService.getProfileImage.mockResolvedValue({
       profileImage: imageBuffer,
       profileImageType: 'image/png',
     });
@@ -345,7 +345,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers['content-type']).toMatch(/image\/png/);
-    expect(requesterProfileService.getProfileImage).toHaveBeenCalledWith(12);
+    expect(profileService.getProfileImage).toHaveBeenCalledWith(12);
   });
 
   it('should return 400 for an invalid user ID', async () => {
@@ -355,7 +355,7 @@ describe('GET /api/admin/users/:id/profile/image', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Invalid user ID');
-    expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
+    expect(profileService.getProfileImage).not.toHaveBeenCalled();
   });
 
   it('should return 400 for a non-positive user ID', async () => {
@@ -363,11 +363,11 @@ describe('GET /api/admin/users/:id/profile/image', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe('Invalid user ID');
-    expect(requesterProfileService.getProfileImage).not.toHaveBeenCalled();
+    expect(profileService.getProfileImage).not.toHaveBeenCalled();
   });
 
   it('should return 404 when the profile image is not found', async () => {
-    requesterProfileService.getProfileImage.mockRejectedValue(
+    profileService.getProfileImage.mockRejectedValue(
       new ApiError(404, 'Profile picture not found')
     );
 

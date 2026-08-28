@@ -6,6 +6,7 @@ const jwtMiddleware = require('../middleware/jwt.middleware');
 const csrfMiddleware = require('../middleware/csrf.middleware');
 const validate = require('../middleware/validate.middleware');
 const volunteerOnly = require('../middleware/volunteerProfileMiddleware');
+const { requireApprovedIfVolunteer } = require('../middleware/authorize');
 const {
   updateVolunteerProfileSchema,
 } = require('../validations/volunteerProfileSchema');
@@ -18,6 +19,7 @@ router.put(
   jwtMiddleware,
   csrfMiddleware,
   volunteerOnly,
+  requireApprovedIfVolunteer,
   validate(updateVolunteerProfileSchema),
   updateVolunteerProfile
 );

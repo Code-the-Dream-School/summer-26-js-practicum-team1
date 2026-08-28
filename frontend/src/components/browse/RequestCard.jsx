@@ -3,10 +3,10 @@ import Pill from './Pill';
 import {
   CATEGORY_BY_API_VALUE,
   URGENCY_BY_API_VALUE,
-  COLORS,
 } from '../../utils/browse.constants';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { formatScheduledLabel } from '../../utils/browse.utils';
+import { COLORS } from '../../utils/constants';
 
 function formatPostedLabel(createdAt) {
   if (!createdAt) return '';

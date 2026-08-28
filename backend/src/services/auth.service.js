@@ -21,6 +21,7 @@ async function verifyCredentials({ email, password }) {
       passwordHash: true,
       failedLoginAttempts: true,
       lockedUntil: true,
+      volunteerProfile: { select: { verificationStatus: true } },
     },
   });
 
@@ -137,7 +138,7 @@ async function createVolunteerApplicant({
           gender,
           phone: phone || null,
           profileImage: profileImage || null,
-          role: 'REQUESTER',
+          role: 'VOLUNTEER',
         },
         select: {
           id: true,

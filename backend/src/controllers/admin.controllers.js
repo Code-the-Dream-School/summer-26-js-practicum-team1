@@ -1,6 +1,6 @@
 const adminService = require('../services/admin.service');
 const volunteerProfileService = require('../services/volunteerProfile.service');
-const requesterProfileService = require('../services/requesterProfile.service');
+const profileService = require('../services/profile.service');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { VerificationStatus } = require('@prisma/client');
@@ -130,12 +130,10 @@ const getAdminUserProfileImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid user ID');
   }
 
-  const profileImage = await requesterProfileService.getProfileImage(userId);
-
+  const profileImage = await profileService.getProfileImage(userId);
   if (!profileImage) {
-    throw new ApiError(404, 'Profile picture not found');
+    return res.status(204).send();
   }
-
   res.set('Content-Type', profileImage.profileImageType);
   return res.status(200).send(Buffer.from(profileImage.profileImage));
 });

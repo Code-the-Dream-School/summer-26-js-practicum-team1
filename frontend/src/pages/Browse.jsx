@@ -11,7 +11,6 @@ import {
   Pagination,
 } from '@mui/material';
 import {
-  COLORS,
   DEFAULT_DISTANCE_MI,
   CATEGORIES,
   URGENCY_LEVELS,
@@ -19,6 +18,7 @@ import {
   fieldSx,
   inputLabelSx,
 } from '../utils/browse.constants.js';
+import { COLORS } from '../utils/constants.js';
 import {
   toggleInArray,
   friendlyErrorMessage,
@@ -242,7 +242,10 @@ function Browse() {
           variant="outlined"
           fullWidth
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            markInteracted();
+            setSearch(e.target.value);
+          }}
           label={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <SearchIcon />
@@ -330,9 +333,9 @@ function Browse() {
               setSelectedUrgencies((prev) => toggleInArray(prev, key));
             }}
             distance={distance}
-            onDistanceChange={() => {
+            onDistanceChange={(newDistance) => {
               markInteracted();
-              setDistance;
+              setDistance(newDistance);
             }}
             selectedDays={selectedDays}
             onToggleDay={(day) => {
@@ -396,7 +399,10 @@ function Browse() {
                     <Pagination
                       page={page}
                       count={meta.totalPages}
-                      onChange={(_, value) => setPage(value)}
+                      onChange={(_, value) => {
+                        markInteracted();
+                        setPage(value);
+                      }}
                       color="primary"
                     />
                   </Stack>

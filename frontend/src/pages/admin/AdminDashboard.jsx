@@ -30,24 +30,21 @@ function AdminDashboard() {
   };
 
   const dashboardCards = [
-    { id: 1, title: 'Total Users', key: 'totalUsers', color: '#e2ecf3' }, // Light Blue
+    { id: 1, title: 'Total Users', key: 'totalUsers' },
     {
       id: 2,
       title: 'Total Requesters',
       key: 'totalRequesters',
-      color: '#def5e0',
     },
     {
       id: 3,
       title: 'Total Volunteers',
       key: 'totalVolunteers',
-      color: '#f7efe3',
     },
     {
       id: 4,
       title: 'Pending Volunteers',
       key: 'pendingVolunteers',
-      color: '#f0e7f1',
     },
   ];
   const { data: stats = {}, isLoading, error } = useDashboardStats();
@@ -80,11 +77,7 @@ function AdminDashboard() {
               md: 6,
             }}
           >
-            <DashboardCard
-              title={card.title}
-              value={stats?.[card.key] ?? 0}
-              bgColor={card.color}
-            />
+            <DashboardCard title={card.title} value={stats?.[card.key] ?? 0} />
           </Grid>
         ))}
         <Grid
