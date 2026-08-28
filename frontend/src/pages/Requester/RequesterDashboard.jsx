@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
+  Alert,
   Box,
   Button,
   Card,
@@ -20,6 +21,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 
 import { getMe, getHelpRequests } from '../../services/api';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const URGENCY_STYLES = {
   HIGH: {
@@ -72,6 +74,20 @@ function getStatusStyle(status) {
   return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
 }
 
+function formatAcceptedNotification(notification) {
+  const { volunteerName, requestTitle, acceptedAt } = notification.payload;
+  const acceptedLabel = acceptedAt
+    ? new Date(acceptedAt).toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+    : '';
+
+  return `${volunteerName} accepted your request "${requestTitle}"${acceptedLabel ? ` — ${acceptedLabel}` : ''}`;
+}
+
 function RequestCard({
   request,
   expandedRequest,
@@ -82,7 +98,7 @@ function RequestCard({
   const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(request.status);
 
-  const isExpanded = expandedRequest === request.id;
+  const isExpanded = Number(expandedRequest) === Number(request.id);
 
   const handleToggleDetails = () => {
     setExpandedRequest(isExpanded ? null : request.id);
@@ -90,6 +106,7 @@ function RequestCard({
 
   return (
     <Card
+      id={`request-card-${request.id}`}
   sx={{
     borderRadius: 3,
     borderLeft: `4px solid ${urgencyStyle.border}`,
@@ -489,6 +506,37 @@ export default function RequesterDashboard() {
   const [expandedRequest, setExpandedRequest] =
     useState(null);
 
+  const {
+    notifications,
+    markRead,
+  } = useNotifications({ enabled: !loading, unreadOnly: true });
+
+  const handleDismissNotification = async (notification) => {
+    try {
+      await markRead(notification.id);
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
+  const handleViewAcceptedRequest = async (notification) => {
+    const requestId = Number(notification.payload?.requestId);
+    if (!Number.isInteger(requestId) || requestId <= 0) {
+      return;
+    }
+
+    setFilter('ALL');
+    setExpandedRequest(requestId);
+
+    window.setTimeout(() => {
+      document
+        .getElementById(`request-card-${requestId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+
+    await handleDismissNotification(notification);
+  };
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -646,6 +694,31 @@ export default function RequesterDashboard() {
             {error}
           </Typography>
         )}
+
+        {notifications.map((notification) => (
+          <Alert
+            key={notification.id}
+            severity="success"
+            sx={{ mb: 2 }}
+            onClose={() => handleDismissNotification(notification)}
+            action={
+              notification.payload?.requestId ? (
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleViewAcceptedRequest(notification);
+                  }}
+                >
+                  View request
+                </Button>
+              ) : null
+            }
+          >
+            {formatAcceptedNotification(notification)}
+          </Alert>
+        ))}
 
         {/* Filters, sorting, and New Request */}
        <Box

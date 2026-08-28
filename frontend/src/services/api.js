@@ -196,6 +196,26 @@ export async function declineHelpRequest(requestId, csrfToken) {
   return data;
 }
 
+export async function getNotifications({ unreadOnly = false, page = 1, pageSize = 20 } = {}) {
+  const { data } = await api.get('/api/notifications', {
+    params: { unreadOnly, page, pageSize },
+    withCredentials: true,
+  });
+  return data;
+}
+
+export async function markNotificationRead(notificationId, csrfToken) {
+  const { data } = await api.patch(
+    `/api/notifications/${notificationId}/read`,
+    {},
+    {
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      withCredentials: true,
+    }
+  );
+  return data;
+}
+
 export async function getCategoryFacets(filters) {
   try {
     const { data } = await api.get('/api/requests/facets', {
