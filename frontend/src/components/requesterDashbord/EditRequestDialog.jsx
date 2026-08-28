@@ -14,24 +14,10 @@ import {
 
 import { COLORS } from '../../utils/browse.constants.js';
 
-const CATEGORY = [
-  'GROCERY',
-  'TRANSPORTATION',
-  'HOUSEHOLD CHORES',
-  'YARD WORK',
-  'PET CARE',
-  'TECH SUPPORT',
-  'COMPANIONSHIP',
-  'MEAL PREP',
-  'MEDICAL ERRAND',
-  'OTHER',
-];
-
-const URGENCY_OPTIONS = [
-  'LOW',
-  'MEDIUM',
-  'HIGH',
-];
+import {
+  CATEGORY,
+  URGENCY_OPTIONS,
+} from '../../utils/requester.constants.js';
 
 
 function EditRequestDialog({
@@ -125,7 +111,7 @@ function EditRequestDialog({
                   key={category}
                   value={category}
                 >
-                  {category}
+                  {category.replaceAll('_', ' ')}
                 </MenuItem>
               ))}
             </TextField>
