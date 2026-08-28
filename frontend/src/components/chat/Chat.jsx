@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -12,6 +13,7 @@ import {
 import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   useChatMessages,
   useSendMessage,
@@ -23,6 +25,7 @@ import { useAuth } from '../../hooks/useAuth';
 const Chat = ({ requestId }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
+  const navigate = useNavigate();
 
   const {
     data: messages = [],
@@ -113,6 +116,25 @@ const Chat = ({ requestId }) => {
             {otherParticipant?.name || 'Chat'}
           </Typography>
         </Box>
+        <Button
+          onClick={() => navigate('/requester-dashboard')}
+
+          sx={{
+            minWidth: 'auto',
+            ml: 'auto',
+            boxShadow: 2,
+            transition: '0.3s',
+            bgcolor: 'black',
+            color: 'white',
+            flexShrink: 0,
+            '&:hover': {
+              boxShadow: 5,
+              transform: 'translateY(-2px)',
+            },
+          }}
+        >
+          <CloseIcon />
+        </Button>
       </Box>
 
       <Box
@@ -202,7 +224,7 @@ const Chat = ({ requestId }) => {
                         variant="caption"
                         fontWeight={600}
                         display="block"
-                        sx={{ mb: 0.5 }}
+                        sx={{ mb: 0.5, color: 'grey' }}
                       >
                         {message.sender?.name}
                       </Typography>
@@ -218,6 +240,9 @@ const Chat = ({ requestId }) => {
                         justifyContent: 'flex-end',
                         gap: 0.5,
                         mt: 0.5,
+                        color: isOwnMessage
+                          ? 'rgba(255,255,255,0.75)'
+                          : 'text.secondary',
                       }}
                     >
                       {new Date(message.createdAt).toLocaleTimeString([], {
