@@ -1,6 +1,7 @@
 import { Stack, TextField, MenuItem, Tooltip, IconButton } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
-import { SORT_FIELDS, COLORS, DIR_LABELS } from '../../utils/browse.constants';
+import { SORT_FIELDS, DIR_LABELS } from '../../utils/browse.constants';
+import { COLORS } from '../../utils/constants';
 
 function SortControl({ sortKey, sortDir, onChange, hasLocation }) {
   const fieldSx = {
