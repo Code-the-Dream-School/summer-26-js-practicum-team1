@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 import { getMe, getHelpRequests } from '../../services/api';
 
 const URGENCY_STYLES = {
@@ -72,7 +73,12 @@ function getStatusStyle(status) {
 }
 
 function RequestCard({ request, expandedRequest, setExpandedRequest }) {
+  const navigate = useNavigate();
   const accepted = request.status === 'ACCEPTED';
+
+  console.log('REQUEST:', request);
+  console.log('STATUS:', request.status);
+  console.log('VOLUNTEER:', request.volunteer);
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(request.status);
@@ -243,6 +249,29 @@ function RequestCard({ request, expandedRequest, setExpandedRequest }) {
             pt: 1,
           }}
         >
+          {accepted && (
+            <Button
+              variant="contained"
+              startIcon={<ChatBubbleIcon />}
+              onClick={() => navigate(`/chat/${request.id}`)}
+              sx={{
+                minHeight: 42,
+                mr: 3,
+                px: 2.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 2,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: 4,
+                  transform: 'translateY(-1px)',
+                },
+              }}
+            >
+              Message
+            </Button>
+          )}
           <Button
             onClick={handleToggleDetails}
             sx={{
