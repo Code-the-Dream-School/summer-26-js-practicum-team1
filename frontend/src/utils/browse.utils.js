@@ -1,9 +1,5 @@
-import {
-  ERROR_MESSAGES,
-  COLORS,
-  CATEGORIES,
-  DAYS_OF_WEEK,
-} from './browse.constants';
+import { ERROR_MESSAGES, CATEGORIES, DAYS_OF_WEEK } from './browse.constants';
+import { COLORS } from './constants';
 
 export function toggleInArray(arr, val) {
   return arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];

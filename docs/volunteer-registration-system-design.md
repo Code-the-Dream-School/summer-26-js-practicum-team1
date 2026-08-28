@@ -25,7 +25,7 @@ User story: As a volunteer, I want to register for the platform so I can become 
 
 ## Flow
 
-Form submit -> client validation -> `POST /api/auth/register` -> server validation (fields + optional image) -> check duplicate email -> hash password -> create requester user + pending VolunteerProfile -> 201
+Form submit -> client validation -> `POST /api/auth/register` -> server validation (fields + optional image) -> check duplicate email -> hash password -> create volunteer user (`role: VOLUNTEER`) + pending VolunteerProfile -> 201
 
 ---
 
@@ -99,7 +99,7 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
 {
     "id": 1,
     "name": "Jhon Doe",
-    "role": "requester",
+    "role": "volunteer",
     "verificationStatus": "pending"
 }
 ```

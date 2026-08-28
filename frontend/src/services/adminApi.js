@@ -68,9 +68,12 @@ export const updateUserVolunteerById = async (userId, payload, csrfToken) => {
 };
 
 export const getUserProfileImage = async (userId) => {
-  const { data } = await adminApi.get(`/api/admin/users/${userId}/profile/image`, {
-    responseType: 'blob',
-  });
+  const { data } = await adminApi.get(
+    `/api/admin/users/${userId}/profile/image`,
+    {
+      responseType: 'blob',
+    }
+  );
   return data;
 };
 

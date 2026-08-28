@@ -1,5 +1,5 @@
 import { Box, Stack, Skeleton } from '@mui/material';
-import { COLORS } from '../../utils/browse.constants';
+import { COLORS } from '../../utils/constants';
 
 function RequestCardSkeleton() {
   return (

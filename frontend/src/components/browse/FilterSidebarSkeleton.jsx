@@ -1,10 +1,10 @@
 import { Box, Skeleton, Stack } from '@mui/material';
 import {
-  COLORS,
   CATEGORIES,
   URGENCY_LEVELS,
   DAYS_OF_WEEK,
 } from '../../utils/browse.constants';
+import { COLORS } from '../../utils/constants';
 
 function FilterSidebarSkeleton() {
   return (

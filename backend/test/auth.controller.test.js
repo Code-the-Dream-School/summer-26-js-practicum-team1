@@ -128,6 +128,25 @@ describe('POST /api/auth/logon — successful login', () => {
     await login(CREDENTIALS);
     expect(prisma.user.update).not.toHaveBeenCalled();
   });
+
+  it('includes verificationStatus for a pending volunteer', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      ...user,
+      role: 'VOLUNTEER',
+      volunteerProfile: { verificationStatus: 'PENDING' },
+    });
+
+    const res = await login(CREDENTIALS);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      id: 1,
+      name: 'Alice',
+      role: 'volunteer',
+      verificationStatus: 'pending',
+      csrfToken: expect.any(String),
+    });
+  });
 });
 
 describe('POST /api/auth/logon — invalid credentials', () => {

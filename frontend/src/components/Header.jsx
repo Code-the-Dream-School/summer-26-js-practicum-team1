@@ -10,12 +10,14 @@ import {
   Container,
   Avatar,
   Tooltip,
+  CircularProgress,
   MenuItem,
   Box,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGetProfileImage } from '../hooks/useGetProfileImage';
 
 const PAGES = [
   { label: 'About', path: '/' },
@@ -26,7 +28,8 @@ const ROLE_SETTINGS = {
   requester: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
-    { label: 'My Requests', path: '/' },
+    { label: 'My Requests', path: '/requester-dashboard' },
+    { label: 'Create New Help Request', path: '/helpRequest' },
   ],
   volunteer: [
     { label: 'Profile', path: '/profile' },
@@ -80,7 +83,6 @@ function Brand({ display, variant, sx }) {
         sx={{
           mr: 2,
           display,
-          fontFamily: 'monospace',
           fontWeight: 700,
           color: 'inherit',
           textDecoration: 'none',
@@ -98,6 +100,11 @@ function Header() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const { user, isCheckingSession, logout } = useAuth();
   const navigate = useNavigate();
+  const {
+    data: profileImage,
+    isLoading,
+    isError,
+  } = useGetProfileImage({ enabled: Boolean(user) });
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
@@ -249,8 +256,16 @@ function Header() {
             <>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name} sx={{ bgcolor: 'primary.main' }}>
-                    {user.name?.[0]?.toUpperCase()}
+                  <Avatar
+                    alt={user.name}
+                    src={isError ? undefined : profileImage || undefined}
+                    sx={{ bgcolor: 'primary.main' }}
+                  >
+                    {isLoading ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      user.name?.[0]?.toUpperCase()
+                    )}
                   </Avatar>
                 </IconButton>
               </Tooltip>
