@@ -117,15 +117,14 @@ const Chat = ({ requestId }) => {
           </Typography>
         </Box>
         <Button
-          onClick={() => navigate('/requester-dashboard')}
+          onClick={() => navigate(-1)}
 
           sx={{
             minWidth: 'auto',
             ml: 'auto',
             boxShadow: 2,
             transition: '0.3s',
-            bgcolor: 'black',
-            color: 'white',
+            color: 'black',
             flexShrink: 0,
             '&:hover': {
               boxShadow: 5,
