@@ -3,8 +3,8 @@ import Pill from './Pill';
 import {
   CATEGORY_BY_API_VALUE,
   URGENCY_BY_API_VALUE,
-  COLORS,
 } from '../../utils/browse.constants';
+import { COLORS } from '../../utils/constants';
 import { formatScheduledLabel } from '../../utils/browse.utils';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 
@@ -14,7 +14,11 @@ function MapPopupCard({ request }) {
 
   return (
     <Box sx={{ minWidth: 220, maxWidth: 260, p: 0.5 }}>
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.75 }}>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: 'center', mb: 0.75 }}
+      >
         <Pill
           label={(category?.label || request.category).toUpperCase()}
           backgroundColor={COLORS.bgSubtle}
@@ -43,7 +47,9 @@ function MapPopupCard({ request }) {
       </Typography>
 
       {request.distanceMi != null && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', mt: 0.5 }}>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: '4px', mt: 0.5 }}
+        >
           <RadioButtonCheckedIcon
             sx={{ fontSize: 14, color: COLORS.textFaint }}
           />
@@ -55,7 +61,12 @@ function MapPopupCard({ request }) {
 
       <Typography
         variant="caption"
-        sx={{ display: 'block', color: COLORS.textFaint, mt: 0.75, fontStyle: 'italic' }}
+        sx={{
+          display: 'block',
+          color: COLORS.textFaint,
+          mt: 0.75,
+          fontStyle: 'italic',
+        }}
       >
         Click pin for details
       </Typography>
