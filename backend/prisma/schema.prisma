@@ -58,6 +58,22 @@ enum VolunteerResponseAction {
   DECLINED
 }
 
+enum NotificationType {
+  HELP_REQUEST_ACCEPTED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+}
+
+enum NotificationDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  SKIPPED
+}
+
 // USERS
 
 model User {
@@ -81,6 +97,7 @@ model User {
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
   helpRequests           HelpRequest[]
   sentMessages           Message[]
+  notifications          Notification[]
 
   @@map("users")
 }
@@ -219,4 +236,39 @@ model UserSupportCategory {
 
   @@unique([volunteerId, supportCategoryId])
   @@map("user_support_categories")
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement())
+  recipientId Int              @map("recipient_id")
+  type        NotificationType
+  dedupeKey   String           @unique @map("dedupe_key") @db.VarChar(120)
+  payload     Json
+  readAt      DateTime?        @map("read_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+
+  recipient  User                   @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  deliveries NotificationDelivery[]
+
+  @@index([recipientId, createdAt(sort: Desc)])
+  @@index([recipientId, readAt])
+  @@map("notifications")
+}
+
+model NotificationDelivery {
+  id             Int                        @id @default(autoincrement())
+  notificationId Int                        @map("notification_id")
+  channel        NotificationChannel
+  status         NotificationDeliveryStatus @default(PENDING)
+  attemptCount   Int                        @default(0) @map("attempt_count")
+  lastAttemptAt  DateTime?                  @map("last_attempt_at")
+  deliveredAt    DateTime?                  @map("delivered_at")
+  failureReason  String?                    @map("failure_reason") @db.VarChar(500)
+  createdAt      DateTime                   @default(now()) @map("created_at")
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, channel])
+  @@index([status, lastAttemptAt])
+  @@map("notification_deliveries")
 }

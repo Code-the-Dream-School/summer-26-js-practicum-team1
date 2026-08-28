@@ -57,6 +57,29 @@ const postHelpRequest = (user, body = validBody) => {
     .send(body);
 };
 
+const mineFindManyArgs = {
+  where: {
+    requesterId: REQUESTER.id,
+  },
+  orderBy: {
+    scheduledAt: 'asc',
+  },
+  include: {
+    volunteer: {
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    },
+  },
+};
+
 const getHelpRequests = (user) => {
   const token = sign({
     id: user.id,
@@ -425,14 +448,7 @@ describe('GET /api/requests/mine', () => {
       })
     );
 
-    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith({
-      where: {
-        requesterId: REQUESTER.id,
-      },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
-    });
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(mineFindManyArgs);
   });
 
   it('returns an empty array when the requester has no help requests', async () => {
@@ -448,14 +464,7 @@ describe('GET /api/requests/mine', () => {
 
     expect(res.body.data).toEqual([]);
 
-    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith({
-      where: {
-        requesterId: REQUESTER.id,
-      },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
-    });
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(mineFindManyArgs);
   });
 
   it('returns 401 when no JWT is provided', async () => {
@@ -493,14 +502,7 @@ describe('GET /api/requests/mine', () => {
 
     await getHelpRequests(REQUESTER);
 
-    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith({
-      where: {
-        requesterId: REQUESTER.id,
-      },
-      orderBy: {
-        scheduledAt: 'asc',
-      },
-    });
+    expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(mineFindManyArgs);
 
     expect(prisma.helpRequest.findMany).not.toHaveBeenCalledWith(
       expect.objectContaining({
