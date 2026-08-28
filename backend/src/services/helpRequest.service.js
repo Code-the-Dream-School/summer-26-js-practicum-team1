@@ -277,9 +277,132 @@ const getCategoryFacets = async ({ user, query }) => {
     }, {});
 };
 
+const isOpenRequest = (request) =>
+  request.status === RequestStatus.PENDING && request.volunteerId === null;
+
+const responseUniqueWhere = (requestId, volunteerId) => ({
+  requestId_volunteerId: { requestId, volunteerId },
+});
+
+async function acceptHelpRequest({ requestId, volunteerId }) {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const request = await tx.helpRequest.findUnique({
+        where: { id: requestId },
+        select: {
+          id: true,
+          requesterId: true,
+          status: true,
+          volunteerId: true,
+        },
+      });
+
+      if (!request) {
+        throw new ApiError(404, 'Help request not found');
+      }
+
+      if (request.requesterId === volunteerId) {
+        throw new ApiError(403, 'Cannot respond to your own request');
+      }
+
+      const existing = await tx.volunteerResponse.findUnique({
+        where: responseUniqueWhere(requestId, volunteerId),
+      });
+
+      if (existing) {
+        throw new ApiError(409, 'You have already responded to this request');
+      }
+
+      const { count } = await tx.helpRequest.updateMany({
+        where: {
+          id: requestId,
+          status: RequestStatus.PENDING,
+          volunteerId: null,
+        },
+        data: {
+          status: RequestStatus.ACCEPTED,
+          volunteerId,
+        },
+      });
+
+      if (count !== 1) {
+        throw new ApiError(409, 'This request is no longer available');
+      }
+
+      await tx.volunteerResponse.create({
+        data: {
+          requestId,
+          volunteerId,
+          action: 'ACCEPTED',
+        },
+      });
+
+      return tx.helpRequest.findUnique({ where: { id: requestId } });
+    });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new ApiError(409, 'You have already responded to this request');
+    }
+    throw err;
+  }
+}
+
+async function declineHelpRequest({ requestId, volunteerId }) {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT id FROM "HelpRequest" WHERE id = ${requestId} FOR UPDATE`;
+
+      const request = await tx.helpRequest.findUnique({
+        where: { id: requestId },
+        select: {
+          id: true,
+          requesterId: true,
+          status: true,
+          volunteerId: true,
+        },
+      });
+
+      if (!request) {
+        throw new ApiError(404, 'Help request not found');
+      }
+
+      if (request.requesterId === volunteerId) {
+        throw new ApiError(403, 'Cannot respond to your own request');
+      }
+
+      if (!isOpenRequest(request)) {
+        throw new ApiError(409, 'This request is no longer available');
+      }
+
+      const existing = await tx.volunteerResponse.findUnique({
+        where: responseUniqueWhere(requestId, volunteerId),
+      });
+
+      if (existing) {
+        throw new ApiError(409, 'You have already responded to this request');
+      }
+
+      return tx.volunteerResponse.create({
+        data: {
+          requestId,
+          volunteerId,
+          action: 'DECLINED',
+        },
+      });
+    });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      throw new ApiError(409, 'You have already responded to this request');
+    }
+    throw err;
+  }
+}
+
 module.exports = {
   createHelpRequest,
   getHelpRequests,
   getBrowseHelpRequests,
   getCategoryFacets,
+  acceptHelpRequest,
+  declineHelpRequest,
 };

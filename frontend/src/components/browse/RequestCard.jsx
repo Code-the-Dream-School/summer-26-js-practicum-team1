@@ -19,9 +19,16 @@ function formatPostedLabel(createdAt) {
   return `Posted ${days} days ago`;
 }
 
-function RequestCard({ request }) {
+function RequestCard({
+  request,
+  isDeclined = false,
+  isResponding = false,
+  onAccept,
+  onDecline,
+}) {
   const category = CATEGORY_BY_API_VALUE[request.category];
   const urgency = URGENCY_BY_API_VALUE[request.urgency];
+  const actionsDisabled = isDeclined || isResponding;
 
   return (
     <Box
@@ -48,6 +55,13 @@ function RequestCard({ request }) {
             backgroundColor={urgency?.color || COLORS.textFaint}
             color="#fff"
           />
+          {isDeclined && (
+            <Pill
+              label="DECLINED"
+              backgroundColor="#F5F0E8"
+              color={COLORS.textMuted}
+            />
+          )}
         </Stack>
 
         {request.distanceMi != null && (
@@ -84,6 +98,7 @@ function RequestCard({ request }) {
         <Stack direction="row" spacing={1.5}>
           <Button
             variant="outlined"
+            disabled={actionsDisabled}
             sx={{
               textTransform: 'none',
               borderColor: COLORS.border,
@@ -97,14 +112,32 @@ function RequestCard({ request }) {
             View details
           </Button>
           <Button
+            variant="outlined"
+            disabled={actionsDisabled}
+            onClick={onDecline}
+            sx={{
+              textTransform: 'none',
+              borderColor: COLORS.border,
+              color: COLORS.textMuted,
+              '&:hover': {
+                borderColor: COLORS.borderHover,
+                backgroundColor: COLORS.bgSubtle,
+              },
+            }}
+          >
+            {isResponding ? 'Saving…' : 'Decline'}
+          </Button>
+          <Button
             variant="contained"
+            disabled={actionsDisabled}
+            onClick={onAccept}
             sx={{
               textTransform: 'none',
               backgroundColor: COLORS.primary,
               '&:hover': { backgroundColor: COLORS.primaryHover },
             }}
           >
-            I can help
+            {isResponding ? 'Saving…' : 'I can help'}
           </Button>
         </Stack>
       </Stack>
