@@ -76,10 +76,6 @@ function RequestCard({ request, expandedRequest, setExpandedRequest }) {
   const navigate = useNavigate();
   const accepted = request.status === 'ACCEPTED';
 
-  console.log('REQUEST:', request);
-  console.log('STATUS:', request.status);
-  console.log('VOLUNTEER:', request.volunteer);
-
   const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(request.status);
 
@@ -249,7 +245,7 @@ function RequestCard({ request, expandedRequest, setExpandedRequest }) {
             pt: 1,
           }}
         >
-          {accepted && (
+          {(accepted || request.status === 'COMPLETED') && (
             <Button
               variant="contained"
               startIcon={<ChatBubbleIcon />}
