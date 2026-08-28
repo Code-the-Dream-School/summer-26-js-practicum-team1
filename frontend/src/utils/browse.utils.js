@@ -109,6 +109,6 @@ const DEFAULT_ICON = L.divIcon({
   popupAnchor: [0, -30],
 });
 
-export function categoryIcon() {
+export function defaultMarkerIcon() {
   return DEFAULT_ICON;
 }
