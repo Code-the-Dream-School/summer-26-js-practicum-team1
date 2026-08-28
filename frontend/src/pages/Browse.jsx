@@ -314,7 +314,7 @@ function Browse() {
         sx={{
           mt: 4,
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'stretch',
           justifyContent: 'space-between',
           gap: '32px',
         }}
@@ -346,7 +346,7 @@ function Browse() {
           />
         </Box>
 
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Stack
             direction="row"
             sx={{
