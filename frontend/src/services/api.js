@@ -172,6 +172,30 @@ export async function getBrowseHelpRequests(filters) {
   }
 }
 
+export async function acceptHelpRequest(requestId, csrfToken) {
+  const { data } = await api.post(
+    `/api/requests/${requestId}/accept`,
+    {},
+    {
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      withCredentials: true,
+    }
+  );
+  return data;
+}
+
+export async function declineHelpRequest(requestId, csrfToken) {
+  const { data } = await api.post(
+    `/api/requests/${requestId}/decline`,
+    {},
+    {
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      withCredentials: true,
+    }
+  );
+  return data;
+}
+
 export async function getCategoryFacets(filters) {
   try {
     const { data } = await api.get('/api/requests/facets', {
