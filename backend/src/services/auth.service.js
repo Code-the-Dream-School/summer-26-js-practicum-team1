@@ -21,6 +21,7 @@ async function verifyCredentials({ email, password }) {
       passwordHash: true,
       failedLoginAttempts: true,
       lockedUntil: true,
+      volunteerProfile: { select: { verificationStatus: true } },
     },
   });
 

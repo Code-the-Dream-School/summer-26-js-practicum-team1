@@ -18,14 +18,34 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
+const SUPPORT_CATEGORIES = [
+  { name: 'Groceries', description: 'Help with grocery shopping' },
+  { name: 'Errands', description: 'General errands and pickups' },
+  { name: 'Transport', description: 'Rides and transportation help' },
+  { name: 'Tech help', description: 'Devices, apps, and tech support' },
+  { name: 'Companionship', description: 'Social visits and company' },
+  { name: 'Home help', description: 'Light help around the home' },
+  { name: 'Other', description: 'Other kinds of support' },
+];
+
 async function main() {
   console.log('Seeding database...');
 
   await prisma.volunteerVerification.deleteMany();
   await prisma.helpRequest.deleteMany();
+  await prisma.userSupportCategory.deleteMany();
   await prisma.volunteerProfile.deleteMany();
   await prisma.requesterProfile.deleteMany();
   await prisma.user.deleteMany();
+
+  for (const category of SUPPORT_CATEGORIES) {
+    await prisma.supportCategory.upsert({
+      where: { name: category.name },
+      create: category,
+      update: { description: category.description },
+    });
+  }
+  console.log(`Seeded ${SUPPORT_CATEGORIES.length} support categories`);
 
   const saltRounds = 10;
   const dummyHash = await bcrypt.hash('password123', saltRounds);

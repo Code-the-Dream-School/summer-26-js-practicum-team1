@@ -14,10 +14,11 @@ const {
 
 const {
   getProfile,
-  updateProfile,
   updateProfileImage,
   getProfileImage,
-} = require('../controllers/requesterProfile.controller');
+} = require('../controllers/profile.controller');
+
+const { updateProfile } = require('../controllers/requesterProfile.controller');
 
 router.get('/', jwtMiddleware, getProfile);
 
@@ -34,11 +35,10 @@ router.patch(
   '/image',
   jwtMiddleware,
   csrfMiddleware,
-  requesterOnly,
   profileImageUpload,
   updateProfileImage
 );
 
-router.get('/image', jwtMiddleware, requesterOnly, getProfileImage);
+router.get('/image', jwtMiddleware, getProfileImage);
 
 module.exports = router;

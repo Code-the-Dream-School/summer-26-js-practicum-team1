@@ -101,6 +101,12 @@ describe('POST /api/auth/register', () => {
   });
 
   it('registers a volunteer applicant with pending verification', async () => {
+    prisma.user.create.mockResolvedValue({
+      id: 1,
+      name: validFields.name,
+      role: 'VOLUNTEER',
+    });
+
     const res = await request(app)
       .post('/api/auth/register')
       .send({ ...validFields, accountType: 'volunteer' });
@@ -109,9 +115,16 @@ describe('POST /api/auth/register', () => {
     expect(res.body).toEqual({
       id: 1,
       name: validFields.name,
-      role: 'requester',
+      role: 'volunteer',
       verificationStatus: 'pending',
     });
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          role: 'VOLUNTEER',
+        }),
+      })
+    );
     expect(prisma.volunteerProfile.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
