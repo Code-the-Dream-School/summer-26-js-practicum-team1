@@ -98,8 +98,6 @@ const Chat = ({ requestId }) => {
         }}
       >
         <Avatar
-          src={otherParticipant?.profileImage}
-          alt={otherParticipant?.name || 'User'}
           sx={{
             width: 70,
             height: 70,
@@ -135,80 +133,112 @@ const Chat = ({ requestId }) => {
             }}
           >
             <Box>
-              <Typography variant="h6">No messages yet</Typography>
+              <Typography variant="h6"> Start a conversation</Typography>
 
               <Typography color="text.secondary">
-                Start the conversation below.
+                Send a message to get started.
               </Typography>
             </Box>
           </Box>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwnMessage = message.senderId === user?.id;
 
+            const showDay =
+              index === 0 ||
+              new Date(message.createdAt).toDateString() !==
+                new Date(messages[index - 1].createdAt).toDateString();
+
             return (
-              <Box
-                key={message.id}
-                sx={{
-                  display: 'flex',
-                  justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
-                  mb: 2,
-                }}
-              >
-                <Box
-                  sx={{
-                    maxWidth: '70%',
-                    px: 2,
-                    py: 1.25,
-                    borderRadius: 3,
-                    boxShadow: 3,
-                    bgcolor: isOwnMessage ? 'primary.main' : 'grey.100',
-                    color: isOwnMessage
-                      ? 'primary.contrastText'
-                      : 'text.primary',
-                  }}
-                >
-                  {!isOwnMessage && (
-                    <Typography
-                      variant="caption"
-                      fontWeight={600}
-                      display="block"
-                      sx={{ mb: 0.5 }}
-                    >
-                      {message.sender?.name}
-                    </Typography>
-                  )}
-
-                  <Typography>{message.content}</Typography>
-
-                  <Typography
-                    variant="caption"
+              <Box key={message.id}>
+                {showDay && (
+                  <Box
                     sx={{
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      gap: 0.5,
-                      mt: 0.5,
+                      justifyContent: 'center',
+                      mb: 2,
                     }}
                   >
-                    {new Date(message.createdAt).toLocaleTimeString([], {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    })}
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 2,
+                        bgcolor: 'grey.200',
+                        color: 'text.secondary',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {new Date(message.createdAt).toLocaleDateString([], {
+                        weekday: 'long',
+                      })}
+                    </Typography>
+                  </Box>
+                )}
 
-                    {isOwnMessage &&
-                      (message.readAt ? (
-                        <DoneAllIcon
-                          fontSize="small"
-                          sx={{ color: '#2196F3 !important' }}
-                        />
-                      ) : (
-                        <DoneIcon
-                          fontSize="small"
-                          sx={{ color: '#2196F3 !important' }}
-                        />
-                      ))}
-                  </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+                    mb: 2,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      maxWidth: '70%',
+                      px: 2,
+                      py: 1.25,
+                      borderRadius: 3,
+                      boxShadow: 3,
+                      bgcolor: isOwnMessage ? 'primary.main' : 'grey.100',
+                      color: isOwnMessage
+                        ? 'primary.contrastText'
+                        : 'text.primary',
+                    }}
+                  >
+                    {!isOwnMessage && (
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        display="block"
+                        sx={{ mb: 0.5 }}
+                      >
+                        {message.sender?.name}
+                      </Typography>
+                    )}
+
+                    <Typography>{message.content}</Typography>
+
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        gap: 0.5,
+                        mt: 0.5,
+                      }}
+                    >
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}
+
+                      {isOwnMessage &&
+                        (message.readAt ? (
+                          <DoneAllIcon
+                            fontSize="small"
+                            sx={{ color: '#2196F3 !important' }}
+                          />
+                        ) : (
+                          <DoneIcon
+                            fontSize="small"
+                            sx={{ color: '#2196F3 !important' }}
+                          />
+                        ))}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             );
