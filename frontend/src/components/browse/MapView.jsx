@@ -9,7 +9,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import { useEffect } from 'react';
 import L from 'leaflet';
 import MapPopupCard from './MapPopupCard.jsx';
-import { categoryIcon } from '../../utils/browse.utils.js';
+import { defaultMarkerIcon } from '../../utils/browse.utils.js';
 
 const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
@@ -36,16 +36,20 @@ function FitBounds({ requests, selectedLocation }) {
   return null;
 }
 
-export default function MapView({ requests, selectedLocation, onSelectRequest }) {
+export default function MapView({
+  requests,
+  selectedLocation,
+  onSelectRequest,
+}) {
   return (
     <MapContainer
-      center={[37.1662, -1194494]}
+      center={[37.1662, -119.4494]}
       zoom={4}
-      style={{ height: 500, width: '100%', borderRadius: 8 }}
+      style={{ height: '100%', width: '100%', borderRadius: 8 }}
     >
       <TileLayer
         url={`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${GEOAPIFY_API_KEY}`}
-        attribution='© OpenMapTiles © OpenStreetMap contributors'
+        attribution="© OpenMapTiles © OpenStreetMap contributors"
       />
       <FitBounds requests={requests} selectedLocation={selectedLocation} />
 
@@ -59,7 +63,7 @@ export default function MapView({ requests, selectedLocation, onSelectRequest })
           <Marker
             key={request.id}
             position={[request.latitude, request.longitude]}
-            icon={categoryIcon()}
+            icon={defaultMarkerIcon()}
             eventHandlers={{ click: () => onSelectRequest(request) }}
           >
             <Tooltip direction="top" offset={[0, -10]} opacity={1}>
