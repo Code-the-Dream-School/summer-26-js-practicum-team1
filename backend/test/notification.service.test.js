@@ -2,11 +2,13 @@ jest.mock('../src/config/prisma', () => ({
   $transaction: jest.fn(),
   notification: {
     create: jest.fn(),
+    findUnique: jest.fn(),
   },
   notificationDelivery: {
     create: jest.fn(),
     update: jest.fn(),
     upsert: jest.fn(),
+    findMany: jest.fn(),
   },
   helpRequest: {
     findUnique: jest.fn(),
@@ -23,6 +25,7 @@ const prisma = require('../src/config/prisma');
 const {
   onHelpRequestAccepted,
   buildDedupeKey,
+  createNotificationWithDelivery,
 } = require('../src/services/notification.service');
 
 describe('notification.service', () => {
@@ -50,10 +53,15 @@ describe('notification.service', () => {
         },
         notificationDelivery: {
           create: jest.fn().mockResolvedValue({ id: 1 }),
-          update: jest.fn().mockResolvedValue({ id: 1 }),
         },
       };
       return callback(tx);
+    });
+
+    prisma.notificationDelivery.update.mockResolvedValue({
+      id: 1,
+      attemptCount: 1,
+      failureReason: null,
     });
   });
 
@@ -66,6 +74,36 @@ describe('notification.service', () => {
 
     expect(notification.id).toBe(1);
     expect(prisma.$transaction).toHaveBeenCalled();
+    expect(prisma.notificationDelivery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: 'DELIVERED' }),
+      })
+    );
+  });
+
+  it('persists FAILED delivery when in-app delivery fails after create', async () => {
+    prisma.notificationDelivery.update
+      .mockRejectedValueOnce(new Error('write failed'))
+      .mockResolvedValueOnce({
+        id: 1,
+        attemptCount: 1,
+        failureReason: 'write failed',
+      });
+
+    const notification = await createNotificationWithDelivery({
+      recipientId: 3,
+      type: 'HELP_REQUEST_ACCEPTED',
+      dedupeKey: buildDedupeKey(99),
+      payload: { requestId: 99 },
+    });
+
+    expect(notification.id).toBe(1);
+    expect(prisma.notificationDelivery.update).toHaveBeenCalledTimes(2);
+    expect(prisma.notificationDelivery.update).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: 'FAILED' }),
+      })
+    );
   });
 
   it('uses a stable dedupe key per request', () => {
