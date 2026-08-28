@@ -137,7 +137,7 @@ async function createVolunteerApplicant({
           gender,
           phone: phone || null,
           profileImage: profileImage || null,
-          role: 'REQUESTER',
+          role: 'VOLUNTEER',
         },
         select: {
           id: true,

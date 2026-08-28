@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
+import VolunteerRegistrationPage from './pages/VolunteerRegistrationPage';
 import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -23,8 +24,10 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
-        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+        <Route
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
+        />
         <Route
           path="requesterRegistration"
           element={<RequestorRegistration />}

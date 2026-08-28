@@ -6,6 +6,7 @@ import { useVolunteerProfile } from '../hooks/useVolunteerProfile';
 import ProfileSummary from '../components/profile/ProfileSummary';
 import VolunteerPreferencesForm from '../components/profile/VolunteerPreferencesForm';
 import VolunteerPreferencesView from '../components/profile/VolunteerPreferencesView';
+import VolunteerPendingNotice from '../components/profile/VolunteerPendingNotice';
 
 function ProfilePage() {
   const { user } = useAuth();
@@ -16,6 +17,8 @@ function ProfilePage() {
     useVolunteerProfile({
       enabled: Boolean(user),
     });
+
+  const isPending = volunteer?.verificationStatus === 'PENDING';
 
   if (!user) {
     return null;
@@ -57,6 +60,8 @@ function ProfilePage() {
       </Box>
 
       <ProfileSummary user={summaryUser} />
+
+      {isPending && <VolunteerPendingNotice user={summaryUser}/>}
 
       {isVolunteer && (
         <>

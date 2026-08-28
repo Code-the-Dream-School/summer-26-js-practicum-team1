@@ -25,7 +25,7 @@ const ERROR_MESSAGES = {
   EMAIL_TAKEN: 'This email is already registered',
   VALIDATION_FAILED: 'Please check the fields and try again',
   NETWORK_ERROR: 'Something went wrong. Please try again',
-  REGISTER_FAILED: 'Something went wrong. Please try again',
+  REGISTRATION_FAILED: 'Something went wrong. Please try again',
 };
 
 function VolunteerRegistrationForm() {
@@ -45,7 +45,7 @@ function VolunteerRegistrationForm() {
 
   const serverErrorMessage =
     registerError &&
-    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTER_FAILED);
+    (ERROR_MESSAGES[registerError.message] ?? ERROR_MESSAGES.REGISTRATION_FAILED);
 
   const onSubmit = async (formData) => {
     const { confirmPassword: _confirmPassword, dob, phone, ...rest } = formData;
