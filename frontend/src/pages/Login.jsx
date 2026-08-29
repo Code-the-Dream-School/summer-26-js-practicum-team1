@@ -8,6 +8,7 @@ import {
   Divider,
 } from '@mui/material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { COLORS } from '../utils/constants';
 import { useAuth } from '../hooks/useAuth';
 import GoogleIcon from '@mui/icons-material/Google';
 import logo from '../assets/logo.png';
@@ -68,8 +69,9 @@ function Login() {
         sx={{
           width: '100%',
           maxWidth: { xs: 400, sm: 460, md: 500 },
-          bgcolor: 'background.paper',
-          borderRadius: '24px',
+          bgcolor: COLORS.bgSubtle,
+          borderRadius: 3,
+          boxShadow: 2,
           p: { xs: 3, sm: 4, md: 5 },
         }}
       >
@@ -105,7 +107,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="email"
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('email', {
               required: 'Email is required',
               pattern: {
@@ -128,7 +130,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="current-password"
-            sx={{ mb: 1 }}
+            sx={{ mb: 1, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors.password?.message}
