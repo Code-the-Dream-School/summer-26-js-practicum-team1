@@ -83,7 +83,6 @@ function Brand({ display, variant, sx }) {
         sx={{
           mr: 2,
           display,
-          fontFamily: 'monospace',
           fontWeight: 700,
           color: 'inherit',
           textDecoration: 'none',

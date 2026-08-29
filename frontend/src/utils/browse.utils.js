@@ -1,4 +1,5 @@
-import { ERROR_MESSAGES, COLORS } from './browse.constants';
+import { ERROR_MESSAGES } from './browse.constants';
+import { COLORS } from './constants';
 
 export function toggleInArray(arr, val) {
   return arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];

@@ -11,7 +11,6 @@ import {
   Pagination,
 } from '@mui/material';
 import {
-  COLORS,
   DEFAULT_DISTANCE_MI,
   CATEGORIES,
   URGENCY_LEVELS,
@@ -19,6 +18,7 @@ import {
   fieldSx,
   inputLabelSx,
 } from '../utils/browse.constants.js';
+import { COLORS } from '../utils/constants.js';
 import {
   toggleInArray,
   friendlyErrorMessage,
@@ -26,11 +26,12 @@ import {
 } from '../utils/browse.utils.js';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import {
   useBrowseHelpRequests,
   useCategoryFacets,
 } from '../hooks/useHelpRequests.js';
+import { useRespondToHelpRequest } from '../hooks/useRespondToHelpRequest.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useLocationAutocomplete } from '../hooks/useLocationAutocomplete.js';
 import SortControl from '../components/browse/SortControl.jsx';
@@ -157,6 +158,63 @@ function Browse() {
     useBrowseHelpRequests(browseFilters);
 
   const { categoryCounts } = useCategoryFacets(filters);
+
+  const {
+    acceptRequest,
+    declineRequest,
+    respondingRequestId,
+  } = useRespondToHelpRequest();
+
+  const [declinedRequestIds, setDeclinedRequestIds] = useState(() => new Set());
+  const [feedback, setFeedback] = useState(null);
+
+  const getResponseErrorMessage = (err, fallback) =>
+    err?.response?.data?.message || fallback;
+
+  const handleAccept = useCallback(
+    async (requestId) => {
+      setFeedback(null);
+      try {
+        await acceptRequest(requestId);
+        setFeedback({
+          severity: 'success',
+          message: 'Request accepted. You are now assigned to help.',
+        });
+      } catch (err) {
+        setFeedback({
+          severity: 'error',
+          message: getResponseErrorMessage(
+            err,
+            'Could not accept this request. Please try again.'
+          ),
+        });
+      }
+    },
+    [acceptRequest]
+  );
+
+  const handleDecline = useCallback(
+    async (requestId) => {
+      setFeedback(null);
+      try {
+        await declineRequest(requestId);
+        setDeclinedRequestIds((current) => new Set(current).add(requestId));
+        setFeedback({
+          severity: 'info',
+          message: 'Request declined. It will stay open for other volunteers.',
+        });
+      } catch (err) {
+        setFeedback({
+          severity: 'error',
+          message: getResponseErrorMessage(
+            err,
+            'Could not decline this request. Please try again.'
+          ),
+        });
+      }
+    },
+    [declineRequest]
+  );
 
   if (isLoading) {
     return (
@@ -319,6 +377,16 @@ function Browse() {
             </ButtonGroup>
           </Stack>
 
+          {feedback && (
+            <Alert
+              severity={feedback.severity}
+              onClose={() => setFeedback(null)}
+              sx={{ mb: 2 }}
+            >
+              {feedback.message}
+            </Alert>
+          )}
+
           {isError ? (
             <Alert severity="error">
               {friendlyErrorMessage(error) ||
@@ -328,7 +396,14 @@ function Browse() {
             helpRequests.length > 0 ? (
               <>
                 {helpRequests.map((request) => (
-                  <RequestCard key={request.id} request={request} />
+                  <RequestCard
+                    key={request.id}
+                    request={request}
+                    isDeclined={declinedRequestIds.has(request.id)}
+                    isResponding={respondingRequestId === request.id}
+                    onAccept={() => handleAccept(request.id)}
+                    onDecline={() => handleDecline(request.id)}
+                  />
                 ))}
 
                 {meta?.totalPages > 1 && (

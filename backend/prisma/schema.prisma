@@ -53,6 +53,11 @@ enum RequestStatus {
   CANCELLED
 }
 
+enum VolunteerResponseAction {
+  ACCEPTED
+  DECLINED
+}
+
 // USERS
 
 model User {
@@ -87,13 +92,14 @@ model VolunteerProfile {
   createdAt          DateTime           @default(now())
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  verifications VolunteerVerification[]
-  availability       Json?
-  serviceArea        String?  @map("service_area") @db.VarChar(255)
-  serviceLatitude    Float?   @map("service_latitude")
-  serviceLongitude   Float?   @map("service_longitude")
-  supportCategories  UserSupportCategory[]
-  helpRequests       HelpRequest[]
+  verifications     VolunteerVerification[]
+  availability      Json?
+  serviceArea       String?                 @map("service_area") @db.VarChar(255)
+  serviceLatitude   Float?                  @map("service_latitude")
+  serviceLongitude  Float?                  @map("service_longitude")
+  supportCategories UserSupportCategory[]
+  helpRequests      HelpRequest[]
+  responses         VolunteerResponse[]
 
   @@index([serviceArea])
   @@index([verificationStatus])
@@ -115,26 +121,44 @@ model VolunteerVerification {
 }
 
 model HelpRequest {
-  id           Int           @id @default(autoincrement())
-  requesterId  Int
-  volunteerId  Int?
-  title        String        @db.VarChar(100)
-  category     Category
-  urgency      Urgency
-  scheduledAt  DateTime
-  scheduledDayOfWeek Int    @default(dbgenerated())
-  address      String
-  latitude     Float
-  longitude    Float
-  description  String?
-  status       RequestStatus @default(PENDING)
-  createdAt    DateTime      @default(now())
-  completedAt  DateTime?
-  conversation Conversation?
+  id                 Int           @id @default(autoincrement())
+  requesterId        Int
+  volunteerId        Int?
+  title              String        @db.VarChar(100)
+  category           Category
+  urgency            Urgency
+  scheduledAt        DateTime
+  scheduledDayOfWeek Int           @default(dbgenerated())
+  address            String
+  latitude           Float
+  longitude          Float
+  description        String?
+  status             RequestStatus @default(PENDING)
+  createdAt          DateTime      @default(now())
+  completedAt        DateTime?
+  conversation       Conversation?
 
-  requester User @relation(fields: [requesterId], references: [id])
-  volunteer VolunteerProfile? @relation(fields: [volunteerId], references: [userId])
+  requester User                @relation(fields: [requesterId], references: [id])
+  volunteer VolunteerProfile?   @relation(fields: [volunteerId], references: [userId])
+  responses VolunteerResponse[]
+
   @@index([scheduledDayOfWeek])
+}
+
+model VolunteerResponse {
+  id          Int                     @id @default(autoincrement())
+  requestId   Int                     @map("request_id")
+  volunteerId Int                     @map("volunteer_id")
+  action      VolunteerResponseAction
+  createdAt   DateTime                @default(now()) @map("created_at")
+
+  request   HelpRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  volunteer VolunteerProfile @relation(fields: [volunteerId], references: [userId], onDelete: Cascade)
+
+  @@unique([requestId, volunteerId])
+  @@index([requestId])
+  @@index([volunteerId])
+  @@map("volunteer_responses")
 }
 
 model RequesterProfile {
