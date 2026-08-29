@@ -8,7 +8,9 @@ import {
 } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
-
+import {
+  searchPlaces,
+} from '../../services/geoapify';
 import {
   getMe,
   getHelpRequests,
@@ -99,42 +101,97 @@ export default function RequesterDashboard() {
   /* =======================================================
      EDIT STATE
   ======================================================= */
+const [locationSuggestions, setLocationSuggestions] = useState([]);
 
-  const [
-    editRequest,
-    setEditRequest,
-  ] = useState(null);
+const [isSearchingLocation, setIsSearchingLocation] =
+  useState(false);
 
-  const [
-    editLoading,
-    setEditLoading,
-  ] = useState(false);
+const [
+  editRequest,
+  setEditRequest,
+] = useState(null);
 
-  const [
-    updating,
-    setUpdating,
-  ] = useState(false);
+const [
+  editLoading,
+  setEditLoading,
+] = useState(false);
 
-  const [
-    editError,
-    setEditError,
-  ] = useState('');
+const [
+  updating,
+  setUpdating,
+] = useState(false);
 
-  const [
-    editForm,
-    setEditForm,
-  ] = useState({
-    title: '',
-    category: '',
-    urgency: '',
-    scheduledAt: '',
-    address: '',
-    latitude: '',
-    longitude: '',
-    description: '',
-  });
+const [
+  editError,
+  setEditError,
+] = useState('');
 
+const [
+  editForm,
+  setEditForm,
+] = useState({
+  title: '',
+  category: '',
+  urgency: '',
+  scheduledAt: '',
+  address: '',
+  latitude: '',
+  longitude: '',
+  description: '',
+});
 
+// MUST be here — top level of component
+const debouncedEditAddress = useDebouncedValue(
+  editForm.address,
+  300
+);
+
+useEffect(() => {
+  if (!editRequest) {
+    setLocationSuggestions([]);
+    return;
+  }
+
+  const address = debouncedEditAddress.trim();
+
+  if (address.length < 2) {
+    setLocationSuggestions([]);
+    return;
+  }
+
+  let cancelled = false;
+
+  const loadSuggestions = async () => {
+    try {
+      setIsSearchingLocation(true);
+
+      const suggestions = await searchPlaces(address);
+
+      if (!cancelled) {
+        setLocationSuggestions(suggestions);
+      }
+    } catch (err) {
+      console.error(
+        'Failed to search edit address:',
+        err
+      );
+
+      if (!cancelled) {
+        setLocationSuggestions([]);
+      }
+    } finally {
+      if (!cancelled) {
+        setIsSearchingLocation(false);
+      }
+    }
+  };
+
+  loadSuggestions();
+
+  return () => {
+    cancelled = true;
+  };
+}, [debouncedEditAddress, editRequest]);
   /* =======================================================
      CANCEL STATE
   ======================================================= */
@@ -336,13 +393,43 @@ export default function RequesterDashboard() {
     }));
   };
 
+const handleEditAddressChange = (event) => {
+  const { value } = event.target;
 
+  setEditForm((current) => ({
+    ...current,
+    address: value,
+
+    // Address changed, so old coordinates
+    // are no longer considered valid.
+    latitude: '',
+    longitude: '',
+  }));
+};
+const handleSelectEditAddress = (location) => {
+  setEditForm((current) => ({
+    ...current,
+    address: location.label,
+    latitude: String(location.latitude),
+    longitude: String(location.longitude),
+  }));
+
+  setLocationSuggestions([]);
+};
   /* =======================================================
      UPDATE REQUEST
   ======================================================= */
 
   const handleUpdateRequest = async () => {
-    if (!editRequest) {
+    if (
+  !editForm.latitude ||
+  !editForm.longitude
+) {
+  setEditError(
+    'Please select an address from the location suggestions so the location coordinates can be updated.'
+  );
+
+  setUpdating(false);
       return;
     }
 
@@ -809,8 +896,12 @@ export default function RequesterDashboard() {
   updating={updating}
   editError={editError}
   editForm={editForm}
+  locationSuggestions={locationSuggestions}
+  isSearchingLocation={isSearchingLocation}
   onClose={handleCloseEditDialog}
   onChange={handleEditChange}
+  onAddressChange={handleEditAddressChange}
+  onSelectAddress={handleSelectEditAddress}
   onUpdate={handleUpdateRequest}
 />
 

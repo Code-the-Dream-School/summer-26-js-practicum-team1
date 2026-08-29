@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 
 import { COLORS } from '../../utils/constants.js';
-
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import { URGENCY_OPTIONS } from '../../utils/requester.constants.js';
 import { CATEGORIES } from '../../utils/browse.constants.js';
 
@@ -24,10 +24,16 @@ function EditRequestDialog({
   updating,
   editError,
   editForm,
+  locationSuggestions,
+  isSearchingLocation,
   onClose,
   onChange,
+  onAddressChange,
+  onSelectAddress,
   onUpdate,
-}) {
+}) 
+
+{
   return (
     <Dialog
       open={open}
@@ -140,29 +146,92 @@ function EditRequestDialog({
             {/* DATE + TIME */}
 
             <TextField
-              label="Date & Time"
-              name="scheduledAt"
-              type="datetime-local"
-              value={editForm.scheduledAt}
-              onChange={onChange}
-              fullWidth
-              required
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
+  label="Date & Time"
+  name="scheduledAt"
+  type="datetime-local"
+  value={editForm.scheduledAt}
+  onChange={onChange}
+  fullWidth
+  required
+  slotProps={{
+    inputLabel: {
+      shrink: true,
+    },
+  }}
+/>
 
 
             {/* ADDRESS */}
 
             <TextField
-              label="Address"
-              name="address"
-              value={editForm.address}
-              onChange={onChange}
-              fullWidth
-              required
-            />
+  label="Address"
+  name="address"
+  value={editForm.address}
+  onChange={onAddressChange}
+  fullWidth
+  required
+  multiline
+  minRows={2}
+/>
+
+{locationSuggestions.length > 0 && (
+  <Box
+    sx={{
+      border: '1px solid #D7E5D8',
+      borderRadius: 2,
+      mt: 1,
+      backgroundColor: '#FFFFFF',
+      overflow: 'hidden',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    }}
+  >
+    {locationSuggestions.map((location) => (
+      <Button
+        key={
+          location.placeId ||
+          `${location.latitude}-${location.longitude}`
+        }
+        type="button"
+        fullWidth
+        onClick={() => onSelectAddress(location)}
+        sx={{
+          justifyContent: 'flex-start',
+          textAlign: 'left',
+          px: 2,
+          py: 1.5,
+          color: '#1E293B',
+          textTransform: 'none',
+          borderRadius: 0,
+          '&:hover': {
+            backgroundColor: '#E8F5E9',
+          },
+        }}
+      >
+        <LocationOnOutlinedIcon
+          sx={{
+            mr: 1,
+            color: '#2E7D32',
+          }}
+        />
+
+        {location.label}
+      </Button>
+    ))}
+  </Box>
+)}
+
+{isSearchingLocation && (
+  <Typography
+    variant="caption"
+    color="text.secondary"
+    sx={{
+      display: 'block',
+      mt: 1,
+    }}
+  >
+    Searching for addresses...
+  </Typography>
+)}
 
 
             {/* DESCRIPTION */}

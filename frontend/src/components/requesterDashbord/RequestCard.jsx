@@ -25,9 +25,11 @@ import {
   getUrgencyStyle,
   getStatusStyle,
 } from '../../utils/requester.constants.js';
+
 import {
   CATEGORY_BY_API_VALUE,
 } from '../../utils/browse.constants.js';
+
 import { COLORS } from '../../utils/constants.js';
 
 function RequestCard({
@@ -69,6 +71,15 @@ function RequestCard({
     accepted
   );
 
+  
+  const blurActiveElement = () => {
+    if (
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
+    }
+  };
+
   const handleToggleDetails = () => {
     setExpandedRequest(
       isExpanded
@@ -79,6 +90,16 @@ function RequestCard({
 
   const handleOpenChat = () => {
     navigate(`/chat/${request.id}`);
+  };
+
+  const handleEditClick = () => {
+    blurActiveElement();
+    onEdit(request);
+  };
+
+  const handleCancelClick = () => {
+    blurActiveElement();
+    onCancel(request);
   };
 
   return (
@@ -115,6 +136,7 @@ function RequestCard({
             mb: 2,
           }}
         >
+
           {/* STATUS */}
 
           <Chip
@@ -124,8 +146,10 @@ function RequestCard({
               fontWeight: 500,
               flexShrink: 0,
               minHeight: 32,
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.text,
+              backgroundColor:
+                statusStyle.bg,
+              color:
+                statusStyle.text,
             }}
           />
 
@@ -133,9 +157,11 @@ function RequestCard({
 
           {isPending && (
             <>
+              {/* EDIT */}
+
               <Tooltip title="Edit request">
                 <IconButton
-                  onClick={() => onEdit(request)}
+                  onClick={handleEditClick}
                   aria-label="Edit help request"
                   size="small"
                   sx={{
@@ -144,19 +170,24 @@ function RequestCard({
                     flexShrink: 0,
                     color: COLORS.primary,
                     borderRadius: 2,
+
                     '&:hover': {
                       backgroundColor:
                         COLORS.bgSubtle,
                     },
                   }}
                 >
-                  <EditOutlinedIcon fontSize="small" />
+                  <EditOutlinedIcon
+                    fontSize="small"
+                  />
                 </IconButton>
               </Tooltip>
 
+              {/* CANCEL */}
+
               <Tooltip title="Cancel request">
                 <IconButton
-                  onClick={() => onCancel(request)}
+                  onClick={handleCancelClick}
                   aria-label="Cancel help request"
                   size="small"
                   sx={{
@@ -165,13 +196,16 @@ function RequestCard({
                     flexShrink: 0,
                     color: COLORS.primary,
                     borderRadius: 2,
+
                     '&:hover': {
                       backgroundColor:
                         COLORS.bgSubtle,
                     },
                   }}
                 >
-                  <DeleteForeverOutlinedIcon fontSize="small" />
+                  <DeleteForeverOutlinedIcon
+                    fontSize="small"
+                  />
                 </IconButton>
               </Tooltip>
             </>
@@ -189,7 +223,9 @@ function RequestCard({
             mb: 1.5,
           }}
         >
-          {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
+          {CATEGORY_BY_API_VALUE[
+            request.category
+          ]?.label || request.category}
         </Typography>
 
         {/* TITLE */}
@@ -329,7 +365,9 @@ function RequestCard({
           {canChat && (
             <Button
               variant="contained"
-              startIcon={<ChatBubbleIcon />}
+              startIcon={
+                <ChatBubbleIcon />
+              }
               onClick={handleOpenChat}
               sx={{
                 minHeight: 42,
@@ -338,7 +376,9 @@ function RequestCard({
                 textTransform: 'none',
                 fontWeight: 600,
                 boxShadow: 2,
-                transition: 'all 0.2s ease',
+                transition:
+                  'all 0.2s ease',
+
                 '&:hover': {
                   boxShadow: 4,
                   transform:
@@ -553,6 +593,7 @@ function RequestCard({
                       color:
                         '#166534',
                       fontWeight: 700,
+
                       '&:hover': {
                         boxShadow:
                           '0 0 0 3px #DCFCE7',
@@ -591,6 +632,7 @@ function RequestCard({
                         cursor: 'pointer',
                         color:
                           COLORS.primary,
+
                         '&:hover': {
                           textDecoration:
                             'underline',
