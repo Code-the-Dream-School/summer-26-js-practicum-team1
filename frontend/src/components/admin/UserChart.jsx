@@ -4,7 +4,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -49,7 +48,7 @@ function UserChart({ users }) {
           }}
         />
         <Tooltip />
-        <Bar dataKey="users" fill="#c4e19e" radius={[8, 8, 0, 0]} />
+        <Bar dataKey="users" fill="#9C9C98" radius={[8, 8, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

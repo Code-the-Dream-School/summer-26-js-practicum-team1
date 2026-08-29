@@ -1,4 +1,4 @@
-import { Grid, Typography } from '@mui/material';
+import { Typography, Box } from '@mui/material';
 import { usePendingVolunteers } from '../../hooks/admin/usePendingVolunteers';
 import VolunteerList from '../../components/admin/VolunteerList';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -21,13 +21,22 @@ function VolunteerApprovals() {
   }
   return (
     <>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
-      >
-        PENDING VOLUNTEERS
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h5"
+          align="left"
+          sx={{ marginLeft: 0, fontWeight: 700 }}
+        >
+          PENDING VOLUNTEERS
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: { xs: 'center', sm: 'left' } }}
+        >
+          View Pending Volunteers.
+        </Typography>
+      </Box>
       <VolunteerList volunteers={volunteers} />
     </>
   );
