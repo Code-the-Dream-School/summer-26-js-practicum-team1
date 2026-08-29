@@ -12,9 +12,12 @@ import {
   IconButton,
 } from '@mui/material';
 
+import { useNavigate } from 'react-router-dom';
+
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
 import { useAcceptedVolunteerProfile } from '../../hooks/useAcceptedVolunteerProfile.js';
 
@@ -22,8 +25,10 @@ import {
   getUrgencyStyle,
   getStatusStyle,
 } from '../../utils/requester.constants.js';
-
-import { COLORS } from '../../utils/browse.constants.js';
+import {
+  CATEGORY_BY_API_VALUE,
+} from '../../utils/browse.constants.js';
+import { COLORS } from '../../utils/constants.js';
 
 function RequestCard({
   request,
@@ -33,14 +38,21 @@ function RequestCard({
   onCancel,
   onVolunteerProfile,
 }) {
+  const navigate = useNavigate();
+
   const requestStatus =
-  String(request.status || '').toUpperCase();
+    String(request.status || '').toUpperCase();
 
-const accepted =
-  requestStatus === 'ACCEPTED';
+  const accepted =
+    requestStatus === 'ACCEPTED';
 
-const isPending =
-  requestStatus === 'PENDING';
+  const isPending =
+    requestStatus === 'PENDING';
+
+  const canChat =
+    requestStatus === 'ACCEPTED' ||
+    requestStatus === 'COMPLETED';
+
   const urgencyStyle =
     getUrgencyStyle(request.urgency);
 
@@ -57,7 +69,6 @@ const isPending =
     accepted
   );
 
-
   const handleToggleDetails = () => {
     setExpandedRequest(
       isExpanded
@@ -66,6 +77,9 @@ const isPending =
     );
   };
 
+  const handleOpenChat = () => {
+    navigate(`/chat/${request.id}`);
+  };
 
   return (
     <Card
@@ -85,87 +99,84 @@ const isPending =
             xs: 2.5,
             md: 3,
           },
-
           display: 'flex',
-
           flexDirection: 'column',
         }}
       >
 
-    
-{/* 
-    STATUS + ACTION BUTTONS
- */}
+        {/* STATUS + ACTION BUTTONS */}
 
-<Box
-  sx={{
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: 0.5,
-    mb: 2,
-  }}
->
-  {/* STATUS */}
-  <Chip
-    label={statusStyle.label}
-    size="small"
-    sx={{
-      fontWeight: 500,
-      flexShrink: 0,
-      minHeight: 32,
-      backgroundColor: statusStyle.bg,
-      color: statusStyle.text,
-    }}
-  />
-
-  {/* EDIT + CANCEL ONLY FOR PENDING */}
-  {isPending && (
-    <>
-      <Tooltip title="Edit request">
-        <IconButton
-          onClick={() => onEdit(request)}
-          aria-label="Edit help request"
-          size="small"
+        <Box
           sx={{
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-            color: COLORS.primary,
-            borderRadius: 2,
-            '&:hover': {
-              backgroundColor: COLORS.bgSubtle,
-            },
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            gap: 0.5,
+            mb: 2,
           }}
         >
-          <EditOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+          {/* STATUS */}
 
-      <Tooltip title="Cancel request">
-        <IconButton
-          onClick={() => onCancel(request)}
-          aria-label="Cancel help request"
-          size="small"
-          sx={{
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-            color: COLORS.primary,
-            borderRadius: 2,
-            '&:hover': {
-              backgroundColor: COLORS.bgSubtle,
-            },
-          }}
-        >
-          <DeleteForeverOutlinedIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </>
-  )}
-</Box>
+          <Chip
+            label={statusStyle.label}
+            size="small"
+            sx={{
+              fontWeight: 500,
+              flexShrink: 0,
+              minHeight: 32,
+              backgroundColor: statusStyle.bg,
+              color: statusStyle.text,
+            }}
+          />
 
+          {/* EDIT + CANCEL ONLY FOR PENDING */}
 
+          {isPending && (
+            <>
+              <Tooltip title="Edit request">
+                <IconButton
+                  onClick={() => onEdit(request)}
+                  aria-label="Edit help request"
+                  size="small"
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    flexShrink: 0,
+                    color: COLORS.primary,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor:
+                        COLORS.bgSubtle,
+                    },
+                  }}
+                >
+                  <EditOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Cancel request">
+                <IconButton
+                  onClick={() => onCancel(request)}
+                  aria-label="Cancel help request"
+                  size="small"
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    flexShrink: 0,
+                    color: COLORS.primary,
+                    borderRadius: 2,
+                    '&:hover': {
+                      backgroundColor:
+                        COLORS.bgSubtle,
+                    },
+                  }}
+                >
+                  <DeleteForeverOutlinedIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Box>
 
         {/* CATEGORY */}
 
@@ -173,60 +184,45 @@ const isPending =
           variant="body2"
           sx={{
             color: COLORS.textMuted,
-
             fontSize: '1rem',
-
             fontWeight: 700,
-
             mb: 1.5,
           }}
         >
-          {request.category}
+          {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
         </Typography>
-            {/* TITLE */}
-          <Typography
-              variant="body2"
-               sx={{
+
+        {/* TITLE */}
+
+        <Typography
+          variant="body2"
+          sx={{
             color: COLORS.textMuted,
-
             fontSize: '1rem',
-
             fontWeight: 800,
-
             mb: 1.5,
           }}
-            >
-              <strong>Title:</strong>{' '}
-              {request.title}
-            </Typography>
-
-
-
-
+        >
+          <strong>Title:</strong>{' '}
+          {request.title}
+        </Typography>
 
         {/* DATE + TIME */}
 
         <Box
           sx={{
             display: 'flex',
-
             alignItems: 'center',
-
             gap: 3,
-
             flexWrap: 'wrap',
-
             mb: 1.5,
           }}
         >
-
           <Typography
             variant="body2"
             sx={{
               color: COLORS.primary,
-
               fontSize: '1rem',
-
               fontWeight: 700,
             }}
           >
@@ -236,7 +232,6 @@ const isPending =
               component="span"
               sx={{
                 color: '#AA7B23',
-
                 fontWeight: 700,
               }}
             >
@@ -248,14 +243,11 @@ const isPending =
             </Box>
           </Typography>
 
-
           <Typography
             variant="body2"
             sx={{
               color: COLORS.primary,
-
               fontSize: '1rem',
-
               fontWeight: 700,
             }}
           >
@@ -265,7 +257,6 @@ const isPending =
               component="span"
               sx={{
                 color: '#AA7B23',
-
                 fontWeight: 700,
               }}
             >
@@ -282,90 +273,93 @@ const isPending =
                 : 'Time not available'}
             </Box>
           </Typography>
-
         </Box>
 
-
-        {/* URGENCY*/}
+        {/* URGENCY */}
 
         <Box
           sx={{
             display: 'flex',
-
             alignItems: 'center',
-
             gap: 2,
-
             mb: 1.5,
           }}
         >
-
           <Typography
             variant="body2"
             sx={{
               color: COLORS.textMuted,
-
               fontSize: '1rem',
-
               fontWeight: 700,
             }}
           >
             Urgency:
           </Typography>
 
-
           <Chip
             label={request.urgency}
             size="small"
             sx={{
               minHeight: 32,
-
               fontSize: '0.9rem',
-
               backgroundColor:
                 urgencyStyle.bg,
-
               color:
                 urgencyStyle.text,
-
               fontWeight: 700,
             }}
           />
-
         </Box>
 
-
-        {/*ACTIONS*/}
+        {/* ACTIONS */}
 
         <Box
           sx={{
             display: 'flex',
-
             justifyContent: 'flex-end',
-
             alignItems: 'center',
-
             mt: 'auto',
-
             pt: 1,
+            gap: 1,
           }}
         >
 
+          {/* MESSAGE BUTTON */}
+
+          {canChat && (
+            <Button
+              variant="contained"
+              startIcon={<ChatBubbleIcon />}
+              onClick={handleOpenChat}
+              sx={{
+                minHeight: 42,
+                px: 2.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: 2,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: 4,
+                  transform:
+                    'translateY(-1px)',
+                },
+              }}
+            >
+              Message
+            </Button>
+          )}
+
+          {/* VIEW DETAILS BUTTON */}
+
           <Button
-            onClick={
-              handleToggleDetails
-            }
+            onClick={handleToggleDetails}
             sx={{
               minHeight: 44,
-
               px: 2,
-
               fontSize: '1rem',
-
               fontWeight: 600,
-
               textTransform: 'none',
-
               color: COLORS.primary,
             }}
           >
@@ -373,11 +367,7 @@ const isPending =
               ? 'Hide Details'
               : 'View Details'}
           </Button>
-
-
-          
         </Box>
-
 
         {/* EXPANDED DETAILS */}
 
@@ -386,32 +376,23 @@ const isPending =
           timeout="auto"
           unmountOnExit
         >
-
           <Box
             sx={{
               mt: 2,
-
               pt: 2,
-
               borderTop:
                 `1px solid ${COLORS.border}`,
             }}
           >
 
-          
-
-            
             {/* DESCRIPTION */}
 
             <Typography
               variant="body2"
               sx={{
                 mt: 1.5,
-
                 color: COLORS.textMuted,
-
                 fontSize: '1rem',
-
                 lineHeight: 1.6,
               }}
             >
@@ -423,26 +404,19 @@ const isPending =
                 'No description provided.'}
             </Typography>
 
-
             {/* LOCATION */}
 
             <Box
               sx={{
                 display: 'flex',
-
-                alignItems:
-                  'flex-start',
-
+                alignItems: 'flex-start',
                 gap: 1,
-
                 mt: 1.5,
               }}
             >
-
               <LocationOnOutlinedIcon
                 sx={{
                   fontSize: 20,
-
                   mt: 0.2,
                 }}
                 color="action"
@@ -453,11 +427,8 @@ const isPending =
                 sx={{
                   color:
                     COLORS.textMuted,
-
                   fontSize: '1rem',
-
                   lineHeight: 1.5,
-
                   overflowWrap:
                     'anywhere',
                 }}
@@ -469,9 +440,7 @@ const isPending =
                 {request.address ||
                   'Address not available'}
               </Typography>
-
             </Box>
-
 
             {/* CATEGORY */}
 
@@ -479,10 +448,8 @@ const isPending =
               variant="body2"
               sx={{
                 mt: 1.5,
-
                 color:
                   COLORS.textMuted,
-
                 fontSize: '1rem',
               }}
             >
@@ -493,17 +460,14 @@ const isPending =
               {request.category}
             </Typography>
 
-
             {/* URGENCY */}
 
             <Typography
               variant="body2"
               sx={{
                 mt: 1.5,
-
                 color:
                   COLORS.textMuted,
-
                 fontSize: '1rem',
               }}
             >
@@ -514,17 +478,14 @@ const isPending =
               {request.urgency}
             </Typography>
 
-
             {/* STATUS */}
 
             <Typography
               variant="body2"
               sx={{
                 mt: 1.5,
-
                 color:
                   COLORS.textMuted,
-
                 fontSize: '1rem',
               }}
             >
@@ -535,16 +496,13 @@ const isPending =
               {statusStyle.label}
             </Typography>
 
-
-            {/*VOLUNTEER */}
+            {/* VOLUNTEER */}
 
             {accepted && volunteer && (
               <Box
                 sx={{
                   mt: 2,
-
                   pt: 2,
-
                   borderTop:
                     `1px solid ${COLORS.border}`,
                 }}
@@ -555,20 +513,16 @@ const isPending =
                   fontWeight={700}
                   sx={{
                     mb: 1.5,
-
                     fontSize: '1rem',
                   }}
                 >
                   Volunteer Details
                 </Typography>
 
-
                 <Box
                   sx={{
                     display: 'flex',
-
                     alignItems: 'center',
-
                     gap: 1.5,
                   }}
                 >
@@ -591,21 +545,14 @@ const isPending =
                     }
                     sx={{
                       width: 48,
-
                       height: 48,
-
                       fontSize: 18,
-
                       cursor: 'pointer',
-
                       bgcolor:
                         '#E8F5E9',
-
                       color:
                         '#166534',
-
                       fontWeight: 700,
-
                       '&:hover': {
                         boxShadow:
                           '0 0 0 3px #DCFCE7',
@@ -617,7 +564,6 @@ const isPending =
                         ?.charAt(0)
                         ?.toUpperCase()}
                   </Avatar>
-
 
                   <Box>
 
@@ -632,7 +578,6 @@ const isPending =
                       Volunteer
                     </Typography>
 
-
                     <Typography
                       variant="body1"
                       fontWeight={600}
@@ -643,12 +588,9 @@ const isPending =
                       }
                       sx={{
                         fontSize: '1rem',
-
                         cursor: 'pointer',
-
                         color:
                           COLORS.primary,
-
                         '&:hover': {
                           textDecoration:
                             'underline',
@@ -660,9 +602,7 @@ const isPending =
                     </Typography>
 
                   </Box>
-
                 </Box>
-
 
                 {/* PHONE */}
 
@@ -672,7 +612,6 @@ const isPending =
                     color="text.secondary"
                     sx={{
                       mt: 1.5,
-
                       fontSize: '1rem',
                     }}
                   >
@@ -684,7 +623,6 @@ const isPending =
                   </Typography>
                 )}
 
-
                 {/* EMAIL */}
 
                 {volunteer.email && (
@@ -693,7 +631,6 @@ const isPending =
                     color="text.secondary"
                     sx={{
                       mt: 1,
-
                       fontSize: '1rem',
                     }}
                   >
@@ -709,11 +646,12 @@ const isPending =
             )}
 
           </Box>
-
         </Collapse>
 
       </CardContent>
     </Card>
   );
 }
+
 export default RequestCard;
+

@@ -79,11 +79,13 @@ Add screenshots or GIFs of key features here.
 project-root/
 ├── frontend/
 │   ├── src/
+│   │   ├── assets/
 │   │   ├── components/
+│   │   ├── context/
 │   │   ├── pages/
 │   │   ├── hooks/
+│   │   ├── layouts/
 │   │   ├── services/
-│   │   ├── styles/
 │   │   ├── utils/
 │   │   ├── App.jsx
 │   │   └── main.jsx
@@ -91,12 +93,14 @@ project-root/
 │   └── package.json
 │
 ├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   ├── middleware/
-│   ├── config/
-│   ├── app.js
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── models/
+│   │   ├── middleware/
+│   │   ├── config/
+│   │   ├── app.js
+│   ├── test/
 │   ├── server.js
 │   └── package.json
 │
@@ -126,19 +130,84 @@ PORT=5000
 DATABASE_URL=your_postgres_url
 
 JWT_SECRET=your_secret_key
-
-# Google reCAPTCHA
-RECAPTCHA_SECRET=your_recaptcha_secret
-RECAPTCHA_BYPASS=your_recaptcha_bypass_value
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:3001
 ```
 
-Backend runs on:  
-http://localhost:5000
+`DATABASE_URL` should point at a PostgreSQL database you can create locally, e.g.:
+
+```env
+DATABASE_URL="postgresql://your_user@localhost:5432/neighborhood_helper"
+```
+
+Make sure the database itself exists before running migrations:
+
+```bash
+createdb -U your_user neighborhood_helper
+# or
+psql -U your_user -h localhost -c "CREATE DATABASE neighborhood_helper;"
+```
+
+`npm install` will automatically run `prisma generate` afterward (via the `prepare` script), which regenerates the Prisma Client from `prisma/schema.prisma`. If you ever see errors about missing Prisma Client types or an out-of-date client, re-run:
+
+```bash
+npm run db:generate
+```
+
+Once your database exists and `.env` points at it, apply the schema:
+
+```bash
+npm run db:migrate
+```
+
+This creates the database schema (and any pending migrations) locally. See [Database Setup & Scripts](#database-setup--scripts) below for the full script reference and what each one does.
+
+Finally, start the server:
+
+```bash
+npm run dev
+```
+
+Backend runs on:
+http://localhost:8080
+
+### Database Setup & Scripts
+
+The backend uses Prisma ORM against PostgreSQL. All database-related tasks are exposed as npm scripts.
+
+### First-time setup
+
+1. Create your local PostgreSQL database (see [Backend Setup](#backend-setup) above).
+2. Set `DATABASE_URL` in `.env` to point at it.
+3. Run `npm install` — this generates the Prisma Client automatically.
+4. Run `npm run db:migrate` to create the schema.
+5. (Optional) Run `npm run db:seed` to populate it with sample data.
+
+### Script reference
+
+| Script                | What it does                                                                                                                                                                  | Safe in production?                 |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `npm run db:generate` | Regenerates Prisma Client from `prisma/schema.prisma`. Runs automatically after `npm install` via `prepare`.                                                                  | Yes                                 |
+| `npm run db:migrate`  | Creates and applies migrations during local development (`prisma migrate dev`).                                                                                               | **No — local only**                 |
+| `npm run db:deploy`   | Applies already-committed migrations with no prompts and no drift detection (`prisma migrate deploy`). This is the command CI/CD and deployed environments should run.        | Yes                                 |
+| `npm run db:status`   | Shows which migrations are applied vs. pending. Read-only.                                                                                                                    | Yes                                 |
+| `npm run db:studio`   | Opens Prisma Studio, a GUI for browsing and editing data.                                                                                                                     | **No — local/troubleshooting only** |
+| `npm run db:reset`    | **Destructive.** Drops the database, reapplies all migrations from scratch, then reruns the seed script (`prisma migrate reset`).                                             | **No — local only**                 |
+| `npm run db:seed`     | Runs `prisma/seed.js` to populate the database with sample data. Wipes and recreates seed records, so it's also destructive to existing data in whatever database it targets. | **No — local/test only**            |
+
+### Test database
+
+Database-backed tests must never run against your development database. Set up an isolated test database before writing any test that touches Prisma directly:
+
+1. Create a separate local database for tests, e.g. `backend_test_db`.
+2. Copy `.env.test.example` to `.env.test` and point `DATABASE_URL` at that test database:
+
+```env
+   DATABASE_URL="postgresql://your_user@localhost:5432/backend_test_db"
+   JWT_SECRET="test-secret-do-not-use-outside-tests"
+```
+
+3. Apply migrations to it: `DATABASE_URL="<your test URL>" npx prisma migrate deploy`
+
+`test/setup.js` loads `.env.test` automatically for every Jest run and will throw if `DATABASE_URL` doesn't look like a test database (i.e. doesn't contain the word "test") — this is what prevents a future database-backed test command from silently targeting development data. `.env.test` is git-ignored; only `.env.test.example` is committed as a template.
 
 ### Frontend Setup
 
@@ -153,20 +222,14 @@ npm run dev
 VITE_BASE_URL=""
 
 # Local backend server
-VITE_TARGET="http://localhost:3000"
+VITE_TARGET="http://localhost:8080"
 
 # Production backend URL (Render)
 # VITE_TARGET="https://node-homework-909.onrender.com"
-
-# Google reCAPTCHA
-VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
-
-# Google OAuth
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 Frontend runs on:  
-http://localhost:3000
+http://localhost:5173
 
 ### Frontend
 

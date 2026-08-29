@@ -16,6 +16,7 @@ import RequestorRegistration from './pages/Register';
 import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import NewhelpRequest from './pages/Requester/helpRequest';
+import ChatPage from './pages/ChatPage';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
@@ -76,6 +77,15 @@ function App() {
             path="admin/users/:id"
             element={<AdminUserDetailPage />}
           />
+        </Route>
+
+        {/* Chat routes */}
+        <Route
+          element={
+            <RoleProtectedRoute allowedRoles={['volunteer', 'requester']} />
+          }
+        >
+          <Route path="/chat/:requestId" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}

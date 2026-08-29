@@ -53,12 +53,21 @@ const logLoginAttempt = (req, { email, outcome, userId = null }) => {
   );
 };
 
-const clientSession = (user, csrfToken) => ({
-  id: user.id,
-  name: user.name,
-  role: user.role.toLowerCase(),
-  csrfToken,
-});
+const clientSession = (user, csrfToken) => {
+  const session = {
+    id: user.id,
+    name: user.name,
+    role: user.role.toLowerCase(),
+    csrfToken,
+  };
+
+  const status = user.volunteerProfile?.verificationStatus;
+  if (status) {
+    session.verificationStatus = status.toLowerCase();
+  }
+
+  return session;
+};
 
 const logon = asyncHandler(async (req, res) => {
   res.set('Cache-Control', 'no-store');

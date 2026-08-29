@@ -12,7 +12,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 
-import { COLORS } from '../../utils/browse.constants.js';
+import { COLORS } from '../../utils/constants.js';
 
  function RequestFilters({
   search,

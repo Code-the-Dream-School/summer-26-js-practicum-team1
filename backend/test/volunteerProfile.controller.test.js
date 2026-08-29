@@ -1,13 +1,20 @@
 const request = require('supertest');
 
 jest.mock('../src/middleware/jwt.middleware', () => {
-  const state = { role: 'VOLUNTEER' };
+  const state = {
+    role: 'VOLUNTEER',
+    verificationStatus: 'APPROVED',
+  };
 
   const middleware = (req, res, next) => {
     req.user = {
       id: 1,
       role: state.role,
       name: 'Test Volunteer',
+      volunteerProfile:
+        state.role === 'VOLUNTEER'
+          ? { verificationStatus: state.verificationStatus }
+          : null,
     };
 
     req.auth = {
@@ -19,6 +26,10 @@ jest.mock('../src/middleware/jwt.middleware', () => {
 
   middleware.__setRole = (role) => {
     state.role = role;
+  };
+
+  middleware.__setVerificationStatus = (verificationStatus) => {
+    state.verificationStatus = verificationStatus;
   };
 
   return middleware;
@@ -42,6 +53,7 @@ const app = require('../src/app');
 
 beforeEach(() => {
   jwtMiddleware.__setRole('VOLUNTEER');
+  jwtMiddleware.__setVerificationStatus('APPROVED');
   jest.clearAllMocks();
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -150,6 +162,20 @@ describe('PUT /api/profile/volunteer', () => {
     });
 
     expect(res.status).toBe(403);
+    expect(
+      volunteerProfileService.updateVolunteerProfile
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejects a pending volunteer', async () => {
+    jwtMiddleware.__setVerificationStatus('PENDING');
+
+    const res = await request(app).put('/api/profile/volunteer').send({
+      interestIds: [1],
+    });
+
+    expect(res.status).toBe(403);
+    expect(res.body).toEqual({ error: 'Volunteer account not approved' });
     expect(
       volunteerProfileService.updateVolunteerProfile
     ).not.toHaveBeenCalled();

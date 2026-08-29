@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 
-import { COLORS } from '../../utils/browse.constants.js';
+import { COLORS } from '../../utils/constants.js';
 
 
 function VolunteerProfileDialog({

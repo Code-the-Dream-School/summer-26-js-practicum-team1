@@ -119,7 +119,6 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
-
 /**
  * Register a new user.
  */
@@ -156,6 +155,50 @@ export async function registerUser(userData) {
     throw new Error('REGISTRATION_FAILED');
   }
 }
+
+/**
+ * Accept a help request.
+ */
+export async function acceptHelpRequest(
+  requestId,
+  csrfToken
+) {
+  const { data } = await api.post(
+    `/api/requests/${requestId}/accept`,
+    {},
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    }
+  );
+
+  return data;
+}
+
+/**
+ * Decline a help request.
+ */
+export async function declineHelpRequest(
+  requestId,
+  csrfToken
+) {
+  const { data } = await api.post(
+    `/api/requests/${requestId}/decline`,
+    {},
+    {
+      headers: {
+        'X-CSRF-TOKEN': csrfToken,
+      },
+      withCredentials: true,
+    }
+  );
+
+  return data;
+}
+
+
 
 /**
  * Create a new help request.

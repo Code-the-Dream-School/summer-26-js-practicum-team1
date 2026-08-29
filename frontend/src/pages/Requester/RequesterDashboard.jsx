@@ -23,7 +23,7 @@ import VolunteerProfileDialog from '../../components/requesterDashbord/Volunteer
 import EditRequestDialog from '../../components/requesterDashbord/EditRequestDialog.jsx';
 import CancelRequestDialog from '../../components/requesterDashbord/CancelRequestDialog.jsx';
 
-import { COLORS } from '../../utils/browse.constants.js';
+import { COLORS } from '../../utils/constants.js';
 
 import {
   formatDateTimeLocal,URGENCY_RANK
@@ -36,6 +36,10 @@ import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
+
+  /* =======================================================
+     USER + REQUESTS
+  ======================================================= */
 
 
   /* =======================================================
@@ -184,6 +188,10 @@ export default function RequesterDashboard() {
 
     loadDashboard();
   }, [navigate]);
+
+  /* =======================================================
+     NEW REQUEST
+  ======================================================= */
 
 
   /* =======================================================
@@ -633,6 +641,10 @@ export default function RequesterDashboard() {
     );
   }
 
+  /* =======================================================
+     MAIN UI
+  ======================================================= */
+
 
   /* =======================================================
      MAIN UI
@@ -816,3 +828,4 @@ export default function RequesterDashboard() {
     </Box>
   );
 }
+
