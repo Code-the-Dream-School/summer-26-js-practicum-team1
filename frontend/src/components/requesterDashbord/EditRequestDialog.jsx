@@ -14,10 +14,8 @@ import {
 
 import { COLORS } from '../../utils/constants.js';
 
-import {
-  CATEGORY,
-  URGENCY_OPTIONS,
-} from '../../utils/requester.constants.js';
+import { URGENCY_OPTIONS } from '../../utils/requester.constants.js';
+import { CATEGORIES } from '../../utils/browse.constants.js';
 
 
 function EditRequestDialog({
@@ -106,14 +104,14 @@ function EditRequestDialog({
               fullWidth
               required
             >
-              {CATEGORY.map((category) => (
-                <MenuItem
-                  key={category}
-                  value={category}
-                >
-                  {category.replaceAll('_', ' ')}
-                </MenuItem>
-              ))}
+              {CATEGORIES.map((category) => (
+  <MenuItem
+    key={category.apiValue}
+    value={category.apiValue}
+  >
+    {category.label}
+  </MenuItem>
+))}
             </TextField>
 
 
