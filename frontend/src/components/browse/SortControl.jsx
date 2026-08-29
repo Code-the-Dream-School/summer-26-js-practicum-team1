@@ -1,21 +1,14 @@
 import { Stack, TextField, MenuItem, Tooltip, IconButton } from '@mui/material';
 import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
-import { SORT_FIELDS, DIR_LABELS } from '../../utils/browse.constants';
+import {
+  SORT_FIELDS,
+  DIR_LABELS,
+  fieldSx,
+  inputLabelSx,
+} from '../../utils/browse.constants';
 import { COLORS } from '../../utils/constants';
 
 function SortControl({ sortKey, sortDir, onChange, hasLocation }) {
-  const fieldSx = {
-    backgroundColor: COLORS.bgSubtle,
-    '& fieldset': { borderColor: COLORS.border },
-    '&:hover fieldset': { borderColor: COLORS.borderHover },
-    '&.Mui-focused fieldset': { borderColor: 'primary.main' },
-  };
-
-  const inputLabelSx = {
-    '& .MuiInputLabel-root': { color: COLORS.textFaint },
-    '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
-  };
-
   const fields = SORT_FIELDS.filter(
     (f) => f.requires !== 'location' || hasLocation
   );
@@ -41,7 +34,6 @@ function SortControl({ sortKey, sortDir, onChange, hasLocation }) {
           minWidth: 200,
           ...inputLabelSx,
           '& .MuiOutlinedInput-root': fieldSx,
-          '& .MuiSelect-select': { color: COLORS.textFaint },
         }}
       >
         {fields.map((f) => (
@@ -56,14 +48,11 @@ function SortControl({ sortKey, sortDir, onChange, hasLocation }) {
           onClick={handleDirToggle}
           sx={{
             ...fieldSx,
-            border: '1px solid',
-            borderColor: COLORS.border,
             borderRadius: 1,
-            color: COLORS.textFaint,
+            border: '1px solid transparent',
             '&:hover': {
-              backgroundColor: COLORS.bgSubtle,
+              backgroundColor: '#fff',
               borderColor: COLORS.borderHover,
-              color: 'primary.main',
             },
           }}
         >

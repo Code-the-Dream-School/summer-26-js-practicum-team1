@@ -33,9 +33,9 @@ function RequestCard({
   return (
     <Box
       sx={{
-        border: '1px solid',
-        borderColor: COLORS.border,
-        borderRadius: 2,
+        backgroundColor: COLORS.bgSubtle,
+        borderRadius: 3,
+        boxShadow: 2,
         p: 2.5,
         mb: 2,
       }}
@@ -47,7 +47,7 @@ function RequestCard({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Pill
             label={(category?.label || request.category).toUpperCase()}
-            backgroundColor={COLORS.bgSubtle}
+            backgroundColor="#fff"
             color={COLORS.textMuted}
           />
           <Pill
@@ -103,9 +103,10 @@ function RequestCard({
               textTransform: 'none',
               borderColor: COLORS.border,
               color: 'text.primary',
+              backgroundColor: '#fff',
               '&:hover': {
                 borderColor: COLORS.borderHover,
-                backgroundColor: COLORS.bgSubtle,
+                backgroundColor: COLORS.sage,
               },
             }}
           >
@@ -119,9 +120,10 @@ function RequestCard({
               textTransform: 'none',
               borderColor: COLORS.border,
               color: COLORS.textMuted,
+              backgroundColor: '#fff',
               '&:hover': {
                 borderColor: COLORS.borderHover,
-                backgroundColor: COLORS.bgSubtle,
+                backgroundColor: COLORS.sage,
               },
             }}
           >

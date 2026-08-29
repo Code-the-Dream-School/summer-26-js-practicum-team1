@@ -79,13 +79,13 @@ export const ERROR_MESSAGES = {
 };
 
 export const fieldSx = {
-  backgroundColor: COLORS.bgSubtle,
-  '& fieldset': { borderColor: COLORS.border },
-  '&:hover fieldset': { borderColor: COLORS.borderHover },
-  '&.Mui-focused fieldset': { borderColor: 'primary.main' },
+  boxShadow: 1,
+  '& fieldset': { border: 'none' },
+  '&:hover fieldset': { border: '1px solid', borderColor: COLORS.borderHover },
+  '&.Mui-focused fieldset': { border: '1px solid', borderColor: 'primary.main' },
 };
 
 export const inputLabelSx = {
-  '& .MuiInputLabel-root': { color: COLORS.textFaint },
+  '& .MuiInputLabel-root': { color: '#000' },
   '& .MuiInputLabel-root.Mui-focused': { color: 'primary.main' },
 };
