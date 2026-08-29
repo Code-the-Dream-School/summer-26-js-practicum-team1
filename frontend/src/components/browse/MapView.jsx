@@ -66,7 +66,7 @@ export default function MapView({
             icon={defaultMarkerIcon()}
             eventHandlers={{ click: () => onSelectRequest(request) }}
           >
-            <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+            <Tooltip direction="top" offset={[0, -20]} opacity={1}>
               <MapPopupCard request={request} />
             </Tooltip>
           </Marker>
