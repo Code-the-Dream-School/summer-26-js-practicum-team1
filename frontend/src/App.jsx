@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 
@@ -21,12 +20,10 @@ import ChatPage from './pages/ChatPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
 
-
 function App() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
-
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="login" element={<Login />} />
@@ -44,39 +41,17 @@ function App() {
         </Route>
 
         {/* Requester Routes */}
-        <Route
-          element={<RoleProtectedRoute allowedRoles={['requester']} />}
-        >
-          <Route
-            path="requester-dashboard"
-            element={<RequesterDashboard />}
-          />
-          <Route
-            path="helpRequest"
-            element={<NewhelpRequest />}
-          />
+        <Route element={<RoleProtectedRoute allowedRoles={['requester']} />}>
+          <Route path="requester-dashboard" element={<RequesterDashboard />} />
+          <Route path="helpRequest" element={<NewhelpRequest />} />
         </Route>
 
         {/* Admin Routes */}
-        <Route
-          element={<RoleProtectedRoute allowedRoles={['admin']} />}
-        >
-          <Route
-            path="admin/dashboard"
-            element={<AdminDashboard />}
-          />
-          <Route
-            path="admin/volunteers"
-            element={<VolunteerApprovals />}
-          />
-          <Route
-            path="admin/users"
-            element={<UsersList />}
-          />
-          <Route
-            path="admin/users/:id"
-            element={<AdminUserDetailPage />}
-          />
+        <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
+          <Route path="admin/dashboard" element={<AdminDashboard />} />
+          <Route path="admin/volunteers" element={<VolunteerApprovals />} />
+          <Route path="admin/users" element={<UsersList />} />
+          <Route path="admin/users/:id" element={<AdminUserDetailPage />} />
         </Route>
 
         {/* Chat routes */}
@@ -94,19 +69,13 @@ function App() {
 
         {/* Volunteer Routes */}
         <Route
-          element={
-            <RoleProtectedRoute
-              allowedRoles={['volunteer', 'admin']}
-            />
-          }
+          element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}
         >
           <Route path="browse" element={<Browse />} />
         </Route>
-
       </Route>
     </Routes>
   );
 }
 
 export default App;
-

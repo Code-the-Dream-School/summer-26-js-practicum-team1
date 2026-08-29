@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   Box,
@@ -26,9 +25,7 @@ import {
   getStatusStyle,
 } from '../../utils/requester.constants.js';
 
-import {
-  CATEGORY_BY_API_VALUE,
-} from '../../utils/browse.constants.js';
+import { CATEGORY_BY_API_VALUE } from '../../utils/browse.constants.js';
 
 import { COLORS } from '../../utils/constants.js';
 
@@ -42,50 +39,30 @@ function RequestCard({
 }) {
   const navigate = useNavigate();
 
-  const requestStatus =
-    String(request.status || '').toUpperCase();
+  const requestStatus = String(request.status || '').toUpperCase();
 
-  const accepted =
-    requestStatus === 'ACCEPTED';
+  const accepted = requestStatus === 'ACCEPTED';
 
-  const isPending =
-    requestStatus === 'PENDING';
+  const isPending = requestStatus === 'PENDING';
 
-  const canChat =
-    requestStatus === 'ACCEPTED' ||
-    requestStatus === 'COMPLETED';
+  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
-  const urgencyStyle =
-    getUrgencyStyle(request.urgency);
+  const urgencyStyle = getUrgencyStyle(request.urgency);
 
-  const statusStyle =
-    getStatusStyle(requestStatus);
+  const statusStyle = getStatusStyle(requestStatus);
 
-  const isExpanded =
-    expandedRequest === request.id;
+  const isExpanded = expandedRequest === request.id;
 
-  const {
-    volunteer,
-  } = useAcceptedVolunteerProfile(
-    request.id,
-    accepted
-  );
+  const { volunteer } = useAcceptedVolunteerProfile(request.id, accepted);
 
-  
   const blurActiveElement = () => {
-    if (
-      document.activeElement instanceof HTMLElement
-    ) {
+    if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
   };
 
   const handleToggleDetails = () => {
-    setExpandedRequest(
-      isExpanded
-        ? null
-        : request.id
-    );
+    setExpandedRequest(isExpanded ? null : request.id);
   };
 
   const handleOpenChat = () => {
@@ -109,8 +86,7 @@ function RequestCard({
         border: `1px solid ${COLORS.border}`,
         boxShadow: 'none',
         '&:hover': {
-          borderColor:
-            COLORS.borderHover,
+          borderColor: COLORS.borderHover,
         },
       }}
     >
@@ -124,7 +100,6 @@ function RequestCard({
           flexDirection: 'column',
         }}
       >
-
         {/* STATUS + ACTION BUTTONS */}
 
         <Box
@@ -136,7 +111,6 @@ function RequestCard({
             mb: 2,
           }}
         >
-
           {/* STATUS */}
 
           <Chip
@@ -146,10 +120,8 @@ function RequestCard({
               fontWeight: 500,
               flexShrink: 0,
               minHeight: 32,
-              backgroundColor:
-                statusStyle.bg,
-              color:
-                statusStyle.text,
+              backgroundColor: statusStyle.bg,
+              color: statusStyle.text,
             }}
           />
 
@@ -172,14 +144,11 @@ function RequestCard({
                     borderRadius: 2,
 
                     '&:hover': {
-                      backgroundColor:
-                        COLORS.bgSubtle,
+                      backgroundColor: COLORS.bgSubtle,
                     },
                   }}
                 >
-                  <EditOutlinedIcon
-                    fontSize="small"
-                  />
+                  <EditOutlinedIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
 
@@ -198,14 +167,11 @@ function RequestCard({
                     borderRadius: 2,
 
                     '&:hover': {
-                      backgroundColor:
-                        COLORS.bgSubtle,
+                      backgroundColor: COLORS.bgSubtle,
                     },
                   }}
                 >
-                  <DeleteForeverOutlinedIcon
-                    fontSize="small"
-                  />
+                  <DeleteForeverOutlinedIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
             </>
@@ -223,9 +189,7 @@ function RequestCard({
             mb: 1.5,
           }}
         >
-          {CATEGORY_BY_API_VALUE[
-            request.category
-          ]?.label || request.category}
+          {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
         </Typography>
 
         {/* TITLE */}
@@ -239,8 +203,7 @@ function RequestCard({
             mb: 1.5,
           }}
         >
-          <strong>Title:</strong>{' '}
-          {request.title}
+          <strong>Title:</strong> {request.title}
         </Typography>
 
         {/* DATE + TIME */}
@@ -263,7 +226,6 @@ function RequestCard({
             }}
           >
             Date:{' '}
-
             <Box
               component="span"
               sx={{
@@ -272,9 +234,7 @@ function RequestCard({
               }}
             >
               {request.scheduledAt
-                ? new Date(
-                    request.scheduledAt
-                  ).toLocaleDateString()
+                ? new Date(request.scheduledAt).toLocaleDateString()
                 : 'Date not available'}
             </Box>
           </Typography>
@@ -288,7 +248,6 @@ function RequestCard({
             }}
           >
             Time:{' '}
-
             <Box
               component="span"
               sx={{
@@ -297,15 +256,10 @@ function RequestCard({
               }}
             >
               {request.scheduledAt
-                ? new Date(
-                    request.scheduledAt
-                  ).toLocaleTimeString(
-                    [],
-                    {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                    }
-                  )
+                ? new Date(request.scheduledAt).toLocaleTimeString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })
                 : 'Time not available'}
             </Box>
           </Typography>
@@ -338,10 +292,8 @@ function RequestCard({
             sx={{
               minHeight: 32,
               fontSize: '0.9rem',
-              backgroundColor:
-                urgencyStyle.bg,
-              color:
-                urgencyStyle.text,
+              backgroundColor: urgencyStyle.bg,
+              color: urgencyStyle.text,
               fontWeight: 700,
             }}
           />
@@ -359,15 +311,12 @@ function RequestCard({
             gap: 1,
           }}
         >
-
           {/* MESSAGE BUTTON */}
 
           {canChat && (
             <Button
               variant="contained"
-              startIcon={
-                <ChatBubbleIcon />
-              }
+              startIcon={<ChatBubbleIcon />}
               onClick={handleOpenChat}
               sx={{
                 minHeight: 42,
@@ -376,13 +325,11 @@ function RequestCard({
                 textTransform: 'none',
                 fontWeight: 600,
                 boxShadow: 2,
-                transition:
-                  'all 0.2s ease',
+                transition: 'all 0.2s ease',
 
                 '&:hover': {
                   boxShadow: 4,
-                  transform:
-                    'translateY(-1px)',
+                  transform: 'translateY(-1px)',
                 },
               }}
             >
@@ -403,28 +350,20 @@ function RequestCard({
               color: COLORS.primary,
             }}
           >
-            {isExpanded
-              ? 'Hide Details'
-              : 'View Details'}
+            {isExpanded ? 'Hide Details' : 'View Details'}
           </Button>
         </Box>
 
         {/* EXPANDED DETAILS */}
 
-        <Collapse
-          in={isExpanded}
-          timeout="auto"
-          unmountOnExit
-        >
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
           <Box
             sx={{
               mt: 2,
               pt: 2,
-              borderTop:
-                `1px solid ${COLORS.border}`,
+              borderTop: `1px solid ${COLORS.border}`,
             }}
           >
-
             {/* DESCRIPTION */}
 
             <Typography
@@ -436,12 +375,8 @@ function RequestCard({
                 lineHeight: 1.6,
               }}
             >
-              <strong>
-                Description:
-              </strong>{' '}
-
-              {request.description ||
-                'No description provided.'}
+              <strong>Description:</strong>{' '}
+              {request.description || 'No description provided.'}
             </Typography>
 
             {/* LOCATION */}
@@ -465,20 +400,14 @@ function RequestCard({
               <Typography
                 variant="body2"
                 sx={{
-                  color:
-                    COLORS.textMuted,
+                  color: COLORS.textMuted,
                   fontSize: '1rem',
                   lineHeight: 1.5,
-                  overflowWrap:
-                    'anywhere',
+                  overflowWrap: 'anywhere',
                 }}
               >
-                <strong>
-                  Location:
-                </strong>{' '}
-
-                {request.address ||
-                  'Address not available'}
+                <strong>Location:</strong>{' '}
+                {request.address || 'Address not available'}
               </Typography>
             </Box>
 
@@ -488,16 +417,11 @@ function RequestCard({
               variant="body2"
               sx={{
                 mt: 1.5,
-                color:
-                  COLORS.textMuted,
+                color: COLORS.textMuted,
                 fontSize: '1rem',
               }}
             >
-              <strong>
-                Category:
-              </strong>{' '}
-
-              {request.category}
+              <strong>Category:</strong> {request.category}
             </Typography>
 
             {/* URGENCY */}
@@ -506,16 +430,11 @@ function RequestCard({
               variant="body2"
               sx={{
                 mt: 1.5,
-                color:
-                  COLORS.textMuted,
+                color: COLORS.textMuted,
                 fontSize: '1rem',
               }}
             >
-              <strong>
-                Urgency:
-              </strong>{' '}
-
-              {request.urgency}
+              <strong>Urgency:</strong> {request.urgency}
             </Typography>
 
             {/* STATUS */}
@@ -524,16 +443,11 @@ function RequestCard({
               variant="body2"
               sx={{
                 mt: 1.5,
-                color:
-                  COLORS.textMuted,
+                color: COLORS.textMuted,
                 fontSize: '1rem',
               }}
             >
-              <strong>
-                Status:
-              </strong>{' '}
-
-              {statusStyle.label}
+              <strong>Status:</strong> {statusStyle.label}
             </Typography>
 
             {/* VOLUNTEER */}
@@ -543,11 +457,9 @@ function RequestCard({
                 sx={{
                   mt: 2,
                   pt: 2,
-                  borderTop:
-                    `1px solid ${COLORS.border}`,
+                  borderTop: `1px solid ${COLORS.border}`,
                 }}
               >
-
                 <Typography
                   variant="subtitle1"
                   fontWeight={700}
@@ -566,54 +478,36 @@ function RequestCard({
                     gap: 1.5,
                   }}
                 >
-
                   {/* AVATAR */}
 
                   <Avatar
-                    src={
-                      volunteer.profileImage ||
-                      undefined
-                    }
-                    alt={
-                      volunteer.name ||
-                      'Volunteer'
-                    }
-                    onClick={() =>
-                      onVolunteerProfile(
-                        volunteer
-                      )
-                    }
+                    src={volunteer.profileImage || undefined}
+                    alt={volunteer.name || 'Volunteer'}
+                    onClick={() => onVolunteerProfile(volunteer)}
                     sx={{
                       width: 48,
                       height: 48,
                       fontSize: 18,
                       cursor: 'pointer',
-                      bgcolor:
-                        '#E8F5E9',
-                      color:
-                        '#166534',
+                      bgcolor: '#E8F5E9',
+                      color: '#166534',
                       fontWeight: 700,
 
                       '&:hover': {
-                        boxShadow:
-                          '0 0 0 3px #DCFCE7',
+                        boxShadow: '0 0 0 3px #DCFCE7',
                       },
                     }}
                   >
                     {!volunteer.profileImage &&
-                      volunteer.name
-                        ?.charAt(0)
-                        ?.toUpperCase()}
+                      volunteer.name?.charAt(0)?.toUpperCase()}
                   </Avatar>
 
                   <Box>
-
                     <Typography
                       variant="body2"
                       color="text.secondary"
                       sx={{
-                        fontSize:
-                          '0.95rem',
+                        fontSize: '0.95rem',
                       }}
                     >
                       Volunteer
@@ -622,27 +516,19 @@ function RequestCard({
                     <Typography
                       variant="body1"
                       fontWeight={600}
-                      onClick={() =>
-                        onVolunteerProfile(
-                          volunteer
-                        )
-                      }
+                      onClick={() => onVolunteerProfile(volunteer)}
                       sx={{
                         fontSize: '1rem',
                         cursor: 'pointer',
-                        color:
-                          COLORS.primary,
+                        color: COLORS.primary,
 
                         '&:hover': {
-                          textDecoration:
-                            'underline',
+                          textDecoration: 'underline',
                         },
                       }}
                     >
-                      {volunteer.name ||
-                        'Not available'}
+                      {volunteer.name || 'Not available'}
                     </Typography>
-
                   </Box>
                 </Box>
 
@@ -657,11 +543,7 @@ function RequestCard({
                       fontSize: '1rem',
                     }}
                   >
-                    <strong>
-                      Phone:
-                    </strong>{' '}
-
-                    {volunteer.phone}
+                    <strong>Phone:</strong> {volunteer.phone}
                   </Typography>
                 )}
 
@@ -676,24 +558,16 @@ function RequestCard({
                       fontSize: '1rem',
                     }}
                   >
-                    <strong>
-                      Email:
-                    </strong>{' '}
-
-                    {volunteer.email}
+                    <strong>Email:</strong> {volunteer.email}
                   </Typography>
                 )}
-
               </Box>
             )}
-
           </Box>
         </Collapse>
-
       </CardContent>
     </Card>
   );
 }
 
 export default RequestCard;
-

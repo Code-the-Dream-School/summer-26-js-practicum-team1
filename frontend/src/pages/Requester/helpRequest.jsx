@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  Alert,
-  Box,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  searchPlaces,
-  reverseGeocode,
-} from '../../services/geoapify';
+import { searchPlaces, reverseGeocode } from '../../services/geoapify';
 
 import { useHelpRequests } from '../../hooks/useHelpRequests';
 import { useAuth } from '../../hooks/useAuth';
@@ -18,26 +11,16 @@ import HelpRequestForm from '../../components/newRequest/HelpRequestForm';
 import RequestLocationField from '../../components/newRequest/RequestLocationField';
 import RequestFormActions from '../../components/newRequest/RequestFormActions';
 
-import {
-  CATEGORY,
-  URGENCY_OPTIONS,
-} from '../../utils/requester.constants';
+import { CATEGORY, URGENCY_OPTIONS } from '../../utils/requester.constants';
 
 function NewHelpRequest() {
   const navigate = useNavigate();
 
   const { user } = useAuth();
 
-  const {
-    createHelpRequest,
-    isCreating,
-  } = useHelpRequests();
+  const { createHelpRequest, isCreating } = useHelpRequests();
 
   const addressSearchTimeoutRef = useRef(null);
-
-  /* =========================================================
-     FORM DATA
-  ========================================================= */
 
   const [formData, setFormData] = useState({
     title: '',
@@ -49,34 +32,19 @@ function NewHelpRequest() {
     address: '',
   });
 
-  /* =========================================================
-     LOCATION
-  ========================================================= */
-
   const [coordinates, setCoordinates] = useState({
     latitude: null,
     longitude: null,
   });
 
-  const [locationSuggestions, setLocationSuggestions] =
-    useState([]);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
 
-  const [isSearchingLocation, setIsSearchingLocation] =
-    useState(false);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
-  const [isGettingLocation, setIsGettingLocation] =
-    useState(false);
-
-  /* =========================================================
-     MESSAGES
-  ========================================================= */
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  /* =========================================================
-     FIELD ERRORS
-  ========================================================= */
 
   const [fieldErrors, setFieldErrors] = useState({
     title: '',
@@ -87,10 +55,6 @@ function NewHelpRequest() {
     address: '',
   });
 
-  /* =========================================================
-     CLEAN UP ADDRESS SEARCH TIMER
-  ========================================================= */
-
   useEffect(() => {
     return () => {
       if (addressSearchTimeoutRef.current) {
@@ -98,10 +62,6 @@ function NewHelpRequest() {
       }
     };
   }, []);
-
-  /* =========================================================
-     FORM FIELD CHANGE
-  ========================================================= */
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -118,10 +78,6 @@ function NewHelpRequest() {
       [name]: '',
     }));
   };
-
-  /* =========================================================
-     ADDRESS CHANGE
-  ========================================================= */
 
   const handleAddressChange = (event) => {
     const value = event.target.value;
@@ -155,36 +111,26 @@ function NewHelpRequest() {
 
     setIsSearchingLocation(true);
 
-    addressSearchTimeoutRef.current = setTimeout(
-      async () => {
-        try {
-          const results = await searchPlaces(value);
+    addressSearchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const results = await searchPlaces(value);
 
-          setLocationSuggestions(results);
-        } catch (locationError) {
-          console.error(
-            'Location search failed:',
-            locationError
-          );
+        setLocationSuggestions(results);
+      } catch (locationError) {
+        console.error('Location search failed:', locationError);
 
-          setLocationSuggestions([]);
+        setLocationSuggestions([]);
 
-          setFieldErrors((previous) => ({
-            ...previous,
-            address:
-              'We could not search for this address. Please try again or use your current location.',
-          }));
-        } finally {
-          setIsSearchingLocation(false);
-        }
-      },
-      300
-    );
+        setFieldErrors((previous) => ({
+          ...previous,
+          address:
+            'We could not search for this address. Please try again or use your current location.',
+        }));
+      } finally {
+        setIsSearchingLocation(false);
+      }
+    }, 300);
   };
-
-  /* =========================================================
-     SELECT ADDRESS SUGGESTION
-  ========================================================= */
 
   const handleSelectAddress = (location) => {
     setFormData((previous) => ({
@@ -206,10 +152,6 @@ function NewHelpRequest() {
     }));
   };
 
-  /* =========================================================
-     GET CURRENT LOCATION
-  ========================================================= */
-
   const handleGetCurrentAddress = () => {
     if (!navigator.geolocation) {
       setError(
@@ -225,10 +167,7 @@ function NewHelpRequest() {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const {
-          latitude,
-          longitude,
-        } = position.coords;
+        const { latitude, longitude } = position.coords;
 
         setCoordinates({
           latitude,
@@ -241,13 +180,9 @@ function NewHelpRequest() {
         }));
 
         try {
-          const data = await reverseGeocode(
-            latitude,
-            longitude
-          );
+          const data = await reverseGeocode(latitude, longitude);
 
-          const currentAddress =
-            data.features?.[0]?.properties?.formatted;
+          const currentAddress = data.features?.[0]?.properties?.formatted;
 
           setFormData((previous) => ({
             ...previous,
@@ -256,10 +191,7 @@ function NewHelpRequest() {
               `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
           }));
         } catch (locationError) {
-          console.error(
-            'Unable to get current address:',
-            locationError
-          );
+          console.error('Unable to get current address:', locationError);
 
           setFormData((previous) => ({
             ...previous,
@@ -270,10 +202,7 @@ function NewHelpRequest() {
         }
       },
       (locationError) => {
-        console.error(
-          'Geolocation error:',
-          locationError
-        );
+        console.error('Geolocation error:', locationError);
 
         setError(
           'Unable to get your current location. Please allow location access and try again.'
@@ -283,10 +212,6 @@ function NewHelpRequest() {
       }
     );
   };
-
-  /* =========================================================
-     SUBMIT FORM
-  ========================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -306,61 +231,30 @@ function NewHelpRequest() {
 
     const errors = {};
 
-    /* =======================================================
-       TITLE
-    ======================================================= */
-
     if (!formData.title.trim()) {
-      errors.title =
-        'Please enter a title for your help request.';
-    } else if (
-      formData.title.trim().length > 100
-    ) {
-      errors.title =
-        'Title must be 100 characters or less.';
+      errors.title = 'Please enter a title for your help request.';
+    } else if (formData.title.trim().length > 100) {
+      errors.title = 'Title must be 100 characters or less.';
     }
-
-    /* =======================================================
-       CATEGORY
-    ======================================================= */
 
     if (!formData.category) {
-      errors.category =
-        'Please select a category.';
+      errors.category = 'Please select a category.';
     }
-
-    /* =======================================================
-       URGENCY
-    ======================================================= */
 
     if (!formData.urgency) {
-      errors.urgency =
-        'Please select an urgency level.';
+      errors.urgency = 'Please select an urgency level.';
     }
-
-    /* =======================================================
-       DATE
-    ======================================================= */
 
     if (!formData.date) {
       errors.date = 'Please select a date.';
     }
 
-    /* =======================================================
-       TIME
-    ======================================================= */
-
     if (!formData.time) {
       errors.time = 'Please select a time.';
     }
 
-    /* =======================================================
-       ADDRESS
-    ======================================================= */
-
     if (!formData.address.trim()) {
-      errors.address =
-        'Please enter the address where help is needed.';
+      errors.address = 'Please enter the address where help is needed.';
     } else if (
       coordinates.latitude === null ||
       coordinates.longitude === null
@@ -369,27 +263,15 @@ function NewHelpRequest() {
         'Please select an address from the suggestions or use your current location.';
     }
 
-    /* =======================================================
-       DISPLAY VALIDATION ERRORS
-    ======================================================= */
-
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
 
-      setError(
-        'Please correct the highlighted fields and try again.'
-      );
+      setError('Please correct the highlighted fields and try again.');
 
       return;
     }
 
-    /* =======================================================
-       CREATE DATE/TIME
-    ======================================================= */
-
-    const scheduledAt = new Date(
-      `${formData.date}T${formData.time}`
-    );
+    const scheduledAt = new Date(`${formData.date}T${formData.time}`);
 
     if (Number.isNaN(scheduledAt.getTime())) {
       setFieldErrors({
@@ -397,16 +279,10 @@ function NewHelpRequest() {
         time: 'Please enter a valid time.',
       });
 
-      setError(
-        'Please enter a valid date and time.'
-      );
+      setError('Please enter a valid date and time.');
 
       return;
     }
-
-    /* =======================================================
-       FUTURE DATE VALIDATION
-    ======================================================= */
 
     if (scheduledAt <= new Date()) {
       setFieldErrors({
@@ -414,16 +290,10 @@ function NewHelpRequest() {
         time: 'Please select a future time.',
       });
 
-      setError(
-        'The help request date and time must be in the future.'
-      );
+      setError('The help request date and time must be in the future.');
 
       return;
     }
-
-    /* =======================================================
-       REQUEST PAYLOAD
-    ======================================================= */
 
     const request = {
       title: formData.title.trim(),
@@ -436,9 +306,8 @@ function NewHelpRequest() {
       description: formData.description.trim(),
     };
 
-    /* =======================================================
-       CREATE REQUEST
-    ======================================================= */
+    /*
+       CREATE REQUEST */
 
     try {
       await createHelpRequest({
@@ -449,10 +318,6 @@ function NewHelpRequest() {
       setSuccess(
         'Your help request has been submitted successfully! Our volunteers will review your request, and someone will be in touch with you soon.'
       );
-
-      /* =====================================================
-         RESET FORM
-      ===================================================== */
 
       setFormData({
         title: '',
@@ -478,26 +343,14 @@ function NewHelpRequest() {
         address: '',
       });
 
-      /* =====================================================
-         RETURN TO DASHBOARD
-      ===================================================== */
-
       setTimeout(() => {
         navigate('/requester-dashboard');
       }, 3000);
     } catch (submitError) {
-      console.error(
-        'Create help request error:',
-        submitError
-      );
-
-      /* =====================================================
-         400 VALIDATION ERROR
-      ===================================================== */
+      console.error('Create help request error:', submitError);
 
       if (submitError.response?.status === 400) {
-        const serverDetails =
-          submitError.response?.data?.details;
+        const serverDetails = submitError.response?.data?.details;
 
         if (Array.isArray(serverDetails)) {
           const serverFieldErrors = {};
@@ -505,14 +358,11 @@ function NewHelpRequest() {
           serverDetails.forEach((detail) => {
             if (detail.field) {
               serverFieldErrors[detail.field] =
-                detail.message ||
-                'This field is invalid.';
+                detail.message || 'This field is invalid.';
             }
           });
 
-          if (
-            Object.keys(serverFieldErrors).length > 0
-          ) {
+          if (Object.keys(serverFieldErrors).length > 0) {
             setFieldErrors(serverFieldErrors);
           }
         }
@@ -524,10 +374,6 @@ function NewHelpRequest() {
         return;
       }
 
-      /* =====================================================
-         401 UNAUTHORIZED
-      ===================================================== */
-
       if (submitError.response?.status === 401) {
         setError(
           'Your session has expired. Please sign in again before submitting a help request.'
@@ -535,10 +381,6 @@ function NewHelpRequest() {
 
         return;
       }
-
-      /* =====================================================
-         403 FORBIDDEN
-      ===================================================== */
 
       if (submitError.response?.status === 403) {
         setError(
@@ -548,10 +390,6 @@ function NewHelpRequest() {
         return;
       }
 
-      /* =====================================================
-         409 CONFLICT
-      ===================================================== */
-
       if (submitError.response?.status === 409) {
         setError(
           'This help request could not be created because it conflicts with an existing request.'
@@ -559,10 +397,6 @@ function NewHelpRequest() {
 
         return;
       }
-
-      /* =====================================================
-         500 SERVER ERROR
-      ===================================================== */
 
       if (submitError.response?.status >= 500) {
         setError(
@@ -572,10 +406,6 @@ function NewHelpRequest() {
         return;
       }
 
-      /* =====================================================
-         NETWORK ERROR
-      ===================================================== */
-
       if (!submitError.response) {
         setError(
           'We could not connect to the server. Please check your internet connection and try again.'
@@ -584,29 +414,19 @@ function NewHelpRequest() {
         return;
       }
 
-      /* =====================================================
-         DEFAULT ERROR
-      ===================================================== */
-
       setError(
         'We could not create your help request. Please check your information and try again.'
       );
     }
   };
 
-  /* =========================================================
-     CANCEL
-  ========================================================= */
+  /* CANCEL */
 
   const handleCancel = () => {
     if (!isCreating) {
       navigate('/requester-dashboard');
     }
   };
-
-  /* =========================================================
-     PAGE UI
-  ========================================================= */
 
   return (
     <Box
@@ -658,8 +478,6 @@ function NewHelpRequest() {
           </Typography>
         </Box>
 
-        {/* FORM CONTAINER */}
-
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -675,8 +493,7 @@ function NewHelpRequest() {
               sm: 5,
             },
             border: '1px solid #D7E5D8',
-            boxShadow:
-              '0 4px 16px rgba(46, 125, 50, 0.08)',
+            boxShadow: '0 4px 16px rgba(46, 125, 50, 0.08)',
           }}
         >
           {/* ERROR */}
@@ -692,8 +509,6 @@ function NewHelpRequest() {
               {error}
             </Alert>
           )}
-
-          {/* SUCCESS */}
 
           {success && (
             <Alert
@@ -718,15 +533,11 @@ function NewHelpRequest() {
               label: item
                 .replaceAll('_', ' ')
                 .toLowerCase()
-                .replace(/\b\w/g, (char) =>
-                  char.toUpperCase()
-                ),
+                .replace(/\b\w/g, (char) => char.toUpperCase()),
             }))}
             urgencies={URGENCY_OPTIONS.map((item) => ({
               value: item,
-              label:
-                item.charAt(0) +
-                item.slice(1).toLowerCase(),
+              label: item.charAt(0) + item.slice(1).toLowerCase(),
             }))}
           />
 
@@ -742,17 +553,10 @@ function NewHelpRequest() {
             isCreating={isCreating}
             onAddressChange={handleAddressChange}
             onSelectAddress={handleSelectAddress}
-            onGetCurrentAddress={
-              handleGetCurrentAddress
-            }
+            onGetCurrentAddress={handleGetCurrentAddress}
           />
 
-          {/* FORM ACTIONS */}
-
-          <RequestFormActions
-            isCreating={isCreating}
-            onCancel={handleCancel}
-          />
+          <RequestFormActions isCreating={isCreating} onCancel={handleCancel} />
         </Box>
       </Box>
     </Box>

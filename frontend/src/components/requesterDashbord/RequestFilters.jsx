@@ -1,4 +1,3 @@
-
 import {
   Box,
   Button,
@@ -14,7 +13,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 import { COLORS } from '../../utils/constants.js';
 
- function RequestFilters({
+function RequestFilters({
   search,
   setSearch,
   filter,
@@ -45,9 +44,7 @@ import { COLORS } from '../../utils/constants.js';
         variant="outlined"
         fullWidth
         value={search}
-        onChange={(event) =>
-          setSearch(event.target.value)
-        }
+        onChange={(event) => setSearch(event.target.value)}
         label={
           <Box
             sx={{
@@ -58,9 +55,7 @@ import { COLORS } from '../../utils/constants.js';
           >
             <SearchIcon fontSize="small" />
 
-            <span>
-              Search your requests
-            </span>
+            <span>Search your requests</span>
           </Box>
         }
         placeholder="Search by title or description"
@@ -74,16 +69,15 @@ import { COLORS } from '../../utils/constants.js';
           },
 
           '& .MuiOutlinedInput-root': {
-          backgroundColor: '#fff',
+            backgroundColor: '#fff',
 
             '& fieldset': {
               borderColor: COLORS.border,
             },
 
-           '&:hover fieldset': {
-            borderColor:
-              COLORS.borderHover,
-          },
+            '&:hover fieldset': {
+              borderColor: COLORS.borderHover,
+            },
 
             '&.Mui-focused fieldset': {
               borderColor: COLORS.primary,
@@ -100,21 +94,11 @@ import { COLORS } from '../../utils/constants.js';
           flexShrink: 0,
         }}
       >
-        {[
-          'ALL',
-          'PENDING',
-          'ACCEPTED',
-        ].map((key) => (
+        {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
           <Button
             key={key}
-            onClick={() =>
-              setFilter(key)
-            }
-            variant={
-              filter === key
-                ? 'contained'
-                : 'outlined'
-            }
+            onClick={() => setFilter(key)}
+            variant={filter === key ? 'contained' : 'outlined'}
             sx={{
               minHeight: 44,
               px: 2,
@@ -122,31 +106,19 @@ import { COLORS } from '../../utils/constants.js';
               fontWeight: 600,
               whiteSpace: 'nowrap',
 
-              backgroundColor:
-                filter === key
-                  ? COLORS.primary
-                  : 'transparent',
+              backgroundColor: filter === key ? COLORS.primary : 'transparent',
 
-              borderColor:
-                COLORS.border,
+              borderColor: COLORS.border,
 
-              color:
-                filter === key
-                  ? '#FFFFFF'
-                  : COLORS.textMuted,
+              color: filter === key ? '#FFFFFF' : COLORS.textMuted,
 
               '&:hover': {
                 backgroundColor:
-                  filter === key
-                    ? COLORS.primaryHover
-                    : COLORS.bgSubtle,
+                  filter === key ? COLORS.primaryHover : COLORS.bgSubtle,
               },
             }}
           >
-            {key.charAt(0) +
-              key
-                .slice(1)
-                .toLowerCase()}
+            {key.charAt(0) + key.slice(1).toLowerCase()}
           </Button>
         ))}
       </ButtonGroup>
@@ -155,32 +127,25 @@ import { COLORS } from '../../utils/constants.js';
 
       <Select
         value={sortBy}
-        onChange={(event) =>
-          setSortBy(event.target.value)
-        }
+        onChange={(event) => setSortBy(event.target.value)}
         size="small"
         sx={{
           minWidth: 180,
           minHeight: 44,
-           backgroundColor: '#fff',
+          backgroundColor: '#fff',
 
           '& fieldset': {
             borderColor: COLORS.border,
           },
 
           '&:hover fieldset': {
-            borderColor:
-              COLORS.borderHover,
+            borderColor: COLORS.borderHover,
           },
         }}
       >
-        <MenuItem value="SOONEST">
-   Earliest First
-</MenuItem>
+        <MenuItem value="SOONEST">Earliest First</MenuItem>
 
-        <MenuItem value="URGENCY">
-          Sort: urgency
-        </MenuItem>
+        <MenuItem value="URGENCY">Sort: urgency</MenuItem>
       </Select>
 
       {/* NEW REQUEST */}
@@ -198,7 +163,7 @@ import { COLORS } from '../../utils/constants.js';
           fontWeight: 700,
           whiteSpace: 'nowrap',
 
-         backgroundColor: '#2E7D32',
+          backgroundColor: '#2E7D32',
 
           '&:hover': {
             backgroundColor: '#1B5E20',

@@ -1,16 +1,9 @@
-
 import { useEffect, useMemo, useState } from 'react';
 
-import {
-  Box,
-  CircularProgress,
-  Typography,
-} from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
-import {
-  searchPlaces,
-} from '../../services/geoapify';
+import { searchPlaces } from '../../services/geoapify';
 import {
   getMe,
   getHelpRequests,
@@ -28,25 +21,14 @@ import CancelRequestDialog from '../../components/requesterDashbord/CancelReques
 import { COLORS } from '../../utils/constants.js';
 
 import {
-  formatDateTimeLocal,URGENCY_RANK
+  formatDateTimeLocal,
+  URGENCY_RANK,
 } from '../../utils/requester.constants.js';
 
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
-/* =========================================================
-   REQUESTER DASHBOARD
-========================================================= */
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
-
-  /* =======================================================
-     USER + REQUESTS
-  ======================================================= */
-
-
-  /* =======================================================
-     USER + REQUESTS
-  ======================================================= */
 
   const [user, setUser] = useState(null);
 
@@ -56,10 +38,7 @@ export default function RequesterDashboard() {
 
   const [error, setError] = useState('');
 
-
-  /* =======================================================
-     SEARCH + FILTER + SORT
-  ======================================================= */
+  /* SEARCH + FILTER + SORT */
 
   const [search, setSearch] = useState('');
 
@@ -67,149 +46,95 @@ export default function RequesterDashboard() {
 
   const [sortBy, setSortBy] = useState('SOONEST');
 
-  const debouncedSearch = useDebouncedValue(
-    search,
-    300
-  );
+  const debouncedSearch = useDebouncedValue(search, 300);
 
+  /* EXPANDED REQUEST */
 
-  /* =======================================================
-     EXPANDED REQUEST
-  ======================================================= */
+  const [expandedRequest, setExpandedRequest] = useState(null);
 
-  const [
-    expandedRequest,
-    setExpandedRequest,
-  ] = useState(null);
+  /* VOLUNTEER PROFILE DIALOG  */
 
+  const [volunteerDialogOpen, setVolunteerDialogOpen] = useState(false);
 
-  /* =======================================================
-     VOLUNTEER PROFILE DIALOG
-  ======================================================= */
+  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
 
-  const [
-    volunteerDialogOpen,
-    setVolunteerDialogOpen,
-  ] = useState(false);
+  /* EDIT STATE*/
 
-  const [
-    selectedVolunteer,
-    setSelectedVolunteer,
-  ] = useState(null);
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
 
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
-  /* =======================================================
-     EDIT STATE
-  ======================================================= */
-const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [editRequest, setEditRequest] = useState(null);
 
-const [isSearchingLocation, setIsSearchingLocation] =
-  useState(false);
+  const [editLoading, setEditLoading] = useState(false);
 
-const [
-  editRequest,
-  setEditRequest,
-] = useState(null);
+  const [updating, setUpdating] = useState(false);
 
-const [
-  editLoading,
-  setEditLoading,
-] = useState(false);
+  const [editError, setEditError] = useState('');
 
-const [
-  updating,
-  setUpdating,
-] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: '',
+    category: '',
+    urgency: '',
+    scheduledAt: '',
+    address: '',
+    latitude: '',
+    longitude: '',
+    description: '',
+  });
 
-const [
-  editError,
-  setEditError,
-] = useState('');
+  const debouncedEditAddress = useDebouncedValue(editForm.address, 300);
 
-const [
-  editForm,
-  setEditForm,
-] = useState({
-  title: '',
-  category: '',
-  urgency: '',
-  scheduledAt: '',
-  address: '',
-  latitude: '',
-  longitude: '',
-  description: '',
-});
-
-// MUST be here — top level of component
-const debouncedEditAddress = useDebouncedValue(
-  editForm.address,
-  300
-);
-
-useEffect(() => {
-  if (!editRequest) {
-    setLocationSuggestions([]);
-    return;
-  }
-
-  const address = debouncedEditAddress.trim();
-
-  if (address.length < 2) {
-    setLocationSuggestions([]);
-    return;
-  }
-
-  let cancelled = false;
-
-  const loadSuggestions = async () => {
-    try {
-      setIsSearchingLocation(true);
-
-      const suggestions = await searchPlaces(address);
-
-      if (!cancelled) {
-        setLocationSuggestions(suggestions);
-      }
-    } catch (err) {
-      console.error(
-        'Failed to search edit address:',
-        err
-      );
-
-      if (!cancelled) {
-        setLocationSuggestions([]);
-      }
-    } finally {
-      if (!cancelled) {
-        setIsSearchingLocation(false);
-      }
+  useEffect(() => {
+    if (!editRequest) {
+      setLocationSuggestions([]);
+      return;
     }
-  };
 
-  loadSuggestions();
+    const address = debouncedEditAddress.trim();
 
-  return () => {
-    cancelled = true;
-  };
-}, [debouncedEditAddress, editRequest]);
-  /* =======================================================
-     CANCEL STATE
-  ======================================================= */
+    if (address.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
 
-  const [
-    cancelRequest,
-    setCancelRequest,
-  ] = useState(null);
+    let cancelled = false;
 
-  const [
-    cancelling,
-    setCancelling,
-  ] = useState(false);
+    const loadSuggestions = async () => {
+      try {
+        setIsSearchingLocation(true);
 
+        const suggestions = await searchPlaces(address);
 
-  /* =======================================================
-     LOAD DASHBOARD
-  ======================================================= */
+        if (!cancelled) {
+          setLocationSuggestions(suggestions);
+        }
+      } catch (err) {
+        console.error('Failed to search edit address:', err);
+
+        if (!cancelled) {
+          setLocationSuggestions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSearchingLocation(false);
+        }
+      }
+    };
+
+    loadSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedEditAddress, editRequest]);
+  /*CANCEL STATE */
+
+  const [cancelRequest, setCancelRequest] = useState(null);
+
+  const [cancelling, setCancelling] = useState(false);
+
+  /* LOAD DASHBOARD */
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -230,14 +155,9 @@ useEffect(() => {
 
         setRequests(response?.data || []);
       } catch (err) {
-        console.error(
-          'Failed to load dashboard:',
-          err
-        );
+        console.error('Failed to load dashboard:', err);
 
-        setError(
-          'Unable to load your requests. Please try again.'
-        );
+        setError('Unable to load your requests. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -246,27 +166,15 @@ useEffect(() => {
     loadDashboard();
   }, [navigate]);
 
-  /* =======================================================
-     NEW REQUEST
-  ======================================================= */
-
-
-  /* =======================================================
-     NEW REQUEST
-  ======================================================= */
+  /* NEW REQUEST */
 
   const handleNewRequest = () => {
     navigate('/helpRequest');
   };
 
+  /*  VOLUNTEER PROFILE */
 
-  /* =======================================================
-     VOLUNTEER PROFILE
-  ======================================================= */
-
-  const handleVolunteerProfile = (
-    volunteer
-  ) => {
+  const handleVolunteerProfile = (volunteer) => {
     if (!volunteer) {
       return;
     }
@@ -276,17 +184,13 @@ useEffect(() => {
     setVolunteerDialogOpen(true);
   };
 
-
   const handleCloseVolunteerDialog = () => {
     setVolunteerDialogOpen(false);
 
     setSelectedVolunteer(null);
   };
 
-
-  /* =======================================================
-     EDIT REQUEST
-  ======================================================= */
+  /* EDIT REQUEST */
 
   const handleEdit = async (request) => {
     try {
@@ -304,69 +208,45 @@ useEffect(() => {
         return;
       }
 
-      const currentRequest =
-        await getHelpRequestById(
-          request.id,
-          csrfToken
-        );
+      const currentRequest = await getHelpRequestById(request.id, csrfToken);
 
       setEditRequest(currentRequest);
 
       setEditForm({
-        title:
-          currentRequest.title || '',
+        title: currentRequest.title || '',
 
-        category:
-          currentRequest.category || '',
+        category: currentRequest.category || '',
 
-        urgency:
-          currentRequest.urgency || '',
+        urgency: currentRequest.urgency || '',
 
-        scheduledAt:
-          formatDateTimeLocal(
-            currentRequest.scheduledAt
-          ),
+        scheduledAt: formatDateTimeLocal(currentRequest.scheduledAt),
 
-        address:
-          currentRequest.address || '',
+        address: currentRequest.address || '',
 
         latitude:
           currentRequest.latitude !== null &&
           currentRequest.latitude !== undefined
-            ? String(
-                currentRequest.latitude
-              )
+            ? String(currentRequest.latitude)
             : '',
 
         longitude:
           currentRequest.longitude !== null &&
           currentRequest.longitude !== undefined
-            ? String(
-                currentRequest.longitude
-              )
+            ? String(currentRequest.longitude)
             : '',
 
-        description:
-          currentRequest.description || '',
+        description: currentRequest.description || '',
       });
     } catch (err) {
-      console.error(
-        'Failed to load request for editing:',
-        err
-      );
+      console.error('Failed to load request for editing:', err);
 
-      setEditError(
-        'Unable to load this request for editing.'
-      );
+      setEditError('Unable to load this request for editing.');
     } finally {
       setEditLoading(false);
     }
   };
 
-
-  /* =======================================================
-     CLOSE EDIT DIALOG
-  ======================================================= */
+  /* CLOSE EDIT DIALOG  */
 
   const handleCloseEditDialog = () => {
     if (!updating) {
@@ -376,16 +256,10 @@ useEffect(() => {
     }
   };
 
-
-  /* =======================================================
-     EDIT FIELD CHANGE
-  ======================================================= */
+  /* EDIT FIELD CHANGE */
 
   const handleEditChange = (event) => {
-    const {
-      name,
-      value,
-    } = event.target;
+    const { name, value } = event.target;
 
     setEditForm((current) => ({
       ...current,
@@ -393,43 +267,36 @@ useEffect(() => {
     }));
   };
 
-const handleEditAddressChange = (event) => {
-  const { value } = event.target;
+  const handleEditAddressChange = (event) => {
+    const { value } = event.target;
 
-  setEditForm((current) => ({
-    ...current,
-    address: value,
+    setEditForm((current) => ({
+      ...current,
+      address: value,
 
-    // Address changed, so old coordinates
-    // are no longer considered valid.
-    latitude: '',
-    longitude: '',
-  }));
-};
-const handleSelectEditAddress = (location) => {
-  setEditForm((current) => ({
-    ...current,
-    address: location.label,
-    latitude: String(location.latitude),
-    longitude: String(location.longitude),
-  }));
+      latitude: '',
+      longitude: '',
+    }));
+  };
+  const handleSelectEditAddress = (location) => {
+    setEditForm((current) => ({
+      ...current,
+      address: location.label,
+      latitude: String(location.latitude),
+      longitude: String(location.longitude),
+    }));
 
-  setLocationSuggestions([]);
-};
-  /* =======================================================
-     UPDATE REQUEST
-  ======================================================= */
+    setLocationSuggestions([]);
+  };
+  /* UPDATE REQUEST */
 
   const handleUpdateRequest = async () => {
-    if (
-  !editForm.latitude ||
-  !editForm.longitude
-) {
-  setEditError(
-    'Please select an address from the location suggestions so the location coordinates can be updated.'
-  );
+    if (!editForm.latitude || !editForm.longitude) {
+      setEditError(
+        'Please select an address from the location suggestions so the location coordinates can be updated.'
+      );
 
-  setUpdating(false);
+      setUpdating(false);
       return;
     }
 
@@ -441,35 +308,24 @@ const handleSelectEditAddress = (location) => {
       setError('');
 
       const updatedData = {
-        title:
-          editForm.title.trim(),
+        title: editForm.title.trim(),
 
-        category:
-          editForm.category,
+        category: editForm.category,
 
-        urgency:
-          editForm.urgency,
+        urgency: editForm.urgency,
 
-        scheduledAt:
-          new Date(
-            editForm.scheduledAt
-          ).toISOString(),
+        scheduledAt: new Date(editForm.scheduledAt).toISOString(),
 
-        address:
-          editForm.address.trim(),
+        address: editForm.address.trim(),
 
-        latitude:
-          Number(editForm.latitude),
+        latitude: Number(editForm.latitude),
 
-        longitude:
-          Number(editForm.longitude),
+        longitude: Number(editForm.longitude),
 
-        description:
-          editForm.description.trim(),
+        description: editForm.description.trim(),
       };
 
-      const csrfToken =
-        user?.csrfToken;
+      const csrfToken = user?.csrfToken;
 
       if (!csrfToken) {
         setEditError(
@@ -479,44 +335,31 @@ const handleSelectEditAddress = (location) => {
         return;
       }
 
-      const updatedRequest =
-        await updateHelpRequest(
-          editRequest.id,
-          updatedData,
-          csrfToken
-        );
+      const updatedRequest = await updateHelpRequest(
+        editRequest.id,
+        updatedData,
+        csrfToken
+      );
 
-      setRequests(
-        (currentRequests) =>
-          currentRequests.map(
-            (request) =>
-              request.id === editRequest.id
-                ? {
-                    ...request,
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === editRequest.id
+            ? {
+                ...request,
 
-                    ...(updatedRequest?.data ||
-                      updatedRequest),
-                  }
-                : request
-          )
+                ...(updatedRequest?.data || updatedRequest),
+              }
+            : request
+        )
       );
 
       setEditRequest(null);
     } catch (err) {
-      console.error(
-        'Failed to update request:',
-        err
-      );
+      console.error('Failed to update request:', err);
 
-      console.error(
-        'Status:',
-        err?.response?.status
-      );
+      console.error('Status:', err?.response?.status);
 
-      console.error(
-        'Server response:',
-        err?.response?.data
-      );
+      console.error('Server response:', err?.response?.data);
 
       setEditError(
         err?.response?.data?.message ||
@@ -529,19 +372,13 @@ const handleSelectEditAddress = (location) => {
     }
   };
 
-
-  /* =======================================================
-     OPEN CANCEL DIALOG
-  ======================================================= */
+  /* OPEN CANCEL DIALOG */
 
   const handleCancel = (request) => {
     setCancelRequest(request);
   };
 
-
-  /* =======================================================
-     CLOSE CANCEL DIALOG
-  ======================================================= */
+  /* CLOSE CANCEL DIALOG */
 
   const handleCloseCancelDialog = () => {
     if (!cancelling) {
@@ -549,10 +386,7 @@ const handleSelectEditAddress = (location) => {
     }
   };
 
-
-  /* =======================================================
-     CONFIRM CANCEL
-  ======================================================= */
+  /* CONFIRM CANCEL */
 
   const handleConfirmCancel = async () => {
     if (!cancelRequest) {
@@ -564,8 +398,7 @@ const handleSelectEditAddress = (location) => {
 
       setError('');
 
-      const csrfToken =
-        user?.csrfToken;
+      const csrfToken = user?.csrfToken;
 
       if (!csrfToken) {
         setError(
@@ -575,138 +408,79 @@ const handleSelectEditAddress = (location) => {
         return;
       }
 
-      await cancelHelpRequest(
-        cancelRequest.id,
-        csrfToken
-      );
+      await cancelHelpRequest(cancelRequest.id, csrfToken);
 
-      setRequests(
-        (currentRequests) =>
-          currentRequests.map(
-            (request) =>
-              request.id ===
-              cancelRequest.id
-                ? {
-                    ...request,
-                    status: 'CANCELLED',
-                  }
-                : request
-          )
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === cancelRequest.id
+            ? {
+                ...request,
+                status: 'CANCELLED',
+              }
+            : request
+        )
       );
 
       setCancelRequest(null);
     } catch (err) {
-      console.error(
-        'Failed to cancel request:',
-        err
-      );
+      console.error('Failed to cancel request:', err);
 
-      setError(
-        'Unable to cancel this request. Please try again.'
-      );
+      setError('Unable to cancel this request. Please try again.');
     } finally {
       setCancelling(false);
     }
   };
 
-
-  /* =======================================================
-     FILTER + SEARCH + SORT
-  ======================================================= */
-
- 
-
+  /* FILTER + SEARCH + SORT  */
 
   const visibleRequests = useMemo(() => {
     let list = [...requests];
-
 
     /* STATUS FILTER */
 
     if (filter === 'PENDING') {
       list = list.filter(
-        (request) =>
-          String(
-            request.status || ''
-          ).toUpperCase() === 'PENDING'
+        (request) => String(request.status || '').toUpperCase() === 'PENDING'
       );
     }
 
     if (filter === 'ACCEPTED') {
       list = list.filter(
-        (request) =>
-          String(
-            request.status || ''
-          ).toUpperCase() === 'ACCEPTED'
+        (request) => String(request.status || '').toUpperCase() === 'ACCEPTED'
       );
     }
-
 
     /* SEARCH */
 
     if (debouncedSearch.trim()) {
-      const searchText =
-        debouncedSearch
-          .toLowerCase()
-          .trim();
+      const searchText = debouncedSearch.toLowerCase().trim();
 
       list = list.filter(
         (request) =>
-          request.title
-            ?.toLowerCase()
-            .includes(searchText) ||
-
-          request.description
-            ?.toLowerCase()
-            .includes(searchText) ||
-
-          request.category
-            ?.toLowerCase()
-            .includes(searchText) ||
-
-          request.address
-            ?.toLowerCase()
-            .includes(searchText)
+          request.title?.toLowerCase().includes(searchText) ||
+          request.description?.toLowerCase().includes(searchText) ||
+          request.category?.toLowerCase().includes(searchText) ||
+          request.address?.toLowerCase().includes(searchText)
       );
     }
-
 
     /* SORT */
 
     if (sortBy === 'URGENCY') {
       list.sort(
         (a, b) =>
-          (
-            URGENCY_RANK[a.urgency] ?? 3
-          ) -
-          (
-            URGENCY_RANK[b.urgency] ?? 3
-          )
+          (URGENCY_RANK[a.urgency] ?? 3) - (URGENCY_RANK[b.urgency] ?? 3)
       );
     } else {
       list.sort(
-        (a, b) =>
-          new Date(
-            a.scheduledAt || 0
-          ) -
-          new Date(
-            b.scheduledAt || 0
-          )
+        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
       );
     }
 
     return list;
-  }, [
-    requests,
-    filter,
-    sortBy,
-    debouncedSearch,
-  ]);
+  }, [requests, filter, sortBy, debouncedSearch]);
 
-
-  /* =======================================================
-     LOADING
-  ======================================================= */
+  /* LOADING */
 
   if (loading) {
     return (
@@ -721,28 +495,14 @@ const handleSelectEditAddress = (location) => {
           justifyContent: 'center',
         }}
       >
-        <CircularProgress
-          color="success"
-        />
+        <CircularProgress color="success" />
       </Box>
     );
   }
 
-  /* =======================================================
-     MAIN UI
-  ======================================================= */
-
-
-  /* =======================================================
-     MAIN UI
-  ======================================================= */
-
   return (
     <Box>
-
-      {/* =================================================
-          PAGE HEADER
-      ================================================= */}
+      {/*PAGE HEADER  */}
 
       <Box sx={{ mb: 3 }}>
         <Typography
@@ -763,12 +523,6 @@ const handleSelectEditAddress = (location) => {
           Manage and track your help requests
         </Typography>
       </Box>
-
-
-      {/* =================================================
-          ERROR
-      ================================================= */}
-
       {error && (
         <Typography
           color="error"
@@ -781,10 +535,7 @@ const handleSelectEditAddress = (location) => {
         </Typography>
       )}
 
-
-      {/* =================================================
-          SEARCH + FILTER + SORT
-      ================================================= */}
+      {/* SEARCH + FILTER + SORT  */}
 
       <RequestFilters
         search={search}
@@ -796,10 +547,7 @@ const handleSelectEditAddress = (location) => {
         onNewRequest={handleNewRequest}
       />
 
-
-      {/* =================================================
-          REQUEST COUNT
-      ================================================= */}
+      {/*REQUEST COUNT */}
 
       <Box
         sx={{
@@ -807,8 +555,7 @@ const handleSelectEditAddress = (location) => {
 
           display: 'flex',
 
-          justifyContent:
-            'space-between',
+          justifyContent: 'space-between',
 
           alignItems: 'center',
         }}
@@ -819,18 +566,12 @@ const handleSelectEditAddress = (location) => {
             color: 'text.primary',
           }}
         >
-          Showing{' '}
-          {visibleRequests.length}{' '}
-          {visibleRequests.length === 1
-            ? 'request'
-            : 'requests'}
+          Showing {visibleRequests.length}{' '}
+          {visibleRequests.length === 1 ? 'request' : 'requests'}
         </Typography>
       </Box>
 
-
-      {/* =================================================
-          REQUEST LIST
-      ================================================= */}
+      {/* REQUEST LIST */}
 
       {visibleRequests.length === 0 ? (
         <Typography
@@ -843,9 +584,7 @@ const handleSelectEditAddress = (location) => {
           {search.trim()
             ? 'No requests match your search.'
             : `You don't have any ${
-                filter !== 'ALL'
-                  ? filter.toLowerCase()
-                  : ''
+                filter !== 'ALL' ? filter.toLowerCase() : ''
               } requests.`}
         </Typography>
       ) : (
@@ -858,65 +597,51 @@ const handleSelectEditAddress = (location) => {
             gap: 2,
           }}
         >
-          {visibleRequests.map(
-            (request) => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                expandedRequest={
-                  expandedRequest
-                }
-                setExpandedRequest={
-                  setExpandedRequest
-                }
-                onEdit={handleEdit}
-                onCancel={handleCancel}
-                onVolunteerProfile={
-                  handleVolunteerProfile
-                }
-              />
-            )
-          )}
+          {visibleRequests.map((request) => (
+            <RequestCard
+              key={request.id}
+              request={request}
+              expandedRequest={expandedRequest}
+              setExpandedRequest={setExpandedRequest}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onVolunteerProfile={handleVolunteerProfile}
+            />
+          ))}
         </Box>
       )}
 
-
-     <VolunteerProfileDialog
-  open={volunteerDialogOpen}
-  volunteer={selectedVolunteer}
-  onClose={handleCloseVolunteerDialog}
-/>
-{/* =================================================
-    EDIT REQUEST DIALOG
-================================================= */}
+      <VolunteerProfileDialog
+        open={volunteerDialogOpen}
+        volunteer={selectedVolunteer}
+        onClose={handleCloseVolunteerDialog}
+      />
+      {/* EDIT REQUEST DIALOG */}
 
       <EditRequestDialog
-  open={Boolean(editRequest)}
-  editLoading={editLoading}
-  updating={updating}
-  editError={editError}
-  editForm={editForm}
-  locationSuggestions={locationSuggestions}
-  isSearchingLocation={isSearchingLocation}
-  onClose={handleCloseEditDialog}
-  onChange={handleEditChange}
-  onAddressChange={handleEditAddressChange}
-  onSelectAddress={handleSelectEditAddress}
-  onUpdate={handleUpdateRequest}
-/>
+        open={Boolean(editRequest)}
+        editLoading={editLoading}
+        updating={updating}
+        editError={editError}
+        editForm={editForm}
+        locationSuggestions={locationSuggestions}
+        isSearchingLocation={isSearchingLocation}
+        onClose={handleCloseEditDialog}
+        onChange={handleEditChange}
+        onAddressChange={handleEditAddressChange}
+        onSelectAddress={handleSelectEditAddress}
+        onUpdate={handleUpdateRequest}
+      />
 
-      {/* =================================================
-          CANCEL REQUEST DIALOG
-      ================================================= */}
+      {/* CANCEL REQUEST DIALOG */}
 
       <CancelRequestDialog
-  open={Boolean(cancelRequest)}
-  cancelRequest={cancelRequest}
-  cancelling={cancelling}
-  onClose={handleCloseCancelDialog}
-  onConfirm={handleConfirmCancel}
-/>
+        open={Boolean(cancelRequest)}
+        cancelRequest={cancelRequest}
+        cancelling={cancelling}
+        onClose={handleCloseCancelDialog}
+        onConfirm={handleConfirmCancel}
+      />
     </Box>
   );
 }
-

@@ -1,4 +1,3 @@
-
 import {
   Button,
   Dialog,
@@ -16,15 +15,8 @@ function CancelRequestDialog({
   onConfirm,
 }) {
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="xs"
-      fullWidth
-    >
-      <DialogTitle>
-        Cancel Help Request?
-      </DialogTitle>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Cancel Help Request?</DialogTitle>
 
       <DialogContent>
         <Typography
@@ -33,8 +25,7 @@ function CancelRequestDialog({
             mt: 1,
           }}
         >
-          Are you sure you want to
-          cancel this help request?
+          Are you sure you want to cancel this help request?
         </Typography>
 
         {cancelRequest && (
@@ -73,9 +64,7 @@ function CancelRequestDialog({
             textTransform: 'none',
           }}
         >
-          {cancelling
-            ? 'Cancelling...'
-            : 'Cancel Request'}
+          {cancelling ? 'Cancelling...' : 'Cancel Request'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -83,4 +72,3 @@ function CancelRequestDialog({
 }
 
 export default CancelRequestDialog;
-

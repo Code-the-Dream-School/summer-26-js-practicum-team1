@@ -57,11 +57,7 @@ export const CATEGORY = [
   'OTHER',
 ];
 
-export const URGENCY_OPTIONS = [
-  'LOW',
-  'MEDIUM',
-  'HIGH',
-];
+export const URGENCY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH'];
 
 export const URGENCY_RANK = {
   HIGH: 0,
@@ -70,17 +66,11 @@ export const URGENCY_RANK = {
 };
 
 export function getUrgencyStyle(urgency) {
-  return (
-    URGENCY_STYLES[urgency] ||
-    URGENCY_STYLES.LOW
-  );
+  return URGENCY_STYLES[urgency] || URGENCY_STYLES.LOW;
 }
 
 export function getStatusStyle(status) {
-  return (
-    STATUS_STYLES[status] ||
-    STATUS_STYLES.PENDING
-  );
+  return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
 }
 
 export function formatDateTimeLocal(dateValue) {
@@ -96,21 +86,13 @@ export function formatDateTimeLocal(dateValue) {
 
   const year = date.getFullYear();
 
-  const month = String(
-    date.getMonth() + 1
-  ).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
 
-  const day = String(
-    date.getDate()
-  ).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
 
-  const hours = String(
-    date.getHours()
-  ).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
 
-  const minutes = String(
-    date.getMinutes()
-  ).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }

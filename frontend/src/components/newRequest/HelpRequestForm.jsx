@@ -1,9 +1,4 @@
-import {
-  Box,
-  MenuItem,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, MenuItem, TextField, Typography } from '@mui/material';
 
 function HelpRequestForm({
   formData,
@@ -91,10 +86,7 @@ function HelpRequestForm({
           }}
         >
           {(categories || []).map((item) => (
-            <MenuItem
-              key={item.value}
-              value={item.value}
-            >
+            <MenuItem key={item.value} value={item.value}>
               {item.label}
             </MenuItem>
           ))}
@@ -123,10 +115,7 @@ function HelpRequestForm({
           }}
         >
           {(urgencies || []).map((item) => (
-            <MenuItem
-              key={item.value}
-              value={item.value}
-            >
+            <MenuItem key={item.value} value={item.value}>
               {item.label}
             </MenuItem>
           ))}
@@ -173,10 +162,7 @@ function HelpRequestForm({
               color: '#334155',
             }}
           >
-            Date{' '}
-            <span style={{ color: '#d32f2f' }}>
-              *
-            </span>
+            Date <span style={{ color: '#d32f2f' }}>*</span>
           </Typography>
 
           <TextField
@@ -214,10 +200,7 @@ function HelpRequestForm({
               color: '#334155',
             }}
           >
-            Time{' '}
-            <span style={{ color: '#d32f2f' }}>
-              *
-            </span>
+            Time <span style={{ color: '#d32f2f' }}>*</span>
           </Typography>
 
           <TextField

@@ -87,8 +87,6 @@ beforeEach(() => {
   });
 });
 
-
-
 describe('POST /api/requests', () => {
   it('creates a help request for an authenticated REQUESTER', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
@@ -189,9 +187,7 @@ describe('POST /api/requests', () => {
     expect(res.status).toBe(400);
 
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe(
-      'scheduledAt must be a future date'
-    );
+    expect(res.body.message).toBe('scheduledAt must be a future date');
 
     expect(prisma.helpRequest.create).not.toHaveBeenCalled();
   });
@@ -214,7 +210,7 @@ describe('POST /api/requests', () => {
   it('creates a help request with description omitted', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
 
-    const {  ...bodyWithoutDescription } = validBody;
+    const { ...bodyWithoutDescription } = validBody;
 
     prisma.helpRequest.create.mockResolvedValue({
       id: 11,
@@ -222,9 +218,7 @@ describe('POST /api/requests', () => {
       title: bodyWithoutDescription.title,
       category: bodyWithoutDescription.category,
       urgency: bodyWithoutDescription.urgency,
-      scheduledAt: new Date(
-        bodyWithoutDescription.scheduledAt
-      ),
+      scheduledAt: new Date(bodyWithoutDescription.scheduledAt),
       address: bodyWithoutDescription.address,
       latitude: bodyWithoutDescription.latitude,
       longitude: bodyWithoutDescription.longitude,
@@ -232,10 +226,7 @@ describe('POST /api/requests', () => {
       status: 'PENDING',
     });
 
-    const res = await postHelpRequest(
-      REQUESTER,
-      bodyWithoutDescription
-    );
+    const res = await postHelpRequest(REQUESTER, bodyWithoutDescription);
 
     expect(res.status).toBe(201);
 
@@ -363,8 +354,6 @@ describe('POST /api/requests', () => {
   });
 });
 
-
-
 describe('GET /api/requests/mine', () => {
   const helpRequests = [
     {
@@ -373,9 +362,7 @@ describe('GET /api/requests/mine', () => {
       title: 'Grocery Shopping Help',
       category: 'GROCERY',
       urgency: 'MEDIUM',
-      scheduledAt: new Date(
-        '2027-08-15T10:00:00.000Z'
-      ),
+      scheduledAt: new Date('2027-08-15T10:00:00.000Z'),
       address: '1000 Main Street, Folsom, CA 95630',
       latitude: 38.6779,
       longitude: -121.1761,
@@ -388,9 +375,7 @@ describe('GET /api/requests/mine', () => {
       title: 'Yard Work Help',
       category: 'YARD_WORK',
       urgency: 'LOW',
-      scheduledAt: new Date(
-        '2027-08-20T10:00:00.000Z'
-      ),
+      scheduledAt: new Date('2027-08-20T10:00:00.000Z'),
       address: '2000 Oak Street, Folsom, CA 95630',
       latitude: 38.678,
       longitude: -121.177,
@@ -402,9 +387,7 @@ describe('GET /api/requests/mine', () => {
   it('returns all help requests belonging to the authenticated requester', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
 
-    prisma.helpRequest.findMany.mockResolvedValue(
-      helpRequests
-    );
+    prisma.helpRequest.findMany.mockResolvedValue(helpRequests);
 
     const res = await getHelpRequests(REQUESTER);
 
@@ -487,9 +470,7 @@ describe('GET /api/requests/mine', () => {
   it('only queries help requests for the authenticated requester', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
 
-    prisma.helpRequest.findMany.mockResolvedValue(
-      helpRequests
-    );
+    prisma.helpRequest.findMany.mockResolvedValue(helpRequests);
 
     await getHelpRequests(REQUESTER);
 

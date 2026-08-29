@@ -180,7 +180,10 @@ describe('POST /api/requests/:id/accept', () => {
   it('rejects an invalid id (T6)', async () => {
     prisma.user.findUnique.mockResolvedValue(APPROVED_VOLUNTEER);
 
-    const res = await postResponse('/api/requests/abc/accept', APPROVED_VOLUNTEER.id);
+    const res = await postResponse(
+      '/api/requests/abc/accept',
+      APPROVED_VOLUNTEER.id
+    );
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Invalid request id');

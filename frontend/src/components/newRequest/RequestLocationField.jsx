@@ -1,9 +1,4 @@
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -81,8 +76,7 @@ function RequestLocationField({
               mt: 1,
               backgroundColor: '#FFFFFF',
               overflow: 'hidden',
-              boxShadow:
-                '0 4px 12px rgba(0,0,0,0.08)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             }}
           >
             {locationSuggestions.map((location) => (
@@ -93,9 +87,7 @@ function RequestLocationField({
                 }
                 type="button"
                 fullWidth
-                onClick={() =>
-                  onSelectAddress(location)
-                }
+                onClick={() => onSelectAddress(location)}
                 sx={{
                   justifyContent: 'flex-start',
                   textAlign: 'left',
@@ -144,10 +136,7 @@ function RequestLocationField({
           type="button"
           startIcon={<MyLocationIcon />}
           onClick={onGetCurrentAddress}
-          disabled={
-            isGettingLocation ||
-            isCreating
-          }
+          disabled={isGettingLocation || isCreating}
           sx={{
             mt: 1,
             textTransform: 'none',
@@ -166,26 +155,25 @@ function RequestLocationField({
 
         {/* COORDINATES CONFIRMATION */}
 
-        {coordinates.latitude !== null &&
-          coordinates.longitude !== null && (
-            <Box
+        {coordinates.latitude !== null && coordinates.longitude !== null && (
+          <Box
+            sx={{
+              mt: 1,
+              px: 2,
+              py: 1,
+            }}
+          >
+            <Typography
+              variant="caption"
               sx={{
-                mt: 1,
-                px: 2,
-                py: 1,
+                color: '#2E7D32',
+                fontWeight: 600,
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#2E7D32',
-                  fontWeight: 600,
-                }}
-              >
-                ✓ Location coordinates captured
-              </Typography>
-            </Box>
-          )}
+              ✓ Location coordinates captured
+            </Typography>
+          </Box>
+        )}
       </Box>
     </>
   );

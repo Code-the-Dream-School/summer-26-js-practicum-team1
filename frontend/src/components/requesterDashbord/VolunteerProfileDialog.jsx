@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   Box,
@@ -12,19 +11,9 @@ import {
 
 import { COLORS } from '../../utils/constants.js';
 
-
-function VolunteerProfileDialog({
-  open,
-  volunteer,
-  onClose,
-}) {
+function VolunteerProfileDialog({ open, volunteer, onClose }) {
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle
         sx={{
           fontWeight: 700,
@@ -35,9 +24,7 @@ function VolunteerProfileDialog({
         Volunteer Profile
       </DialogTitle>
 
-
       <DialogContent dividers>
-
         {volunteer ? (
           <Box
             sx={{
@@ -47,18 +34,11 @@ function VolunteerProfileDialog({
               py: 2,
             }}
           >
-
             {/* PROFILE IMAGE */}
 
             <Avatar
-              src={
-                volunteer.profileImage ||
-                undefined
-              }
-              alt={
-                volunteer.name ||
-                'Volunteer'
-              }
+              src={volunteer.profileImage || undefined}
+              alt={volunteer.name || 'Volunteer'}
               sx={{
                 width: 110,
                 height: 110,
@@ -70,11 +50,8 @@ function VolunteerProfileDialog({
               }}
             >
               {!volunteer.profileImage &&
-                volunteer.name
-                  ?.charAt(0)
-                  ?.toUpperCase()}
+                volunteer.name?.charAt(0)?.toUpperCase()}
             </Avatar>
-
 
             {/* NAME */}
 
@@ -86,10 +63,8 @@ function VolunteerProfileDialog({
                 mb: 3,
               }}
             >
-              {volunteer.name ||
-                'Name not available'}
+              {volunteer.name || 'Name not available'}
             </Typography>
-
 
             {/* PROFILE INFORMATION */}
 
@@ -101,7 +76,6 @@ function VolunteerProfileDialog({
                 gap: 2,
               }}
             >
-
               {/* EMAIL */}
 
               <Box>
@@ -114,11 +88,9 @@ function VolunteerProfileDialog({
                 </Typography>
 
                 <Typography variant="body1">
-                  {volunteer.email ||
-                    'Not available'}
+                  {volunteer.email || 'Not available'}
                 </Typography>
               </Box>
-
 
               {/* PHONE */}
 
@@ -132,11 +104,9 @@ function VolunteerProfileDialog({
                 </Typography>
 
                 <Typography variant="body1">
-                  {volunteer.phone ||
-                    'Not available'}
+                  {volunteer.phone || 'Not available'}
                 </Typography>
               </Box>
-
 
               {/* BIO */}
 
@@ -155,13 +125,9 @@ function VolunteerProfileDialog({
                     lineHeight: 1.6,
                   }}
                 >
-                  {volunteer
-                    .volunteerProfile
-                    ?.bio ||
-                    'No bio available'}
+                  {volunteer.volunteerProfile?.bio || 'No bio available'}
                 </Typography>
               </Box>
-
 
               {/* SERVICE AREA */}
 
@@ -175,13 +141,9 @@ function VolunteerProfileDialog({
                 </Typography>
 
                 <Typography variant="body1">
-                  {volunteer
-                    .volunteerProfile
-                    ?.serviceArea ||
-                    'Not available'}
+                  {volunteer.volunteerProfile?.serviceArea || 'Not available'}
                 </Typography>
               </Box>
-
 
               {/* AVAILABILITY */}
 
@@ -195,13 +157,9 @@ function VolunteerProfileDialog({
                 </Typography>
 
                 <Typography variant="body1">
-                  {volunteer
-                    .volunteerProfile
-                    ?.availability ||
-                    'Not available'}
+                  {volunteer.volunteerProfile?.availability || 'Not available'}
                 </Typography>
               </Box>
-
 
               {/* INTERESTS */}
 
@@ -215,21 +173,11 @@ function VolunteerProfileDialog({
                 </Typography>
 
                 <Typography variant="body1">
-                  {Array.isArray(
-                    volunteer
-                      .volunteerProfile
-                      ?.interests
-                  )
-                    ? volunteer.volunteerProfile.interests.join(
-                        ', '
-                      )
-                    : volunteer
-                        .volunteerProfile
-                        ?.interests ||
-                      'Not available'}
+                  {Array.isArray(volunteer.volunteerProfile?.interests)
+                    ? volunteer.volunteerProfile.interests.join(', ')
+                    : volunteer.volunteerProfile?.interests || 'Not available'}
                 </Typography>
               </Box>
-
             </Box>
           </Box>
         ) : (
@@ -237,9 +185,7 @@ function VolunteerProfileDialog({
             Volunteer information is not available.
           </Typography>
         )}
-
       </DialogContent>
-
 
       <DialogActions
         sx={{
@@ -255,11 +201,8 @@ function VolunteerProfileDialog({
           Close
         </Button>
       </DialogActions>
-
     </Dialog>
   );
 }
 
-
 export default VolunteerProfileDialog;
-

@@ -1,4 +1,3 @@
-
 const express = require('express');
 
 const router = express.Router();
@@ -31,7 +30,6 @@ const {
   facetsQuerySchema,
 } = require('../validations/helpRequestSchema');
 
-
 // Create help request
 router.post(
   '/',
@@ -42,15 +40,8 @@ router.post(
   createHelpRequest
 );
 
-
 // Get requester's help requests
-router.get(
-  '/mine',
-  jwtMiddleware,
-  requireRole('REQUESTER'),
-  getHelpRequests
-);
-
+router.get('/mine', jwtMiddleware, requireRole('REQUESTER'), getHelpRequests);
 
 // Get browse help request facets
 router.get(
@@ -62,7 +53,6 @@ router.get(
   getBrowseHelpRequestsFacets
 );
 
-
 // Get accepted volunteer profile for a help request
 router.get(
   '/:id/volunteer',
@@ -70,7 +60,6 @@ router.get(
   requireRole('REQUESTER'),
   getAcceptedVolunteerProfile
 );
-
 
 // Get one help request for view
 router.get(
@@ -80,7 +69,6 @@ router.get(
   requireRole('REQUESTER'),
   getHelpRequestById
 );
-
 
 // Update help request
 router.patch(
@@ -92,7 +80,6 @@ router.patch(
   updateHelpRequest
 );
 
-
 // Cancel help request
 router.patch(
   '/:id/cancel',
@@ -101,7 +88,6 @@ router.patch(
   requireRole('REQUESTER'),
   cancelHelpRequest
 );
-
 
 // Browse help requests
 router.get(
@@ -112,7 +98,6 @@ router.get(
   validate(browseHelpRequestQuerySchema, 'query'),
   getBrowseHelpRequests
 );
-
 
 router.post(
   '/:id/accept',
@@ -133,4 +118,3 @@ router.post(
 );
 
 module.exports = router;
-

@@ -1,12 +1,6 @@
-import {
-  Box,
-  Button,
-} from '@mui/material';
+import { Box, Button } from '@mui/material';
 
-function RequestFormActions({
-  isCreating,
-  onCancel,
-}) {
+function RequestFormActions({ isCreating, onCancel }) {
   return (
     <Box
       sx={{
@@ -52,16 +46,14 @@ function RequestFormActions({
           borderRadius: 2,
           textTransform: 'none',
           fontWeight: 600,
-         backgroundColor: '#2E7D32',
+          backgroundColor: '#2E7D32',
 
           '&:hover': {
-           backgroundColor: '#1B5E20',
+            backgroundColor: '#1B5E20',
           },
         }}
       >
-        {isCreating
-          ? 'Creating...'
-          : 'Create My Request'}
+        {isCreating ? 'Creating...' : 'Create My Request'}
       </Button>
     </Box>
   );
