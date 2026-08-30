@@ -120,8 +120,88 @@ const markMessagesRead = async (requestId, userId) => {
   });
 };
 
+const getConversations = async (userId) => {
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      request: {
+        OR: [{ requesterId: userId }, { volunteerId: userId }],
+      },
+      messages: {
+        some: {},
+      },
+    },
+
+    include: {
+      request: {
+        select: {
+          id: true,
+          requesterId: true,
+          volunteerId: true,
+
+          requester: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+
+          volunteer: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+
+      messages: {
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 1,
+        select: {
+          content: true,
+          createdAt: true,
+          senderId: true,
+        },
+      },
+    },
+
+    orderBy: {
+      updatedAt: 'desc',
+    },
+  });
+  return conversations
+    .map((conversation) => {
+      const { requesterId, requester, volunteer } = conversation.request;
+
+      const participant = requesterId === userId ? volunteer?.user : requester;
+
+      if (!participant) {
+        return null;
+      }
+
+      return {
+        conversationId: conversation.id,
+        requestId: conversation.request.id,
+
+        participant: {
+          id: participant.id,
+          name: participant.name,
+        },
+
+        lastMessage: conversation.messages[0] || null,
+      };
+    })
+    .filter(Boolean);
+};
 module.exports = {
   getMessages,
   sendMessage,
   markMessagesRead,
+  getConversations,
 };
