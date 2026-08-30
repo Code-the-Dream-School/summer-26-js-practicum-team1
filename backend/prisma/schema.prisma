@@ -80,7 +80,7 @@ model User {
 
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
   helpRequests           HelpRequest[]           @relation("RequesterHelpRequests")
-  acceptedHelpRequests   HelpRequest[]           @relation("VolunteerHelpRequests")
+  
   sentMessages           Message[]
 
 
@@ -141,7 +141,7 @@ model HelpRequest {
   completedAt        DateTime?
   conversation       Conversation?
 
-  requester User                @relation(fields: [requesterId], references: [id])
+  requester User @relation("RequesterHelpRequests", fields: [requesterId], references: [id])
   volunteer VolunteerProfile?   @relation(fields: [volunteerId], references: [userId])
   responses VolunteerResponse[]
 
