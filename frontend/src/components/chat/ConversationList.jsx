@@ -1,0 +1,53 @@
+import {
+  Avatar,
+  Box,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from '@mui/material';
+
+const ConversationList = ({
+  conversations,
+  selectedConversationId,
+  onSelect,
+}) => {
+  return (
+    <Box
+      sx={{
+        width: 300,
+        borderRight: '1px solid',
+        borderColor: 'divider',
+        height: '100%',
+        overflowY: 'auto',
+      }}
+    >
+      <Typography variant="h6" sx={{ px: 2, py: 2 }}>
+        Chats
+      </Typography>
+
+      <List disablePadding>
+        {conversations.map((conversation) => {
+          const name = conversation.participant.name;
+
+          return (
+            <ListItemButton
+              key={conversation.conversationId}
+              selected={conversation.conversationId === selectedConversationId}
+              onClick={() => onSelect(conversation)}
+            >
+              <Avatar sx={{ mr: 1.5 }}>{name.charAt(0).toUpperCase()}</Avatar>
+
+              <ListItemText
+                primary={name}
+                secondary={conversation.lastMessage?.content || ''}
+              />
+            </ListItemButton>
+          );
+        })}
+      </List>
+    </Box>
+  );
+};
+
+export default ConversationList;
