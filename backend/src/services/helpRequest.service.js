@@ -26,7 +26,7 @@ async function createHelpRequest({ requesterId, data }) {
 }
 
 async function getHelpRequests({ requesterId }) {
-  return prisma.helpRequest.findMany({
+  const requests = await prisma.helpRequest.findMany({
     where: {
       requesterId,
     },
@@ -36,14 +36,23 @@ async function getHelpRequests({ requesterId }) {
     include: {
       volunteer: {
         select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
         },
       },
     },
   });
+
+  return requests.map((request) => ({
+    ...request,
+    volunteer: request.volunteer?.user || null,
+  }));
 }
 
 async function getHelpRequestById({ id, requesterId }) {
