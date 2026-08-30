@@ -15,7 +15,7 @@ const {
   getConversations,
 } = require('../controllers/chat.controller');
 
-router.get('/conversations', getConversations);
+router.get('/conversations', jwtMiddleware, getConversations);
 router.get('/requests/:requestId/messages', jwtMiddleware, getMessages);
 
 router.post(
