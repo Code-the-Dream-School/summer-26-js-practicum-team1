@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import ChatPage from './pages/ChatPage';
+import About from './pages/About';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         {/* Public routes */}
         <Route index element={<HomePage />} />
+        <Route path="about" element={<About />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
