@@ -5,19 +5,11 @@ import {
   URGENCY_BY_API_VALUE,
 } from '../../utils/browse.constants';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import {
+  formatScheduledLabel,
+  formatPostedLabel,
+} from '../../utils/browse.utils';
 import { COLORS } from '../../utils/constants';
-import { formatScheduledLabel } from '../../utils/browse.utils';
-
-function formatPostedLabel(createdAt) {
-  if (!createdAt) return '';
-  const diffMs = Date.now() - new Date(createdAt).getTime();
-  const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 1) return 'Posted just now';
-  if (hours < 24) return `Posted ${hours} hour${hours === 1 ? '' : 's'} ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Posted yesterday';
-  return `Posted ${days} days ago`;
-}
 
 function RequestCard({
   request,
@@ -25,6 +17,7 @@ function RequestCard({
   isResponding = false,
   onAccept,
   onDecline,
+  onSelect,
 }) {
   const category = CATEGORY_BY_API_VALUE[request.category];
   const urgency = URGENCY_BY_API_VALUE[request.urgency];
@@ -99,6 +92,7 @@ function RequestCard({
           <Button
             variant="outlined"
             disabled={actionsDisabled}
+            onClick={onSelect}
             sx={{
               textTransform: 'none',
               borderColor: COLORS.border,
