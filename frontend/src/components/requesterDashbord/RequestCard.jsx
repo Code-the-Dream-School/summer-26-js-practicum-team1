@@ -177,7 +177,18 @@ function RequestCard({
             </>
           )}
         </Box>
+ {/* TITLE */}
 
+<Typography
+  variant="h6"
+  sx={{
+    color: COLORS.text,
+    fontWeight: 800,
+    mb: 1.5,
+  }}
+>
+  {request.title}
+</Typography>
         {/* CATEGORY */}
 
         <Typography
@@ -192,20 +203,7 @@ function RequestCard({
           {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
         </Typography>
 
-        {/* TITLE */}
-
-        <Typography
-          variant="body2"
-          sx={{
-            color: COLORS.textMuted,
-            fontSize: '1rem',
-            fontWeight: 800,
-            mb: 1.5,
-          }}
-        >
-          <strong>Title:</strong> {request.title}
-        </Typography>
-
+      
         {/* DATE + TIME */}
 
         <Box
