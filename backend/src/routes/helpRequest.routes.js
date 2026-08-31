@@ -14,6 +14,7 @@ const {
   getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
+  completeHelpRequest,
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
@@ -74,8 +75,7 @@ router.get(
 router.get(
   '/:id',
   jwtMiddleware,
-  csrfMiddleware,
-  requireRole('REQUESTER'),
+  requireApprovedIfVolunteer,
   getHelpRequestById
 );
 
@@ -124,6 +124,15 @@ router.post(
   requireRole('VOLUNTEER'),
   requireApprovedIfVolunteer,
   declineHelpRequest
+);
+
+router.post(
+  '/:id/complete',
+  jwtMiddleware,
+  csrfMiddleware,
+  requireRole('VOLUNTEER'),
+  requireApprovedIfVolunteer,
+  completeHelpRequest
 );
 
 module.exports = router;
