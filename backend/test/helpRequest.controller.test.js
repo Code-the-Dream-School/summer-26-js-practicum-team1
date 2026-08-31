@@ -210,7 +210,7 @@ describe('POST /api/requests', () => {
   it('creates a help request with description omitted', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
 
-    const { ...bodyWithoutDescription } = validBody;
+   const { description, ...bodyWithoutDescription } = validBody;
 
     prisma.helpRequest.create.mockResolvedValue({
       id: 11,
