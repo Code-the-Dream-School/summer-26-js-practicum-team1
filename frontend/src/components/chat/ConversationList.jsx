@@ -18,7 +18,7 @@ const ConversationList = ({
         width: 300,
         borderRight: '1px solid',
         borderColor: 'divider',
-        height: '100%',
+        height: 'calc(100vh - 120px)',
         overflowY: 'auto',
         boxShadow: 3,
         borderRadius: { xs: 2, sm: 3 },
