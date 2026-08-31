@@ -134,7 +134,31 @@ async function cancelHelpRequest({ id, requesterId }) {
     },
   });
 }
+async function getVolunteerAcceptedRequests({ volunteerId }) {
+  const requests = await prisma.helpRequest.findMany({
+    where: {
+      volunteerId,
+      status: RequestStatus.ACCEPTED,
+    },
+    orderBy: {
+      scheduledAt: 'asc',
+    },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          profileImage: true,
+          profileImageType: true,
+        },
+      },
+    },
+  });
 
+  return requests;
+}
 async function getAcceptedVolunteerProfile({ requestId, requesterId }) {
   const helpRequest = await prisma.helpRequest.findFirst({
     where: {
@@ -660,6 +684,7 @@ module.exports = {
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
+  getVolunteerAcceptedRequests,
   getBrowseHelpRequests,
   getCategoryFacets,
   acceptHelpRequest,
