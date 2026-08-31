@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, Link as RouterLink } from 'react-router-dom';
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Stack,
@@ -48,6 +48,7 @@ function InfoRow({ icon, label, value }) {
 }
 
 function RequestDetail() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [feedback, setFeedback] = useState(null);
 
@@ -130,12 +131,11 @@ function RequestDetail() {
     return (
       <Box>
         <Button
-          component={RouterLink}
-          to="/browse"
+          onClick={() => navigate(-1)}
           startIcon={<ArrowBackIcon />}
-          sx={{ textTransform: 'none', mb: 2, color: 'text.primary', pl: 0 }}
+          sx={{ mb: 2, color: 'text.primary' }}
         >
-          Back to Browse
+          Back
         </Button>
         <Alert severity="error">{friendlyDetailErrorMessage(error)}</Alert>
       </Box>
@@ -164,12 +164,11 @@ function RequestDetail() {
   return (
     <Box>
       <Button
-        component={RouterLink}
-        to="/browse"
+        onClick={() => navigate(-1)}
         startIcon={<ArrowBackIcon />}
         sx={{ mb: 2, color: 'text.primary' }}
       >
-        Back to Browse
+        Back
       </Button>
 
       {feedback && (
