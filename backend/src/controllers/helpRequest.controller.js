@@ -120,8 +120,8 @@ const getBrowseHelpRequests = asyncHandler(async (req, res) => {
   });
 });
 
-const getBrowseHelpRequestsFacets = asyncHandler(async (req, res) => {
-  const facets = await helpRequestService.getBrowseHelpRequestsFacets({
+const getCategoryFacets = asyncHandler(async (req, res) => {
+  const facets = await helpRequestService.getCategoryFacets({
     user: req.user,
     query: req.query,
   });
@@ -173,7 +173,7 @@ module.exports = {
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
   getBrowseHelpRequests,
-  getBrowseHelpRequestsFacets,
+ getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
 };

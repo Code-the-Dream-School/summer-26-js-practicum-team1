@@ -490,7 +490,7 @@ async function getBrowseHelpRequests({ user, query }) {
 // Browse Help Request Facets
 // --------------------------------------------------
 
-async function getBrowseHelpRequestsFacets({ user, query }) {
+async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
     query,
@@ -665,7 +665,7 @@ module.exports = {
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
   getBrowseHelpRequests,
-  getBrowseHelpRequestsFacets,
+  getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
 };

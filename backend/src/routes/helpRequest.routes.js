@@ -10,7 +10,7 @@ const {
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
   getBrowseHelpRequests,
-  getBrowseHelpRequestsFacets,
+  getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
 } = require('../controllers/helpRequest.controller');
@@ -50,7 +50,7 @@ router.get(
   requireRole(['VOLUNTEER', 'ADMIN']),
   requireApprovedIfVolunteer,
   validate(facetsQuerySchema, 'query'),
-  getBrowseHelpRequestsFacets
+  getCategoryFacets
 );
 
 // Get accepted volunteer profile for a help request
