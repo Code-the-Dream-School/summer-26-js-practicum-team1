@@ -20,6 +20,7 @@ import VolunteerPendingPage from './pages/VolunteerPendingPage';
 import ChatPage from './pages/ChatPage';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import RequestDetail from './pages/RequestDetail';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
@@ -53,6 +54,7 @@ function App() {
           <Route path="volunteer-pending" element={<VolunteerPendingPage />} />
           <Route element={<RequireApprovedVolunteer />}>
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="/requests/:id" element={<RequestDetail />} />
           </Route>
         </Route>
 
