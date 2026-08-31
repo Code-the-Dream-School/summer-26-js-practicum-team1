@@ -49,40 +49,64 @@ const ChatPage = () => {
   }
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        height: 'calc(100vh - 64px)',
-      }}
-    >
-      <ConversationList
-        conversations={conversations}
-        selectedConversationId={activeConversation?.conversationId}
-        onSelect={setSelectedConversation}
-      />
+    <>
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            marginLeft: 0,
+            fontWeight: 700,
+          }}
+        >
+          Chat
+        </Typography>
 
-      <Box sx={{ flex: 1 }}>
-        {activeConversation ? (
-          <Chat
-            requestId={activeConversation?.requestId ?? requestId}
-            participant={activeConversation?.participant}
-          />
-        ) : (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Typography color="text.secondary">
-              Select a conversation to start chatting
-            </Typography>
-          </Box>
-        )}
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: '#6b6b6b',
+          }}
+        >
+          Your Conversations.
+        </Typography>
       </Box>
-    </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          height: 'calc(100vh - 64px)',
+          gap: 3,
+        }}
+      >
+        <ConversationList
+          conversations={conversations}
+          selectedConversationId={activeConversation?.conversationId}
+          onSelect={setSelectedConversation}
+        />
+
+        <Box sx={{ flex: 1 }}>
+          {activeConversation ? (
+            <Chat
+              requestId={activeConversation?.requestId ?? requestId}
+              participant={activeConversation?.participant}
+            />
+          ) : (
+            <Box
+              sx={{
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography color="text.secondary">
+                Select a conversation to start chatting
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </>
   );
 };
 

@@ -82,7 +82,7 @@ const Chat = ({ requestId, participant }) => {
         border: '1px solid',
         borderColor: 'divider',
         overflow: 'hidden',
-        borderRadius: { xs: 2, sm: 3 },
+        borderRadius: { xs: 2, sm: 3, lg: 2 },
         boxShadow: 3,
       }}
     >
@@ -95,21 +95,25 @@ const Chat = ({ requestId, participant }) => {
           display: 'flex',
           alignItems: 'center',
           gap: 2,
+          bgcolor: '#1E5631',
         }}
       >
         <Avatar
           sx={{
-            width: 70,
-            height: 70,
-            fontSize: '2.75rem',
-            boxShadow: 3,
+            width: 48,
+            height: 48,
+            mr: 1.5,
+            bgcolor: '#D9D9D6',
+            color: '#1E5631',
+            fontWeight: 700,
+            flexShrink: 0,
           }}
         >
           {participant?.name?.charAt(0)}
         </Avatar>
 
         <Box>
-          <Typography variant="h3" fontWeight={700}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: '#F6F6F4' }}>
             {participant?.name || 'Chat'}
           </Typography>
         </Box>
@@ -119,9 +123,8 @@ const Chat = ({ requestId, participant }) => {
           sx={{
             minWidth: 'auto',
             ml: 'auto',
-            boxShadow: 2,
             transition: '0.3s',
-            color: 'black',
+            color: 'white',
             flexShrink: 0,
             '&:hover': {
               boxShadow: 5,
@@ -205,14 +208,11 @@ const Chat = ({ requestId, participant }) => {
                   <Box
                     sx={{
                       maxWidth: '70%',
-                      px: 2,
-                      py: 1.25,
-                      borderRadius: 3,
-                      boxShadow: 3,
-                      bgcolor: isOwnMessage ? 'primary.main' : 'grey.100',
-                      color: isOwnMessage
-                        ? 'primary.contrastText'
-                        : 'text.primary',
+                      px: 1.75,
+                      py: 1,
+                      borderRadius: 2.5,
+                      bgcolor: isOwnMessage ? '#1E5631' : '#F0F2EF',
+                      color: isOwnMessage ? '#F6F6F4' : 'text.primary',
                     }}
                   >
                     {!isOwnMessage && (
@@ -226,39 +226,38 @@ const Chat = ({ requestId, participant }) => {
                       </Typography>
                     )}
 
-                    <Typography>{message.content}</Typography>
-
-                    <Typography
-                      variant="caption"
+                    <Box
                       sx={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        gap: 0.5,
-                        mt: 0.5,
-                        color: isOwnMessage
-                          ? 'rgba(255,255,255,0.75)'
-                          : 'text.secondary',
+                        alignItems: 'flex-end',
+                        gap: 1,
                       }}
                     >
-                      {new Date(message.createdAt).toLocaleTimeString([], {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
+                      <Typography>{message.content}</Typography>
 
-                      {isOwnMessage &&
-                        (message.readAt ? (
-                          <DoneAllIcon
-                            fontSize="small"
-                            sx={{ color: '#2196F3 !important' }}
-                          />
-                        ) : (
-                          <DoneIcon
-                            fontSize="small"
-                            sx={{ color: '#2196F3 !important' }}
-                          />
-                        ))}
-                    </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.25,
+                          whiteSpace: 'nowrap',
+                          opacity: 0.75,
+                        }}
+                      >
+                        {new Date(message.createdAt).toLocaleTimeString([], {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+
+                        {isOwnMessage &&
+                          (message.readAt ? (
+                            <DoneAllIcon fontSize="small" />
+                          ) : (
+                            <DoneIcon fontSize="small" />
+                          ))}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
@@ -284,7 +283,11 @@ const Chat = ({ requestId, participant }) => {
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Type a message..."
-          sx={{ boxShadow: 3 }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 5,
+            },
+          }}
         />
 
         <Button
@@ -292,12 +295,13 @@ const Chat = ({ requestId, participant }) => {
           variant="contained"
           disabled={!content.trim() || sendMessage.isPending}
           sx={{
-            boxShadow: 2,
-            transition: '0.3s',
-            flexShrink: 0,
+            minWidth: 44,
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            bgcolor: '#1E5631',
             '&:hover': {
-              boxShadow: 5,
-              transform: 'translateY(-2px)',
+              bgcolor: '#164525',
             },
           }}
         >
