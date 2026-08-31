@@ -30,14 +30,12 @@ import SearchOffOutlinedIcon from '@mui/icons-material/SearchOffOutlined';
 import { useUsers } from '../../hooks/admin/useUsers';
 import Pagination from '../common/Pagination';
 
-const TITLE_COLOR = '#52462A';
-
 const filterFieldSx = {
   minWidth: { xs: '100%', sm: 160 },
   flex: { sm: 1 },
-  boxShadow: 1,
-  borderRadius: 2,
-  bgcolor: 'background.paper',
+  boxShadow: 3,
+  borderRadius: 1,
+
   '& .MuiOutlinedInput-root': {
     height: 40,
   },
@@ -92,7 +90,7 @@ const stickyActionsCellSx = {
 const stickyActionsHeaderSx = {
   ...stickyActionsCellSx,
   top: 0,
-  bgcolor: 'success.main',
+  bgcolor: 'primary.main',
   zIndex: 3,
   boxShadow: 'none',
 };
@@ -104,13 +102,29 @@ const hideOnXs = {
 function getRoleChipProps(role) {
   switch (role) {
     case 'ADMIN':
-      return { label: 'Admin', color: 'primary', variant: 'filled' };
+      return {
+        label: 'Admin',
+        variant: 'filled',
+        sx: { backgroundColor: '#B33F32', color: '#FFF' },
+      };
     case 'VOLUNTEER':
-      return { label: 'Volunteer', color: 'success', variant: 'filled' };
+      return {
+        label: 'Volunteer',
+        variant: 'filled',
+        sx: { backgroundColor: '#6b6b6b', color: '#FFF' },
+      };
     case 'REQUESTER':
-      return { label: 'Requester', color: 'default', variant: 'outlined' };
+      return {
+        label: 'Requester',
+        variant: 'filled',
+        sx: { backgroundColor: '#C1791E', color: '#FFF' },
+      };
     default:
-      return { label: 'N/A', color: 'default', variant: 'outlined' };
+      return {
+        label: 'N/A',
+        variant: 'outlined',
+        color: 'default',
+      };
   }
 }
 
@@ -152,7 +166,7 @@ function AdminUserAvatar({ user }) {
         width: 34,
         height: 34,
         fontSize: '0.8125rem',
-        bgcolor: grey[400],
+        bgcolor: 'primary.main',
       }}
     >
       {user.name?.charAt(0)?.toUpperCase()}
@@ -221,15 +235,7 @@ function UserTable() {
 
   return (
     <>
-      <Box
-        sx={{
-          mb: 2,
-          p: 2,
-          borderRadius: 2,
-          boxShadow: 1,
-          bgcolor: 'background.paper',
-        }}
-      >
+      <Box>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
@@ -280,17 +286,16 @@ function UserTable() {
 
           <Chip
             label={`${filteredUsers.length} user${filteredUsers.length === 1 ? '' : 's'}`}
-            color="success"
+            color="#171717"
             variant="outlined"
             size="small"
             sx={{
               ml: { sm: 'auto' },
-              height: 40,
+              height: 35,
               px: 0.5,
               fontSize: '0.75rem',
               fontWeight: 500,
-              color: TITLE_COLOR,
-              borderColor: 'success.main',
+              borderColor: 'primary.main',
               alignSelf: { xs: 'flex-start', sm: 'center' },
             }}
           />
@@ -311,8 +316,9 @@ function UserTable() {
         sx={{
           width: '100%',
           maxWidth: '100%',
-          borderRadius: 2,
+          borderRadius: 1,
           border: 1,
+          mt: 4,
           borderColor: 'divider',
           boxShadow: 1,
           overflowX: 'auto',
@@ -342,30 +348,30 @@ function UserTable() {
               <TableCell
                 sx={{
                   ...headerCellSx,
-                  bgcolor: 'success.main',
+                  bgcolor: 'primary.main',
                 }}
               >
                 User
               </TableCell>
-              <TableCell sx={{ ...headerCellSx, bgcolor: 'success.main' }}>
+              <TableCell sx={{ ...headerCellSx, bgcolor: 'primary.main' }}>
                 Email
               </TableCell>
-              <TableCell sx={{ ...headerCellSx, bgcolor: 'success.main' }}>
+              <TableCell sx={{ ...headerCellSx, bgcolor: 'primary.main' }}>
                 Role
               </TableCell>
               <TableCell
-                sx={{ ...headerCellSx, bgcolor: 'success.main', ...hideOnXs }}
+                sx={{ ...headerCellSx, bgcolor: 'primary.main', ...hideOnXs }}
               >
                 Phone
               </TableCell>
               <TableCell
-                sx={{ ...headerCellSx, bgcolor: 'success.main', ...hideOnXs }}
+                sx={{ ...headerCellSx, bgcolor: 'primary.main', ...hideOnXs }}
               >
                 Gender
               </TableCell>
               <TableCell
                 align="right"
-                sx={{ ...headerCellSx, bgcolor: 'success.main' }}
+                sx={{ ...headerCellSx, bgcolor: 'primary.main' }}
               >
                 Date of birth
               </TableCell>
@@ -444,7 +450,6 @@ function UserTable() {
                         sx={{
                           fontWeight: 600,
                           fontSize: '0.875rem',
-                          color: TITLE_COLOR,
                         }}
                         noWrap
                       >
@@ -469,7 +474,13 @@ function UserTable() {
                     <Chip
                       {...getRoleChipProps(user.role)}
                       size="small"
-                      sx={{ height: 24, fontSize: '0.75rem', fontWeight: 500 }}
+                      sx={{
+                        height: 24,
+                        width: 85,
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        ...getRoleChipProps(user.role).sx,
+                      }}
                     />
                   </TableCell>
 
@@ -521,7 +532,7 @@ function UserTable() {
                       to={`/admin/users/${user.id}`}
                       size="small"
                       variant="contained"
-                      color="success"
+                      color="primary"
                       sx={viewButtonSx}
                       onClick={(event) => event.stopPropagation()}
                     >
