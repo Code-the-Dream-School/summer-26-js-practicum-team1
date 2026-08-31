@@ -133,7 +133,14 @@ function RequestDetail() {
         <Button
           onClick={() => navigate(-1)}
           startIcon={<ArrowBackIcon />}
-          sx={{ mb: 2, color: 'text.primary' }}
+          sx={{
+            mb: 2,
+            color: 'text.primary',
+            textTransform: 'none',
+            '& .MuiButton-startIcon': {
+              marginTop: '-2px',
+            },
+          }}
         >
           Back
         </Button>
@@ -166,7 +173,14 @@ function RequestDetail() {
       <Button
         onClick={() => navigate(-1)}
         startIcon={<ArrowBackIcon />}
-        sx={{ mb: 2, color: 'text.primary' }}
+        sx={{
+          mb: 2,
+          color: 'text.primary',
+          textTransform: 'none',
+          '& .MuiButton-startIcon': {
+            marginTop: '-2px',
+          },
+        }}
       >
         Back
       </Button>
