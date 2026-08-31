@@ -13,6 +13,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlaceIcon from '@mui/icons-material/Place';
 import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
+import ChatIcon from '@mui/icons-material/Chat';
 import Pill from '../components/browse/Pill';
 import { useHelpRequest } from '../hooks/useHelpRequests';
 import { useRespondToHelpRequest } from '../hooks/useRespondToHelpRequest';
@@ -158,6 +159,7 @@ function RequestDetail() {
     !helpRequest.canRespond &&
     helpRequest.status === 'PENDING' &&
     helpRequest.viewerResponse;
+  const showChat = helpRequest.isAssignedVolunteer;
 
   return (
     <Box>
@@ -289,7 +291,10 @@ function RequestDetail() {
           </Box>
         </Stack>
 
-        {(showAcceptDecline || showComplete || showAlreadyResponded) && (
+        {(showAcceptDecline ||
+          showComplete ||
+          showAlreadyResponded ||
+          showChat) && (
           <>
             <Divider sx={{ my: 3, borderColor: COLORS.border }} />
 
@@ -331,20 +336,47 @@ function RequestDetail() {
               </Stack>
             )}
 
-            {showComplete && (
-              <Stack direction="row" sx={{ justifyContent: 'flex-end' }}>
-                <Button
-                  variant="contained"
-                  disabled={isCompleting}
-                  onClick={handleComplete}
-                  sx={{
-                    textTransform: 'none',
-                    backgroundColor: COLORS.forest,
-                    '&:hover': { backgroundColor: COLORS.primaryHover },
-                  }}
-                >
-                  {isCompleting ? 'Saving…' : 'Mark as completed'}
-                </Button>
+            {(showChat || showComplete) && (
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{ justifyContent: 'flex-end' }}
+              >
+                {showChat && (
+                  <Button
+                    component={RouterLink}
+                    to={`/chat/${id}`}
+                    variant="outlined"
+                    startIcon={<ChatIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      borderColor: COLORS.border,
+                      color: COLORS.forest,
+                      '&:hover': {
+                        borderColor: COLORS.borderHover,
+                        backgroundColor: COLORS.sage,
+                      },
+                    }}
+                  >
+                    Message{' '}
+                    {helpRequest.requester?.name?.split(' ')[0] || 'requester'}
+                  </Button>
+                )}
+
+                {showComplete && (
+                  <Button
+                    variant="contained"
+                    disabled={isCompleting}
+                    onClick={handleComplete}
+                    sx={{
+                      textTransform: 'none',
+                      backgroundColor: COLORS.forest,
+                      '&:hover': { backgroundColor: COLORS.primaryHover },
+                    }}
+                  >
+                    {isCompleting ? 'Saving…' : 'Mark as completed'}
+                  </Button>
+                )}
               </Stack>
             )}
 
