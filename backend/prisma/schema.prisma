@@ -138,6 +138,7 @@ model HelpRequest {
   description        String?
   status             RequestStatus @default(PENDING)
   createdAt          DateTime      @default(now())
+  acceptedAt         DateTime?     @map("accepted_at")
   completedAt        DateTime?
   conversation       Conversation?
 
