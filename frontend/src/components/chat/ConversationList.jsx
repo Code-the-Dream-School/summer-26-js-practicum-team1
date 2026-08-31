@@ -20,6 +20,8 @@ const ConversationList = ({
         borderColor: 'divider',
         height: '100%',
         overflowY: 'auto',
+        boxShadow: 3,
+        borderRadius: { xs: 2, sm: 3 },
       }}
     >
       <Typography variant="h6" sx={{ px: 2, py: 2 }}>
