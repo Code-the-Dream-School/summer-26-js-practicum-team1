@@ -486,9 +486,7 @@ async function getBrowseHelpRequests({ user, query }) {
   };
 }
 
-// --------------------------------------------------
-// Browse Help Request Facets
-// --------------------------------------------------
+
 
 async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
@@ -532,9 +530,7 @@ async function getCategoryFacets({ user, query }) {
     }, {});
 }
 
-// --------------------------------------------------
-// Exports
-// --------------------------------------------------
+
 
 const isOpenRequest = (request) =>
   request.status === RequestStatus.PENDING && request.volunteerId === null;
