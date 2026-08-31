@@ -22,7 +22,7 @@ import {
 
 import { useAuth } from '../../hooks/useAuth';
 
-const Chat = ({ requestId }) => {
+const Chat = ({ requestId, participant }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const navigate = useNavigate();
@@ -62,9 +62,6 @@ const Chat = ({ requestId }) => {
       },
     });
   };
-  const otherParticipant = messages.find(
-    (message) => message.senderId !== user?.id
-  )?.sender;
 
   if (isLoading) {
     return <CircularProgress />;
@@ -108,12 +105,12 @@ const Chat = ({ requestId }) => {
             boxShadow: 3,
           }}
         >
-          {otherParticipant?.name?.charAt(0)}
+          {participant?.name?.charAt(0)}
         </Avatar>
 
         <Box>
           <Typography variant="h3" fontWeight={700}>
-            {otherParticipant?.name || 'Chat'}
+            {participant?.name || 'Chat'}
           </Typography>
         </Box>
         <Button

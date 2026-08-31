@@ -63,7 +63,10 @@ const ChatPage = () => {
 
       <Box sx={{ flex: 1 }}>
         {activeConversation ? (
-          <Chat requestId={activeConversation?.requestId ?? requestId} />
+          <Chat
+            requestId={activeConversation?.requestId ?? requestId}
+            participant={activeConversation?.participant}
+          />
         ) : (
           <Box
             sx={{
