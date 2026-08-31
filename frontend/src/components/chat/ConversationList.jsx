@@ -42,10 +42,7 @@ const ConversationList = ({
 
               <ListItemText
                 primary={name}
-                secondary={
-                  conversation.lastMessage?.content ||
-                  `Request #${conversation.requestId}`
-                }
+                secondary={conversation.lastMessage?.content || ''}
               />
             </ListItemButton>
           );

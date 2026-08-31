@@ -306,15 +306,21 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
           action: 'ACCEPTED',
         },
       });
-      await tx.conversation.upsert({
+      const existingConversation = await tx.conversation.findFirst({
         where: {
-          requestId,
+          request: {
+            requesterId: request.requesterId,
+            volunteerId,
+          },
         },
-        create: {
-          requestId,
-        },
-        update: {},
       });
+      if (!existingConversation) {
+        await tx.conversation.create({
+          data: {
+            requestId,
+          },
+        });
+      }
       return tx.helpRequest.findUnique({ where: { id: requestId } });
     });
   } catch (err) {

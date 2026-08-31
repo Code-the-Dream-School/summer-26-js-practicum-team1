@@ -249,7 +249,13 @@ function RequestCard({ request, expandedRequest, setExpandedRequest }) {
             <Button
               variant="contained"
               startIcon={<ChatBubbleIcon />}
-              onClick={() => navigate(`/chat/${request.id}`)}
+              onClick={() =>
+                navigate(`/chat/${request.id}`, {
+                  state: {
+                    participantId: request.volunteerId,
+                  },
+                })
+              }
               sx={{
                 minHeight: 42,
                 mr: 3,
@@ -268,6 +274,7 @@ function RequestCard({ request, expandedRequest, setExpandedRequest }) {
               Message
             </Button>
           )}
+
           <Button
             onClick={handleToggleDetails}
             sx={{

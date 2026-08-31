@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { Box, CircularProgress, Typography } from '@mui/material';
 
@@ -9,32 +9,22 @@ import ConversationList from '../components/chat/ConversationList';
 import { useGetConversation } from '../hooks/useChat';
 
 const ChatPage = () => {
-  const navigate = useNavigate();
   const { requestId } = useParams();
+  const location = useLocation();
 
   const { data: conversations = [], isLoading, isError } = useGetConversation();
 
-  const [selectedConversationId, setSelectedConversationId] = useState(null);
+  const [selectedConversation, setSelectedConversation] = useState(null);
 
-  const urlConversation = requestId
+  const participantId = location.state?.participantId;
+
+  const conversationFromRequest = participantId
     ? conversations.find(
-        (conversation) => conversation.requestId === Number(requestId)
+        (conversation) => conversation.participant.id === Number(participantId)
       )
     : null;
 
-  const selectedConversation =
-    selectedConversationId !== null
-      ? conversations.find(
-          (conversation) =>
-            conversation.conversationId === selectedConversationId
-        )
-      : urlConversation;
-
-  useEffect(() => {
-    if (!isLoading && requestId && !urlConversation) {
-      navigate('/chat', { replace: true });
-    }
-  }, [isLoading, requestId, urlConversation, navigate]);
+  const activeConversation = selectedConversation || conversationFromRequest;
 
   if (isLoading) {
     return (
@@ -67,15 +57,13 @@ const ChatPage = () => {
     >
       <ConversationList
         conversations={conversations}
-        selectedConversationId={selectedConversation?.conversationId}
-        onSelect={(conversation) =>
-          setSelectedConversationId(conversation.conversationId)
-        }
+        selectedConversationId={activeConversation?.conversationId}
+        onSelect={setSelectedConversation}
       />
 
       <Box sx={{ flex: 1 }}>
-        {selectedConversation ? (
-          <Chat requestId={selectedConversation.requestId} />
+        {activeConversation ? (
+          <Chat requestId={activeConversation?.requestId ?? requestId} />
         ) : (
           <Box
             sx={{

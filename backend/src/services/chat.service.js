@@ -39,8 +39,16 @@ const getAuthorizedConversation = async (
     throw new ApiError(403, 'Chat is not available for this request');
   }
 
-  const conversation = await prisma.conversation.findUnique({
-    where: { requestId },
+  const conversation = await prisma.conversation.findFirst({
+    where: {
+      request: {
+        requesterId: request.requesterId,
+        volunteerId: request.volunteerId,
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
   });
 
   return conversation;
