@@ -12,7 +12,7 @@ export function useChatMessages(requestId) {
     queryKey: ['chatMessages', requestId],
     queryFn: () => getMessages(requestId),
     enabled: Boolean(requestId),
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
 }
 
@@ -20,7 +20,7 @@ export function useGetConversation() {
   return useQuery({
     queryKey: ['chatConversations'],
     queryFn: () => getConversations(),
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
 }
 export function useSendMessage(requestId) {
