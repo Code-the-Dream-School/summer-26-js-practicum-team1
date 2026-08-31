@@ -194,7 +194,7 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   data.sort((a, b) => {
     const diff = compareBy[sortField](a, b);
     if (diff !== 0) return sortDir === 'asc' ? diff : -diff;
-    return a.id - b.id;  
+    return a.id - b.id;
   });
 
   const totalCount = data.length;
@@ -306,7 +306,15 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
           action: 'ACCEPTED',
         },
       });
-
+      await tx.conversation.upsert({
+        where: {
+          requestId,
+        },
+        create: {
+          requestId,
+        },
+        update: {},
+      });
       return tx.helpRequest.findUnique({ where: { id: requestId } });
     });
   } catch (err) {

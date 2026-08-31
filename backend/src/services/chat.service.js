@@ -126,9 +126,6 @@ const getConversations = async (userId) => {
       request: {
         OR: [{ requesterId: userId }, { volunteerId: userId }],
       },
-      messages: {
-        some: {},
-      },
     },
 
     include: {

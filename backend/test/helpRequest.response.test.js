@@ -11,6 +11,9 @@ jest.mock('../src/config/prisma', () => ({
     findUnique: jest.fn(),
     create: jest.fn(),
   },
+  conversation: {
+    upsert: jest.fn(),
+  },
   $transaction: jest.fn(),
   $executeRaw: jest.fn(),
 }));
@@ -84,6 +87,10 @@ beforeEach(() => {
   prisma.$executeRaw.mockResolvedValue(1);
   prisma.volunteerResponse.findUnique.mockResolvedValue(null);
   prisma.helpRequest.updateMany.mockResolvedValue({ count: 1 });
+  prisma.conversation.upsert.mockResolvedValue({
+    id: 1,
+    requestId: openRequest.id,
+  });
   prisma.volunteerResponse.create.mockResolvedValue({
     id: 1,
     requestId: openRequest.id,
@@ -136,6 +143,15 @@ describe('POST /api/requests/:id/accept', () => {
         action: 'ACCEPTED',
       },
     });
+    expect(prisma.conversation.upsert).toHaveBeenCalledWith({
+      where: {
+        requestId: openRequest.id,
+      },
+      create: {
+        requestId: openRequest.id,
+      },
+      update: {},
+    });
   });
 
   it('returns 409 when a second volunteer accepts after assignment (T3/T9)', async () => {
@@ -180,7 +196,10 @@ describe('POST /api/requests/:id/accept', () => {
   it('rejects an invalid id (T6)', async () => {
     prisma.user.findUnique.mockResolvedValue(APPROVED_VOLUNTEER);
 
-    const res = await postResponse('/api/requests/abc/accept', APPROVED_VOLUNTEER.id);
+    const res = await postResponse(
+      '/api/requests/abc/accept',
+      APPROVED_VOLUNTEER.id
+    );
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Invalid request id');
