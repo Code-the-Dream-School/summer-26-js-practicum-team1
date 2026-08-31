@@ -463,6 +463,7 @@ function Browse() {
                     isResponding={respondingRequestId === request.id}
                     onAccept={() => handleAccept(request.id)}
                     onDecline={() => handleDecline(request.id)}
+                    onSelect={() => navigate(`/requests/${request.id}`)}
                   />
                 ))}
 
