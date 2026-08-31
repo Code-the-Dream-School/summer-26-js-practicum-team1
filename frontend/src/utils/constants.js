@@ -1,6 +1,6 @@
 export const API_URL = import.meta.env.VITE_API_URL || '';
 
-import { grey } from "@mui/material/colors";
+import { grey } from '@mui/material/colors';
 export const COLORS = {
   forest: '#1E5631',
   forestDark: '#143d23',
@@ -13,4 +13,5 @@ export const COLORS = {
   borderHover: '#B2B2AE',
   textFaint: '#858581',
   primaryHover: '#345A41',
+  cancelled: '#B33F32',
 };
