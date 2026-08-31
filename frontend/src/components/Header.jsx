@@ -20,7 +20,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGetProfileImage } from '../hooks/useGetProfileImage';
 
 const PAGES = [
-  { label: 'About', path: '/' },
+  { label: 'About', path: '/about' },
   { label: 'Contact Us', path: '/' },
 ];
 
