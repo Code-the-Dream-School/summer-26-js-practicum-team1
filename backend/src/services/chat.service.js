@@ -147,6 +147,8 @@ const getConversations = async (userId) => {
             select: {
               id: true,
               name: true,
+              profileImage: true,
+              profileImageType: true,
             },
           },
 
@@ -156,6 +158,8 @@ const getConversations = async (userId) => {
                 select: {
                   id: true,
                   name: true,
+                  profileImage: true,
+                  profileImageType: true,
                 },
               },
             },
@@ -197,6 +201,8 @@ const getConversations = async (userId) => {
         participant: {
           id: participant.id,
           name: participant.name,
+          profileImage: participant.profileImage,
+          profileImageType: participant.profileImageType,
         },
 
         lastMessage: conversation.messages[0] || null,
