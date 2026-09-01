@@ -20,11 +20,14 @@ const prisma = new PrismaClient({ adapter });
 
 const SUPPORT_CATEGORIES = [
   { name: 'Groceries', description: 'Help with grocery shopping' },
-  { name: 'Errands', description: 'General errands and pickups' },
-  { name: 'Transport', description: 'Rides and transportation help' },
-  { name: 'Tech help', description: 'Devices, apps, and tech support' },
+  { name: 'Medical Errand', description: 'General errands and pickups' },
+  { name: 'Transportation', description: 'Rides and transportation help' },
+  { name: 'Tech Support', description: 'Devices, apps, and tech support' },
   { name: 'Companionship', description: 'Social visits and company' },
-  { name: 'Home help', description: 'Light help around the home' },
+  { name: 'Household Chores', description: 'Light help around the home' },
+  { name: 'Yard Work', description: 'Gardening, mowing, and general outside work' },
+  { name: 'Pet Care', description: 'Pet tasks like sitting, walking, and gromming' },
+  { name: 'Meal Prep', description: 'Cooking and buying meals' },
   { name: 'Other', description: 'Other kinds of support' },
 ];
 

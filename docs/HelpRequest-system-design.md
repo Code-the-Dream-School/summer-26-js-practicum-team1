@@ -6,21 +6,21 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 
 ## Database Fields
 
-| Field                   | Type        | Required | Notes                                                                                                                         |
-| ----------------------- | ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| id                      | Int     | Yes      | Primary key                                                                                                                   |
+| Field                   | Type     | Required | Notes                                                                                                                         |
+| ----------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| id                      | Int      | Yes      | Primary key                                                                                                                   |
 | requesterId             | Int (FK) | Yes      | From auth session, never client body                                                                                          |
 | volunteerId             | Int (FK) | No       | Null at creation; set later via assignment flow                                                                               |
-| title                   | String      | Yes      | Max ~100 chars                                                                                                                |
-| category                | Enum        | Yes      | Grocery, Transportation, Household Chores, Yard Work, Pet Care, Tech Support, Companionship, Meal Prep, Medical Errand, Other |
-| urgency                 | Enum        | Yes      | Low, Medium, High                                                                                                             |
-| scheduledAt             | DateTime    | Yes      | Must be in the future                                                                                                         |
-| address                 | String      | Yes      | From Geoapify                                                                                                                 |
-| latitude / longitude    | Float       | Yes      | From Geoapify, needed for volunteer matching                                                                                  |
-| placeId                 | String      | No       | Geoapify place ID, for re-lookup                                                                                              |
-| description             | String      | No       | Free text                                                                                                                     |
-| status                  | Enum        | Yes      | `PENDING` (default) → `ACCEPTED` → `COMPLETED` / `CANCELLED`                                                                  |
-| createdAt / completedAt | DateTime    | Yes / No | Auto-set / set on completion                                                                                                  |
+| title                   | String   | Yes      | Max ~100 chars                                                                                                                |
+| category                | Enum     | Yes      | Grocery, Transportation, Household Chores, Yard Work, Pet Care, Tech Support, Companionship, Meal Prep, Medical Errand, Other |
+| urgency                 | Enum     | Yes      | Low, Medium, High                                                                                                             |
+| scheduledAt             | DateTime | Yes      | Must be in the future                                                                                                         |
+| address                 | String   | Yes      | From Geoapify                                                                                                                 |
+| latitude / longitude    | Float    | Yes      | From Geoapify, needed for volunteer matching                                                                                  |
+| placeId                 | String   | No       | Geoapify place ID, for re-lookup                                                                                              |
+| description             | String   | No       | Free text                                                                                                                     |
+| status                  | Enum     | Yes      | `PENDING` (default) → `ACCEPTED` → `COMPLETED` / `CANCELLED`                                                                  |
+| createdAt / completedAt | DateTime | Yes / No | Auto-set / set on completion                                                                                                  |
 
 ## Location: Geoapify Integration
 
@@ -39,7 +39,7 @@ Authenticated requesters (role `REQUESTER`) can create help requests, stored in 
 3. Validate body (see below) → 400 on failure.
 4. Create request with `status = PENDING`, `requesterId` from session.
 5. Return created object.
- Get authenticated requester's requests
+   Get authenticated requester's requests
 
 GET /api/requests/mine
 
@@ -51,17 +51,17 @@ GET /api/requests/mine
 Success response:
 
 {
-  "success": true,
-  "data": [
-    { ...request fields... }
-  ]
+"success": true,
+"data": [
+{ ...request fields... }
+]
 }
 
 Error response:
 
 {
-  "success": false,
-  "message": "..."
+"success": false,
+"message": "..."
 }
 
 ### 2. Get one help request
@@ -79,30 +79,30 @@ GET /api/requests/:id
 Success response:
 
 {
-  "success": true,
-  "data": { ...request fields... }
+"success": true,
+"data": { ...request fields... }
 }
 
 Error response:
 
 {
-  "success": false,
-  "message": "..."
+"success": false,
+"message": "..."
 }
-
 
 **Validation:** `title`, `category`/`urgency` (enum match), `scheduledAt` (future date), `latitude`/`longitude` (valid ranges) required; `description`/`placeId` optional.
 
 **Response shape:**
 
-
 // success (201)
 { "success": true, "data": { ...request fields... } }
 // error (400/401/403)
 { "success": false, "message": "..." }
+
 ```
 
 ## Frontend
 
 - Form fields: Title, Category, Urgency, Date/Time, Address (Geoapify autocomplete), Description (optional).
 - Client-side validation → submit via `useMutation` (TanStack Query) → show loading/error/success states → invalidate/refresh request list cache on success.
+```

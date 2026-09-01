@@ -93,7 +93,9 @@ function VolunteerPreferencesForm({
       serviceLocation?.latitude != null && serviceLocation?.longitude != null;
 
     if (hasLabel && !hasCoords) {
-      setError('Please pick your service area again from search to confirm it.');
+      setError(
+        'Please pick your service area again from search to confirm it.'
+      );
       return;
     }
 
@@ -103,10 +105,7 @@ function VolunteerPreferencesForm({
         serviceLatitude: serviceLocation?.latitude ?? null,
         serviceLongitude: serviceLocation?.longitude ?? null,
         interestIds,
-        availability:
-          slots.length > 0
-            ? { frequency: 'WEEKLY', slots }
-            : null,
+        availability: slots.length > 0 ? { frequency: 'WEEKLY', slots } : null,
       });
     } catch (err) {
       setError('Could not save preferences. Please try again.');
