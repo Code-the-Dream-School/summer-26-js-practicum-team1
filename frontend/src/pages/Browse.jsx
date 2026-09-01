@@ -159,11 +159,8 @@ function Browse() {
 
   const { categoryCounts } = useCategoryFacets(filters);
 
-  const {
-    acceptRequest,
-    declineRequest,
-    respondingRequestId,
-  } = useRespondToHelpRequest();
+  const { acceptRequest, declineRequest, respondingRequestId } =
+    useRespondToHelpRequest();
 
   const [declinedRequestIds, setDeclinedRequestIds] = useState(() => new Set());
   const [feedback, setFeedback] = useState(null);

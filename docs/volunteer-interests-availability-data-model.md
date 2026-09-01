@@ -38,13 +38,13 @@ USERS
         └── USER_SUPPORT_CATEGORIES ──► SUPPORT_CATEGORIES
 ```
 
-| Need | Where it lives |
-|------|----------------|
-| Interests list | `SUPPORT_CATEGORIES` |
-| Selected interests | `USER_SUPPORT_CATEGORIES` |
-| Availability | `VOLUNTEER_PROFILES.availability` |
+| Need                     | Where it lives                    |
+| ------------------------ | --------------------------------- |
+| Interests list           | `SUPPORT_CATEGORIES`              |
+| Selected interests       | `USER_SUPPORT_CATEGORIES`         |
+| Availability             | `VOLUNTEER_PROFILES.availability` |
 | Area for location filter | `VOLUNTEER_PROFILES.service_area` |
-| Request location (later) | `HELP_REQUESTS.location` |
+| Request location (later) | `HELP_REQUESTS.location`          |
 
 The ERD draws `USER_SUPPORT_CATEGORIES` off requester profiles (`requester_id`). HELPER-23 is volunteer preferences, so we use the same join pattern with `volunteer_id` → `volunteer_profiles.user_id`. Requester-side prefs can stay a follow-up if needed.
 

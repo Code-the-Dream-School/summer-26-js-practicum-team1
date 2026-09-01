@@ -23,12 +23,11 @@ export function useRespondToHelpRequest() {
   return {
     acceptRequest: acceptMutation.mutateAsync,
     declineRequest: declineMutation.mutateAsync,
-    respondingRequestId:
-      acceptMutation.isPending
-        ? acceptMutation.variables
-        : declineMutation.isPending
-          ? declineMutation.variables
-          : null,
+    respondingRequestId: acceptMutation.isPending
+      ? acceptMutation.variables
+      : declineMutation.isPending
+        ? declineMutation.variables
+        : null,
     isAccepting: acceptMutation.isPending,
     isDeclining: declineMutation.isPending,
   };
