@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { getParticipantImage } from '../../utils/getParticipantImage';
 
 const ConversationList = ({
   conversations,
@@ -33,6 +34,10 @@ const ConversationList = ({
           const lastMessage = conversation.lastMessage;
           const isSelected =
             conversation.conversationId === selectedConversationId;
+          const profileImageSrc = getParticipantImage(
+            conversation.participant.profileImage,
+            conversation.participant.profileImageType
+          );
 
           return (
             <ListItemButton
@@ -52,6 +57,7 @@ const ConversationList = ({
               }}
             >
               <Avatar
+                src={profileImageSrc}
                 sx={{
                   width: 48,
                   height: 48,
@@ -76,7 +82,7 @@ const ConversationList = ({
                       gap: 1,
                     }}
                   >
-                    <Typography variant="body1" fontWeight={600} noWrap>
+                    <Typography variant="body1" fontWeight={700} noWrap>
                       {name}
                     </Typography>
 
@@ -99,8 +105,8 @@ const ConversationList = ({
                 }
                 secondary={
                   <Typography
-                    variant="body2"
-                    color="text.secondary"
+                    variant="caption"
+                    color="#6b6b6b"
                     noWrap
                     sx={{
                       mt: 0.25,

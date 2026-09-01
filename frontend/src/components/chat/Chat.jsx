@@ -14,11 +14,13 @@ import DoneIcon from '@mui/icons-material/Done';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
+
 import {
   useChatMessages,
   useSendMessage,
   useMarkMessagesRead,
 } from '../../hooks/useChat';
+import { getParticipantImage } from '../../utils/getParticipantImage';
 
 import { useAuth } from '../../hooks/useAuth';
 
@@ -26,12 +28,17 @@ const Chat = ({ requestId, participant }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const navigate = useNavigate();
-
+  console.log('Chat participant:', participant);
   const {
     data: messages = [],
     isLoading,
     isError,
   } = useChatMessages(requestId);
+
+  const profileImageSrc = getParticipantImage(
+    participant.profileImage,
+    participant.profileImageType
+  );
 
   const sendMessage = useSendMessage(requestId);
 
@@ -99,6 +106,7 @@ const Chat = ({ requestId, participant }) => {
         }}
       >
         <Avatar
+          src={profileImageSrc}
           sx={{
             width: 48,
             height: 48,
