@@ -12,13 +12,14 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchOutlinedIcon from '@mui/icons-material/LaunchOutlined';
 import { COLORS } from '../utils/constants';
+import deryaProfilePhoto from '../assets/derya-profile.png';
 
 const team = [
   {
     name: 'Derya Kendircikahraman',
     role: 'Backend / Full Stack',
     bio: "I worked on our registration APIs, volunteer profile and preferences, admin user detail views, and the volunteer accept/decline flow with in-app notifications for requesters. The accept-and-notify path was my favorite to build because it ties the whole product together—one volunteer commits, the requester knows right away, and the database has to stay correct even when two people click at the same time.",
-    photo: undefined,
+    photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
   },
