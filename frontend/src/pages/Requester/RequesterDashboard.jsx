@@ -208,7 +208,7 @@ export default function RequesterDashboard() {
         return;
       }
 
-      const currentRequest = await getHelpRequestById(request.id, csrfToken);
+      const currentRequest = await getHelpRequestById(request.id);
 
       setEditRequest(currentRequest);
 

@@ -252,7 +252,7 @@ export async function getCategoryFacets(filters = {}) {
       withCredentials: true,
     });
 
-    return data.categoryCounts;
+    return data.data;
   } catch (err) {
     if (!err.response) {
       throw new Error('NETWORK_ERROR');

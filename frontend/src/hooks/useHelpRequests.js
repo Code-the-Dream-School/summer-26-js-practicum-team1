@@ -6,7 +6,7 @@ import {
   createHelpRequest,
   getVolunteerAcceptedRequests,
   getAcceptedVolunteerProfile,
-  getHelpRequest,
+  getHelpRequestById,
 } from '../services/api';
 
 export function useBrowseHelpRequests(filters) {
@@ -98,7 +98,7 @@ export function useVolunteerAcceptedRequests() {
 export function useHelpRequest(requestId) {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['help-request', requestId],
-    queryFn: () => getHelpRequest(requestId),
+    queryFn: () => getHelpRequestById(requestId),
     enabled: requestId != null,
   });
 
