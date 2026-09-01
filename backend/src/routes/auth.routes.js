@@ -3,6 +3,7 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const {
   logon,
+  googleLogon,
   logoff,
   me,
   register,
@@ -11,7 +12,7 @@ const jwtMiddleware = require('../middleware/jwt.middleware');
 const validate = require('../middleware/validate.middleware');
 const csrfMiddleware = require('../middleware/csrf.middleware');
 const profileImageUpload = require('../middleware/profileImageUpload');
-const { authSchema } = require('../validations/authSchema');
+const { authSchema, googleAuthSchema } = require('../validations/authSchema');
 const { registerSchema } = require('../validations/registerSchema');
 
 const loginLimiter = rateLimit({
@@ -32,6 +33,7 @@ const registerLimiter = rateLimit({
 });
 
 router.post('/logon', loginLimiter, validate(authSchema), logon);
+router.post('/google', loginLimiter, validate(googleAuthSchema), googleLogon);
 router.post('/logoff', jwtMiddleware, csrfMiddleware, logoff);
 router.get('/me', jwtMiddleware, me);
 router.post(

@@ -5,6 +5,8 @@ const {
   verifyCredentials,
   createRequester,
   createVolunteerApplicant,
+  verifyGoogleToken,
+  findOrLinkGoogleUser,
 } = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
@@ -90,6 +92,29 @@ const logon = asyncHandler(async (req, res) => {
   return res.status(200).json(clientSession(user, csrfToken));
 });
 
+const googleLogon = asyncHandler(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+
+  const { idToken } = req.body;
+
+  const googleUser = await verifyGoogleToken(idToken);
+
+  const user = await findOrLinkGoogleUser({
+    googleId: googleUser.googleId,
+    email: googleUser.email,
+  });
+
+  const csrfToken = setJwtCookie(res, user);
+
+  logLoginAttempt(req, {
+    email: googleUser.email,
+    outcome: 'google_success',
+    userId: user.id,
+  });
+
+  return res.status(200).json(clientSession(user, csrfToken));
+});
+
 const me = asyncHandler(async (req, res) => {
   res.set('Cache-Control', 'no-store');
   return res.status(200).json(clientSession(req.user, req.auth.csrfToken));
@@ -147,4 +172,4 @@ const register = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { logon, logoff, me, register };
+module.exports = { logon, googleLogon, logoff, me, register };
