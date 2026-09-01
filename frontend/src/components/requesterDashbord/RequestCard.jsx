@@ -320,11 +320,15 @@ function RequestCard({
               startIcon={<ChatBubbleIcon />}
               onClick={handleOpenChat}
               sx={{
+                width: 140,
                 minHeight: 42,
-                px: 2.5,
+                px: 2,
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
               {volunteer.name || 'Volunteer'}
