@@ -17,7 +17,7 @@ const team = [
   {
     name: 'Derya Kendircikahraman',
     role: 'Backend / Full Stack',
-    bio: 'I worked on requester and volunteer registration APIs, volunteer profile and preferences, admin user detail views, and the volunteer accept/decline flow with in-app requester notifications when a help request is accepted.',
+    bio: "I worked on our registration APIs, volunteer profile and preferences, admin user detail views, and the volunteer accept/decline flow with in-app notifications for requesters. The accept-and-notify path was my favorite to build because it ties the whole product together—one volunteer commits, the requester knows right away, and the database has to stay correct even when two people click at the same time.",
     photo: undefined,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
