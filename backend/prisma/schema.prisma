@@ -79,8 +79,10 @@ model User {
   requesterProfile RequesterProfile?
 
   volunteerVerifications VolunteerVerification[] @relation("Reviewer")
-  helpRequests           HelpRequest[]
+  helpRequests           HelpRequest[]           @relation("RequesterHelpRequests")
+  
   sentMessages           Message[]
+
 
   @@map("users")
 }
@@ -121,6 +123,7 @@ model VolunteerVerification {
 }
 
 model HelpRequest {
+
   id                 Int           @id @default(autoincrement())
   requesterId        Int
   volunteerId        Int?
@@ -138,9 +141,10 @@ model HelpRequest {
   completedAt        DateTime?
   conversation       Conversation?
 
-  requester User                @relation(fields: [requesterId], references: [id])
+  requester User @relation("RequesterHelpRequests", fields: [requesterId], references: [id])
   volunteer VolunteerProfile?   @relation(fields: [volunteerId], references: [userId])
   responses VolunteerResponse[]
+
 
   @@index([scheduledDayOfWeek])
 }

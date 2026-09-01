@@ -337,7 +337,10 @@ describe('helpRequestService.getBrowseHelpRequests — filters', () => {
   beforeEach(() => prisma.helpRequest.findMany.mockResolvedValue([]));
 
   it('defaults to status=PENDING when none is provided', async () => {
-    await helpRequestService.getBrowseHelpRequests({ user: admin, query: paged() });
+    await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged(),
+    });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -416,7 +419,10 @@ describe('helpRequestService.getBrowseHelpRequests — sorting', () => {
   it('passes DB-level orderBy (with id tie-breaker) for createdAt', async () => {
     prisma.helpRequest.findMany.mockResolvedValue([]);
 
-    await helpRequestService.getBrowseHelpRequests({ user: admin, query: paged() });
+    await helpRequestService.getBrowseHelpRequests({
+      user: admin,
+      query: paged(),
+    });
 
     expect(prisma.helpRequest.findMany).toHaveBeenCalledWith(
       expect.objectContaining({

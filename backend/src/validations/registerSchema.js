@@ -13,16 +13,10 @@ const registerSchema = Joi.object({
       'string.pattern.base': 'Name contains invalid characters',
       'any.required': 'Name is required',
     }),
-  email: Joi.string()
-    .trim()
-    .lowercase()
-    .email()
-    .max(255)
-    .required()
-    .messages({
-      'string.email': 'Enter a valid email address',
-      'any.required': 'Email is required',
-    }),
+  email: Joi.string().trim().lowercase().email().max(255).required().messages({
+    'string.email': 'Enter a valid email address',
+    'any.required': 'Email is required',
+  }),
   password: Joi.string()
     .min(8)
     .max(72)

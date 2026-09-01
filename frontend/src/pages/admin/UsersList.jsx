@@ -1,8 +1,6 @@
 import { Typography, Box } from '@mui/material';
 import UserTable from '../../components/admin/UserTable';
 
-const TITLE_COLOR = '#52462A';
-
 function UsersList() {
   return (
     <Box
@@ -20,7 +18,6 @@ function UsersList() {
           component="h1"
           sx={{
             fontWeight: 600,
-            color: TITLE_COLOR,
             mb: 0.5,
             textAlign: { xs: 'center', sm: 'left' },
           }}

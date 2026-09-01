@@ -32,12 +32,13 @@ const REQUESTER = {
 };
 
 const APPROVED_VOLUNTEER = {
-  id: 5,
-  name: 'Emma',
+  id: 2,
+  name: 'Bob',
   role: 'VOLUNTEER',
-  volunteerProfile: { verificationStatus: 'APPROVED' },
+  volunteerProfile: {
+    verificationStatus: 'APPROVED',
+  },
 };
-
 const PENDING_VOLUNTEER = {
   id: 6,
   name: 'Henry',

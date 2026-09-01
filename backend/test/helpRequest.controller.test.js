@@ -87,8 +87,6 @@ beforeEach(() => {
   });
 });
 
-
-
 describe('POST /api/requests', () => {
   it('creates a help request for an authenticated REQUESTER', async () => {
     prisma.user.findUnique.mockResolvedValue(REQUESTER);
@@ -363,8 +361,6 @@ describe('POST /api/requests', () => {
   });
 });
 
-
-
 describe('GET /api/requests/mine', () => {
   const helpRequests = [
     {
@@ -432,6 +428,20 @@ describe('GET /api/requests/mine', () => {
       orderBy: {
         scheduledAt: 'asc',
       },
+      include: {
+        volunteer: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
     });
   });
 
@@ -454,6 +464,20 @@ describe('GET /api/requests/mine', () => {
       },
       orderBy: {
         scheduledAt: 'asc',
+      },
+      include: {
+        volunteer: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
       },
     });
   });
@@ -499,6 +523,20 @@ describe('GET /api/requests/mine', () => {
       },
       orderBy: {
         scheduledAt: 'asc',
+      },
+      include: {
+        volunteer: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
       },
     });
 

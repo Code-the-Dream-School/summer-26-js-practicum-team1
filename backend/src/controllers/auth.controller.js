@@ -1,7 +1,11 @@
 const { randomUUID } = require('crypto');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
-const { verifyCredentials, createRequester, createVolunteerApplicant } = require('../services/auth.service');
+const {
+  verifyCredentials,
+  createRequester,
+  createVolunteerApplicant,
+} = require('../services/auth.service');
 
 const JWT_TTL_MS = 60 * 60 * 1000;
 const IS_PROD = process.env.NODE_ENV === 'production';
