@@ -79,7 +79,7 @@ function buildHelpRequestParams(filters = {}) {
  * should return category counts for the other active filters.
  */
 function buildFacetsParams(filters = {}) {
-  const { category, ...rest } = filters;
+  const { category: _, ...rest } = filters;
 
   return buildFilterParams(rest);
 }
@@ -119,6 +119,30 @@ export async function login(email, password) {
     throw new Error('INVALID_CREDENTIALS');
   }
 }
+
+/**
+ * Login with Google.
+ */
+export async function googleLogin(idToken) {
+  try {
+    const { data } = await api.post('/api/auth/google', {
+      idToken,
+    });
+
+    return data;
+  } catch (err) {
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+
+    const error = new Error(err.response.data?.error || 'GOOGLE_LOGIN_FAILED');
+
+    error.status = err.response.status;
+
+    throw error;
+  }
+}
+
 /**
  * Register a new user.
  */
