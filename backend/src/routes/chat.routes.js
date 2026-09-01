@@ -13,9 +13,13 @@ const {
   sendMessage,
   markMessagesRead,
   getConversations,
+  getUnreadMessageCount,
 } = require('../controllers/chat.controller');
 
+router.get('/unreadCount', jwtMiddleware, getUnreadMessageCount);
+
 router.get('/conversations', jwtMiddleware, getConversations);
+
 router.get('/requests/:requestId/messages', jwtMiddleware, getMessages);
 
 router.post(
