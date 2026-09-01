@@ -57,9 +57,21 @@ const getConversations = asyncHandler(async (req, res) => {
     data: conversations,
   });
 });
+const getUnreadMessageCount = asyncHandler(async (req, res) => {
+  const unreadCount = await chatService.getUnreadMessageCount(req.user.id);
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      unreadCount,
+    },
+  });
+});
+
 module.exports = {
   getMessages,
   sendMessage,
   markMessagesRead,
   getConversations,
+  getUnreadMessageCount,
 };
