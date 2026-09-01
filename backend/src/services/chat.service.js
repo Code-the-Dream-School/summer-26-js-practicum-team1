@@ -210,9 +210,26 @@ const getConversations = async (userId) => {
     })
     .filter(Boolean);
 };
+const getUnreadMessageCount = async (userId) => {
+  return prisma.message.count({
+    where: {
+      readAt: null,
+      senderId: {
+        not: userId,
+      },
+      conversation: {
+        request: {
+          OR: [{ requesterId: userId }, { volunteerId: userId }],
+        },
+      },
+    },
+  });
+};
+
 module.exports = {
   getMessages,
   sendMessage,
   markMessagesRead,
   getConversations,
+  getUnreadMessageCount,
 };
