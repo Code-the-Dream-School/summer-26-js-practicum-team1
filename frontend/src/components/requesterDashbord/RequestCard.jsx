@@ -18,7 +18,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
-import { useAcceptedVolunteerProfile } from '../../hooks/useAcceptedVolunteerProfile.js';
+import { useAcceptedVolunteerProfile } from '../../hooks/useHelpRequests';
 
 import {
   getUrgencyStyle,
@@ -32,7 +32,6 @@ import { COLORS } from '../../utils/constants.js';
 function RequestCard({
   request,
   expandedRequest,
-  setExpandedRequest,
   onEdit,
   onCancel,
   onVolunteerProfile,
@@ -60,9 +59,9 @@ function RequestCard({
       document.activeElement.blur();
     }
   };
-
+  // Navigate to the request details page
   const handleToggleDetails = () => {
-    setExpandedRequest(isExpanded ? null : request.id);
+    //navigate(`/requests/${request.id}`);
   };
 
   const handleOpenChat = () => {
@@ -177,18 +176,18 @@ function RequestCard({
             </>
           )}
         </Box>
- {/* TITLE */}
+        {/* TITLE */}
 
-<Typography
-  variant="h6"
-  sx={{
-    color: COLORS.text,
-    fontWeight: 800,
-    mb: 1.5,
-  }}
->
-  {request.title}
-</Typography>
+        <Typography
+          variant="h6"
+          sx={{
+            color: COLORS.text,
+            fontWeight: 800,
+            mb: 1.5,
+          }}
+        >
+          {request.title}
+        </Typography>
         {/* CATEGORY */}
 
         <Typography
@@ -203,7 +202,6 @@ function RequestCard({
           {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
         </Typography>
 
-      
         {/* DATE + TIME */}
 
         <Box
