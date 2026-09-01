@@ -28,7 +28,7 @@ const Chat = ({ requestId, participant }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const navigate = useNavigate();
-  console.log('Chat participant:', participant);
+
   const {
     data: messages = [],
     isLoading,
