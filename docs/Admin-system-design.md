@@ -137,13 +137,13 @@ If API responses transform role values for frontend use, frontend role checks sh
 
 # API Routes
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/admin/dashboard` | Get admin dashboard statistics |
-| GET | `/api/admin/users` | Get all users |
-| GET | `/api/admin/volunteers/pending` | Get volunteers waiting for approval |
-| PUT | `/api/admin/volunteers/:id/approve` | Approve volunteer request |
-| PUT | `/api/admin/volunteers/:id/reject` | Reject volunteer request |
+| Method | Endpoint                            | Description                         |
+| ------ | ----------------------------------- | ----------------------------------- |
+| GET    | `/api/admin/dashboard`              | Get admin dashboard statistics      |
+| GET    | `/api/admin/users`                  | Get all users                       |
+| GET    | `/api/admin/volunteers/pending`     | Get volunteers waiting for approval |
+| PUT    | `/api/admin/volunteers/:id/approve` | Approve volunteer request           |
+| PUT    | `/api/admin/volunteers/:id/reject`  | Reject volunteer request            |
 
 ---
 
@@ -201,15 +201,15 @@ Unauthorized users receive proper HTTP status codes.
 
 The Admin API returns appropriate HTTP status codes and messages.
 
-| Status Code | Error | Description |
-|---|---|---|
-| 200 OK | Success | Request completed successfully |
-| 400 Bad Request | Invalid Request | Request contains invalid or missing data |
-| 401 Unauthorized | Authentication Required | User is not authenticated or authentication information is invalid |
-| 403 Forbidden | Access Denied | Authenticated user does not have ADMIN privileges |
-| 404 Not Found | Resource Not Found | Volunteer profile or requested resource does not exist |
-| 409 Conflict | Conflict | Volunteer request has already been approved or rejected |
-| 500 Internal Server Error | Server Error | Unexpected server-side error |
+| Status Code               | Error                   | Description                                                        |
+| ------------------------- | ----------------------- | ------------------------------------------------------------------ |
+| 200 OK                    | Success                 | Request completed successfully                                     |
+| 400 Bad Request           | Invalid Request         | Request contains invalid or missing data                           |
+| 401 Unauthorized          | Authentication Required | User is not authenticated or authentication information is invalid |
+| 403 Forbidden             | Access Denied           | Authenticated user does not have ADMIN privileges                  |
+| 404 Not Found             | Resource Not Found      | Volunteer profile or requested resource does not exist             |
+| 409 Conflict              | Conflict                | Volunteer request has already been approved or rejected            |
+| 500 Internal Server Error | Server Error            | Unexpected server-side error                                       |
 
 ---
 
@@ -241,8 +241,6 @@ Controller-level errors return:
   "message": "Error message"
 }
 ```
-
-
 
 # Error Handling Rules
 

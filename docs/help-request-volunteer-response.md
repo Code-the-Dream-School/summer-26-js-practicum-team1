@@ -27,40 +27,40 @@ This document is the source of truth for schema, HTTP API, and UI states. Implem
 
 ### In scope
 
-| ID | Requirement |
-|----|-------------|
-| G1 | Approved volunteer can accept an open request. |
-| G2 | Approved volunteer can decline an open request without changing `HelpRequest.status` or `volunteerId`. |
-| G3 | Successful accept sets `status = ACCEPTED` and `volunteerId` to the actor. |
-| G4 | A second accept on the same request fails; the first assignment is preserved. |
-| G5 | Every accept/decline writes an audit row with `createdAt`. |
-| G6 | API returns explicit success and error payloads for the UI. |
+| ID  | Requirement                                                                                            |
+| --- | ------------------------------------------------------------------------------------------------------ |
+| G1  | Approved volunteer can accept an open request.                                                         |
+| G2  | Approved volunteer can decline an open request without changing `HelpRequest.status` or `volunteerId`. |
+| G3  | Successful accept sets `status = ACCEPTED` and `volunteerId` to the actor.                             |
+| G4  | A second accept on the same request fails; the first assignment is preserved.                          |
+| G5  | Every accept/decline writes an audit row with `createdAt`.                                             |
+| G6  | API returns explicit success and error payloads for the UI.                                            |
 
 ### Out of scope
 
-| Item | Owner |
-|------|--------|
-| Route handlers, Joi, tests | HELPER-66 |
-| Transaction / `updateMany` implementation | HELPER-67 |
-| Prisma migrate | HELPER-68 |
-| Browse/detail buttons, toasts | HELPER-65 |
-| Requester edit, cancel, complete | HELPER-102 |
-| Chat thread creation | Chat design (`status = ACCEPTED` prerequisite) |
-| Push/email notification | future |
-| Matching / ranking which requests a volunteer sees | browse + later matching |
+| Item                                               | Owner                                          |
+| -------------------------------------------------- | ---------------------------------------------- |
+| Route handlers, Joi, tests                         | HELPER-66                                      |
+| Transaction / `updateMany` implementation          | HELPER-67                                      |
+| Prisma migrate                                     | HELPER-68                                      |
+| Browse/detail buttons, toasts                      | HELPER-65                                      |
+| Requester edit, cancel, complete                   | HELPER-102                                     |
+| Chat thread creation                               | Chat design (`status = ACCEPTED` prerequisite) |
+| Push/email notification                            | future                                         |
+| Matching / ranking which requests a volunteer sees | browse + later matching                        |
 
 ---
 
 ## 3. Terminology
 
-| Term | Definition |
-|------|------------|
-| **Open request** | `HelpRequest.status = PENDING` AND `HelpRequest.volunteerId IS NULL` |
-| **Assigned request** | `status = ACCEPTED` AND `volunteerId` is a non-null FK to `VolunteerProfile.userId` |
-| **Closed request** | `status IN (COMPLETED, CANCELLED)` |
-| **Volunteer response** | One row in `VolunteerResponse` for pair `(requestId, volunteerId)` |
-| **Decline** | Insert `VolunteerResponse.action = DECLINED`. Does **not** close or unassign the request. |
-| **Accept** | Atomic: assign request to actor + insert `VolunteerResponse.action = ACCEPTED` |
+| Term                   | Definition                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| **Open request**       | `HelpRequest.status = PENDING` AND `HelpRequest.volunteerId IS NULL`                      |
+| **Assigned request**   | `status = ACCEPTED` AND `volunteerId` is a non-null FK to `VolunteerProfile.userId`       |
+| **Closed request**     | `status IN (COMPLETED, CANCELLED)`                                                        |
+| **Volunteer response** | One row in `VolunteerResponse` for pair `(requestId, volunteerId)`                        |
+| **Decline**            | Insert `VolunteerResponse.action = DECLINED`. Does **not** close or unassign the request. |
+| **Accept**             | Atomic: assign request to actor + insert `VolunteerResponse.action = ACCEPTED`            |
 
 Story text “declined” is **not** a `RequestStatus` value. It is a per-volunteer response.
 
@@ -70,12 +70,12 @@ Story text “declined” is **not** a `RequestStatus` value. It is a per-volunt
 
 `HelpRequest` (current Prisma):
 
-| Column | Type | Assignment role |
-|--------|------|-----------------|
-| `id` | Int PK | Path param |
-| `requesterId` | Int FK → `User` | Must not equal actor on accept/decline |
-| `volunteerId` | Int? FK → `VolunteerProfile.userId` | Null iff open |
-| `status` | `RequestStatus` | `PENDING \| ACCEPTED \| COMPLETED \| CANCELLED` |
+| Column        | Type                                | Assignment role                                 |
+| ------------- | ----------------------------------- | ----------------------------------------------- |
+| `id`          | Int PK                              | Path param                                      |
+| `requesterId` | Int FK → `User`                     | Must not equal actor on accept/decline          |
+| `volunteerId` | Int? FK → `VolunteerProfile.userId` | Null iff open                                   |
+| `status`      | `RequestStatus`                     | `PENDING \| ACCEPTED \| COMPLETED \| CANCELLED` |
 
 ```text
 RequestStatus
@@ -95,17 +95,17 @@ Browse (`GET /api/requests`) already defaults `status=PENDING`. Assignment must 
 
 ## 5. Invariants (assignment + audit)
 
-| ID | Rule |
-|----|------|
-| I1 | At most one `volunteerId` on a request at a time. |
-| I2 | Accept is allowed only from **open**. |
-| I3 | Decline is allowed only from **open** (same as accept). If the request is already assigned or closed → 409. |
-| I4 | At most one `VolunteerResponse` per `(requestId, volunteerId)` (unique constraint). |
-| I5 | Accept writes assignment **and** `ACCEPTED` response in **one transaction**. Partial success is not allowed. |
-| I6 | Decline writes **only** `VolunteerResponse`. `HelpRequest` columns are unchanged. |
-| I7 | Actor must be `User.role = VOLUNTEER` and `VolunteerProfile.verificationStatus = APPROVED`. |
-| I8 | Actor must not be the requester (`requesterId !== req.user.id`). |
-| I9 | Pending volunteers (`VOLUNTEER` + `PENDING` profile) cannot call these endpoints (same gate as browse via `requireApprovedIfVolunteer`). |
+| ID  | Rule                                                                                                                                     |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| I1  | At most one `volunteerId` on a request at a time.                                                                                        |
+| I2  | Accept is allowed only from **open**.                                                                                                    |
+| I3  | Decline is allowed only from **open** (same as accept). If the request is already assigned or closed → 409.                              |
+| I4  | At most one `VolunteerResponse` per `(requestId, volunteerId)` (unique constraint).                                                      |
+| I5  | Accept writes assignment **and** `ACCEPTED` response in **one transaction**. Partial success is not allowed.                             |
+| I6  | Decline writes **only** `VolunteerResponse`. `HelpRequest` columns are unchanged.                                                        |
+| I7  | Actor must be `User.role = VOLUNTEER` and `VolunteerProfile.verificationStatus = APPROVED`.                                              |
+| I8  | Actor must not be the requester (`requesterId !== req.user.id`).                                                                         |
+| I9  | Pending volunteers (`VOLUNTEER` + `PENDING` profile) cannot call these endpoints (same gate as browse via `requireApprovedIfVolunteer`). |
 
 ---
 
@@ -127,24 +127,24 @@ Decline is a self-loop on `PENDING`. It is visible only in `VolunteerResponse`.
 
 ### 6.2 Transition table (this story)
 
-| Precondition | Command | `status'` | `volunteerId'` | `VolunteerResponse` | HTTP |
-|--------------|---------|-----------|----------------|---------------------|------|
-| Open | `accept` | `ACCEPTED` | actor id | `ACCEPTED` | 200 |
-| Open | `decline` | `PENDING` | `null` | `DECLINED` | 200 |
-| Assigned or closed | `accept` | unchanged | unchanged | none | 409 |
-| Assigned or closed | `decline` | unchanged | unchanged | none | 409 |
-| Open + actor already has a response row | `accept` or `decline` | unchanged | unchanged | none | 409 |
-| Open + concurrent second `accept` | `accept` | winner’s values | winner | winner’s row | 409 for loser |
+| Precondition                            | Command               | `status'`       | `volunteerId'` | `VolunteerResponse` | HTTP          |
+| --------------------------------------- | --------------------- | --------------- | -------------- | ------------------- | ------------- |
+| Open                                    | `accept`              | `ACCEPTED`      | actor id       | `ACCEPTED`          | 200           |
+| Open                                    | `decline`             | `PENDING`       | `null`         | `DECLINED`          | 200           |
+| Assigned or closed                      | `accept`              | unchanged       | unchanged      | none                | 409           |
+| Assigned or closed                      | `decline`             | unchanged       | unchanged      | none                | 409           |
+| Open + actor already has a response row | `accept` or `decline` | unchanged       | unchanged      | none                | 409           |
+| Open + concurrent second `accept`       | `accept`              | winner’s values | winner         | winner’s row        | 409 for loser |
 
 ### 6.3 Volunteer-level (orthogonal)
 
 For volunteer `V` and request `R`:
 
-| Prior `VolunteerResponse` for `(R,V)` | Next command | Result |
-|---------------------------------------|--------------|--------|
-| none | accept / decline | as §6.2 |
-| `DECLINED` | accept or decline | 409 |
-| `ACCEPTED` | accept or decline | 409 |
+| Prior `VolunteerResponse` for `(R,V)` | Next command      | Result  |
+| ------------------------------------- | ----------------- | ------- |
+| none                                  | accept / decline  | as §6.2 |
+| `DECLINED`                            | accept or decline | 409     |
+| `ACCEPTED`                            | accept or decline | 409     |
 
 MVP does not support “undecline” or “unaccept”.
 
@@ -161,11 +161,11 @@ Middleware (same pattern as `GET /api/requests`):
 
 Application checks after load:
 
-| Check | Status | Message |
-|-------|--------|---------|
-| `:id` not a positive integer | 400 | `Invalid request id` |
-| No `HelpRequest` for `:id` | 404 | `Help request not found` |
-| `requesterId === req.user.id` | 403 | `Cannot respond to your own request` |
+| Check                         | Status | Message                              |
+| ----------------------------- | ------ | ------------------------------------ |
+| `:id` not a positive integer  | 400    | `Invalid request id`                 |
+| No `HelpRequest` for `:id`    | 404    | `Help request not found`             |
+| `requesterId === req.user.id` | 403    | `Cannot respond to your own request` |
 
 Admin is not a caller for MVP (403 via role). Requester uses HELPER-102 for cancel.
 
@@ -209,21 +209,21 @@ Relations to add on existing models:
 
 ### 8.3 Constraint intent
 
-| Constraint | Enforces |
-|------------|----------|
-| `@@unique([requestId, volunteerId])` | I4; duplicate HTTP → Prisma `P2002` → 409 |
-| FK `requestId` | Cascade delete if request is removed |
-| FK `volunteerId` → `volunteer_profiles.userId` | Actor must have a volunteer profile row |
+| Constraint                                     | Enforces                                  |
+| ---------------------------------------------- | ----------------------------------------- |
+| `@@unique([requestId, volunteerId])`           | I4; duplicate HTTP → Prisma `P2002` → 409 |
+| FK `requestId`                                 | Cascade delete if request is removed      |
+| FK `volunteerId` → `volunteer_profiles.userId` | Actor must have a volunteer profile row   |
 
 `createdAt` is the audit timestamp required by HELPER-56. No separate event-log table in MVP.
 
 ### 8.4 Source of truth
 
-| Question | Read from |
-|----------|-----------|
-| Who is assigned? | `HelpRequest.volunteerId` + `status` |
+| Question                   | Read from                                                 |
+| -------------------------- | --------------------------------------------------------- |
+| Who is assigned?           | `HelpRequest.volunteerId` + `status`                      |
 | Did volunteer V decline R? | `VolunteerResponse` where `(R,V)` and `action = DECLINED` |
-| When did V respond? | `VolunteerResponse.createdAt` |
+| When did V respond?        | `VolunteerResponse.createdAt`                             |
 
 ---
 
@@ -298,10 +298,10 @@ Accept already updates the row (implicit row lock). Aligning decline with `FOR U
 
 Base path existing router: `/api/requests`.
 
-| Method | Path | Auth |
-|--------|------|------|
-| POST | `/api/requests/:id/accept` | JWT + CSRF + volunteer + approved |
-| POST | `/api/requests/:id/decline` | same |
+| Method | Path                        | Auth                              |
+| ------ | --------------------------- | --------------------------------- |
+| POST   | `/api/requests/:id/accept`  | JWT + CSRF + volunteer + approved |
+| POST   | `/api/requests/:id/decline` | same                              |
 
 Request body: empty JSON object or omitted. No client-supplied `volunteerId` or `status`.
 
@@ -357,15 +357,15 @@ Envelope matches help-request create/browse: `{ success, data }` or `{ success: 
 
 ### 10.3 Error catalog
 
-| HTTP | `message` (stable for UI) | When |
-|------|---------------------------|------|
-| 401 | (existing auth middleware) | No/invalid JWT |
-| 403 | `Forbidden` / `Volunteer account not approved` | Role or approval gate |
-| 403 | `Cannot respond to your own request` | Actor is requester |
-| 400 | `Invalid request id` | Non-integer / ≤ 0 |
-| 404 | `Help request not found` | Unknown id |
-| 409 | `This request is no longer available` | Not open, or lost accept race |
-| 409 | `You have already responded to this request` | Unique `(requestId, volunteerId)` |
+| HTTP | `message` (stable for UI)                      | When                              |
+| ---- | ---------------------------------------------- | --------------------------------- |
+| 401  | (existing auth middleware)                     | No/invalid JWT                    |
+| 403  | `Forbidden` / `Volunteer account not approved` | Role or approval gate             |
+| 403  | `Cannot respond to your own request`           | Actor is requester                |
+| 400  | `Invalid request id`                           | Non-integer / ≤ 0                 |
+| 404  | `Help request not found`                       | Unknown id                        |
+| 409  | `This request is no longer available`          | Not open, or lost accept race     |
+| 409  | `You have already responded to this request`   | Unique `(requestId, volunteerId)` |
 
 Do not leak whether a hidden request exists beyond 404 for unknown id.
 
@@ -377,14 +377,14 @@ Surface: volunteer browse (`frontend/src/pages/Browse.jsx`) and/or request detai
 
 Commands: `POST accept` / `POST decline` with `X-CSRF-TOKEN` from session (same as other mutations).
 
-| Request + local response | Accept | Decline | Copy |
-|--------------------------|--------|---------|------|
-| Open, no row for actor | enabled | enabled | — |
-| Mutation in flight | disabled | disabled | — |
-| `DECLINED` for actor, still open | disabled | disabled | Declined |
-| `ACCEPTED` and `volunteerId === me` | disabled | disabled | You’re assigned |
+| Request + local response            | Accept   | Decline  | Copy                |
+| ----------------------------------- | -------- | -------- | ------------------- |
+| Open, no row for actor              | enabled  | enabled  | —                   |
+| Mutation in flight                  | disabled | disabled | —                   |
+| `DECLINED` for actor, still open    | disabled | disabled | Declined            |
+| `ACCEPTED` and `volunteerId === me` | disabled | disabled | You’re assigned     |
 | `ACCEPTED` and `volunteerId !== me` | disabled | disabled | No longer available |
-| Closed | disabled | disabled | Closed |
+| Closed                              | disabled | disabled | Closed              |
 
 On accept **200**: invalidate browse query (card leaves default PENDING list).  
 On decline **200**: keep card or hide for this user (MVP: keep + disable).  
@@ -395,19 +395,19 @@ On **403**: show not-approved / forbidden.
 
 ## 12. Test matrix (HELPER-66 / 67)
 
-| # | Case | Expect |
-|---|------|--------|
-| T1 | Approved volunteer accept open | 200, `ACCEPTED`, `volunteerId = actor`, response row |
-| T2 | Approved volunteer decline open | 200, request still PENDING/null volunteer, response `DECLINED` |
-| T3 | Two accepts (serial) | first 200, second 409, `volunteerId` unchanged |
-| T4 | Requester cookie | 403 |
-| T5 | Pending volunteer applicant | 403 |
-| T6 | Invalid id | 400 |
-| T7 | Unknown id | 404 |
-| T8 | Accept own request | 403 |
-| T9 | Accept already ACCEPTED | 409 |
-| T10 | Decline twice | 409 |
-| T11 | Accept then decline same actor | 409 |
+| #   | Case                            | Expect                                                         |
+| --- | ------------------------------- | -------------------------------------------------------------- |
+| T1  | Approved volunteer accept open  | 200, `ACCEPTED`, `volunteerId = actor`, response row           |
+| T2  | Approved volunteer decline open | 200, request still PENDING/null volunteer, response `DECLINED` |
+| T3  | Two accepts (serial)            | first 200, second 409, `volunteerId` unchanged                 |
+| T4  | Requester cookie                | 403                                                            |
+| T5  | Pending volunteer applicant     | 403                                                            |
+| T6  | Invalid id                      | 400                                                            |
+| T7  | Unknown id                      | 404                                                            |
+| T8  | Accept own request              | 403                                                            |
+| T9  | Accept already ACCEPTED         | 409                                                            |
+| T10 | Decline twice                   | 409                                                            |
+| T11 | Accept then decline same actor  | 409                                                            |
 
 T3 is the concurrency acceptance test (may be serial in Jest; predicate `updateMany` is still asserted via `count` / second caller).
 
@@ -415,12 +415,12 @@ T3 is the concurrency acceptance test (may be serial in Jest; predicate `updateM
 
 ## 13. Implementation order
 
-| Order | Ticket | Deliverable |
-|-------|--------|-------------|
-| 1 | HELPER-64 | This document |
-| 2 | HELPER-68 | Enum + `VolunteerResponse` + relations + migration |
-| 3 | HELPER-66 + HELPER-67 | Routes, service transaction, error mapping, tests |
-| 4 | HELPER-65 | UI actions and feedback |
+| Order | Ticket                | Deliverable                                        |
+| ----- | --------------------- | -------------------------------------------------- |
+| 1     | HELPER-64             | This document                                      |
+| 2     | HELPER-68             | Enum + `VolunteerResponse` + relations + migration |
+| 3     | HELPER-66 + HELPER-67 | Routes, service transaction, error mapping, tests  |
+| 4     | HELPER-65             | UI actions and feedback                            |
 
 HELPER-66 and HELPER-67 SHOULD ship in one PR so accept cannot land without the compare-and-set.
 
