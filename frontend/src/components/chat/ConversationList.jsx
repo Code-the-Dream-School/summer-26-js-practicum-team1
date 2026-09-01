@@ -6,6 +6,7 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 
 const ConversationList = ({
   conversations,
@@ -21,6 +22,7 @@ const ConversationList = ({
         border: '1px solid',
         borderColor: 'divider',
         overflowY: 'auto',
+        bgcolor: grey[200],
         boxShadow: 3,
         borderRadius: { xs: 2, sm: 3, lg: 2 },
       }}
