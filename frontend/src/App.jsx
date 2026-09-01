@@ -4,7 +4,7 @@ import MainLayout from './layouts/MainLayout';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
-
+import RequireApprovedVolunteer from './components/auth/RequireApprovedVolunteer';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import VolunteerApprovals from './pages/admin/VolunteerApprovals';
 import UsersList from './pages/admin/UsersList';

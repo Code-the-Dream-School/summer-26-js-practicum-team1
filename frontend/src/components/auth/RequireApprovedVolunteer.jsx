@@ -5,8 +5,8 @@ function RequireApprovedVolunteer() {
   const { user } = useAuth();
 
   if (
-    user.role?.toLowerCase() === 'volunteer' &&
-    user.verificationStatus === 'pending'
+    user?.role?.toLowerCase() === 'volunteer' &&
+    user?.verificationStatus === 'pending'
   ) {
     return <Navigate to="/volunteer-pending" replace />;
   }
