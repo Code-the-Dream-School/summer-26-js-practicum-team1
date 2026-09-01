@@ -15,14 +15,12 @@ import { COLORS } from '../utils/constants';
 
 const team = [
   {
-    name: 'Team Member Name',
-    role: 'Frontend / Backend',
-    bio: 'Short one or two sentence bio about what this teammate focused on for Neighborhood Helper and what they enjoy building.',
+    name: 'Derya Kendircikahraman',
+    role: 'Backend / Full Stack',
+    bio: 'I worked on requester and volunteer registration APIs, volunteer profile and preferences, admin user detail views, and the volunteer accept/decline flow with in-app requester notifications when a help request is accepted.',
     photo: undefined,
-    email: 'name1@example.com',
-    github: 'https://github.com/username',
-    extraLinkLabel: 'Portfolio',
-    extraLink: 'https://example.com',
+    email: 'deryakendircikahraman@gmail.com',
+    github: 'https://github.com/deryakendircikahraman',
   },
   {
     name: 'Emmanuel Cobian',
