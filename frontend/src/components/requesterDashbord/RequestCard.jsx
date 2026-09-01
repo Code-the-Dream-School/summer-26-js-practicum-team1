@@ -314,7 +314,7 @@ function RequestCard({
         >
           {/* MESSAGE BUTTON */}
 
-          {canChat && (
+          {canChat && volunteer && (
             <Button
               variant="contained"
               startIcon={<ChatBubbleIcon />}
@@ -325,16 +325,9 @@ function RequestCard({
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: 2,
-                transition: 'all 0.2s ease',
-
-                '&:hover': {
-                  boxShadow: 4,
-                  transform: 'translateY(-1px)',
-                },
               }}
             >
-              Message
+              {volunteer.name || 'Volunteer'}
             </Button>
           )}
 
