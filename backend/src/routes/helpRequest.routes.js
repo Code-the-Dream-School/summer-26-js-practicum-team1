@@ -6,6 +6,7 @@ const {
   createHelpRequest,
   getHelpRequests,
   getHelpRequestById,
+  getMyAcceptedRequests,
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
@@ -52,7 +53,15 @@ router.get(
   validate(facetsQuerySchema, 'query'),
   getCategoryFacets
 );
+// Get accepted help requests for the authenticated volunteer
 
+router.get(
+  '/volunteer/accepted',
+  jwtMiddleware,
+  requireRole('VOLUNTEER'),
+  requireApprovedIfVolunteer,
+  getMyAcceptedRequests
+);
 // Get accepted volunteer profile for a help request
 router.get(
   '/:id/volunteer',

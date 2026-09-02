@@ -20,7 +20,7 @@ import Contact from './pages/Contact';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
-
+import VolunteerDashboard from './pages/volunteer/VolunteerDashboard';
 function App() {
   return (
     <Routes>
@@ -69,7 +69,10 @@ function App() {
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
-
+        {/* VolunteerDashbord Routes */}
+        <Route element={<RoleProtectedRoute allowedRoles={['volunteer']} />}>
+          <Route path="volunteer-dashboard" element={<VolunteerDashboard />} />
+        </Route>
         {/* Volunteer Routes */}
         <Route
           element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}
