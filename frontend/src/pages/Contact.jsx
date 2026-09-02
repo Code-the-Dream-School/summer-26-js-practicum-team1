@@ -13,6 +13,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchOutlinedIcon from '@mui/icons-material/LaunchOutlined';
 import { COLORS } from '../utils/constants';
 import deryaProfilePhoto from '../assets/derya-profile.png';
+import cesarProfilePhoto from '../assets/cesarve-profile.jpg';
 
 const team = [
   {
@@ -39,7 +40,7 @@ const team = [
     name: 'Cesar D. Verastegui',
     role: 'Frontend / Backend',
     bio: 'I worked on the volunteer registration flow, which includes the signup and registration pages, the routing behind them, and the pending page that holds new volunteer accounts until an admin approves them. I enjoyed building that flow, especially making each step feel obvious to the person going through it.',
-    photo: '../assets/cesarve-profile.jpg',
+    photo: cesarProfilePhoto,
     email: 'cesar.radiate@gmail.com',
     github: 'https://github.com/cesarve-dev',
     extraLinkLabel: 'LinkedIn',
