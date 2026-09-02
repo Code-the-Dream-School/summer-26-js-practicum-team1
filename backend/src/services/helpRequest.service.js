@@ -486,8 +486,6 @@ async function getBrowseHelpRequests({ user, query }) {
   };
 }
 
-
-
 async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
@@ -529,8 +527,6 @@ async function getCategoryFacets({ user, query }) {
       return acc;
     }, {});
 }
-
-
 
 const isOpenRequest = (request) =>
   request.status === RequestStatus.PENDING && request.volunteerId === null;
@@ -591,7 +587,21 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
           action: 'ACCEPTED',
         },
       });
-
+      const existingConversation = await tx.conversation.findFirst({
+        where: {
+          request: {
+            requesterId: request.requesterId,
+            volunteerId,
+          },
+        },
+      });
+      if (!existingConversation) {
+        await tx.conversation.create({
+          data: {
+            requestId,
+          },
+        });
+      }
       return tx.helpRequest.findUnique({ where: { id: requestId } });
     });
   } catch (err) {

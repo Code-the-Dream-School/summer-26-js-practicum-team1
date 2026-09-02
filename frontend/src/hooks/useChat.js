@@ -4,6 +4,7 @@ import {
   getMessages,
   sendMessage,
   markMessagesRead,
+  getConversations,
 } from '../services/chatApi';
 
 export function useChatMessages(requestId) {
@@ -11,10 +12,17 @@ export function useChatMessages(requestId) {
     queryKey: ['chatMessages', requestId],
     queryFn: () => getMessages(requestId),
     enabled: Boolean(requestId),
-    refetchInterval: 5000,
+    refetchInterval: 15000,
   });
 }
 
+export function useGetConversation() {
+  return useQuery({
+    queryKey: ['chatConversations'],
+    queryFn: () => getConversations(),
+    refetchInterval: 15000,
+  });
+}
 export function useSendMessage(requestId) {
   const queryClient = useQueryClient();
 

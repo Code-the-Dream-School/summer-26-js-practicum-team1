@@ -11,6 +11,10 @@ jest.mock('../src/config/prisma', () => ({
     findUnique: jest.fn(),
     create: jest.fn(),
   },
+  conversation: {
+    findFirst: jest.fn(),
+    create: jest.fn(),
+  },
   $transaction: jest.fn(),
   $executeRaw: jest.fn(),
 }));
@@ -85,6 +89,12 @@ beforeEach(() => {
   prisma.$executeRaw.mockResolvedValue(1);
   prisma.volunteerResponse.findUnique.mockResolvedValue(null);
   prisma.helpRequest.updateMany.mockResolvedValue({ count: 1 });
+  prisma.conversation.findFirst.mockResolvedValue(null);
+
+  prisma.conversation.create.mockResolvedValue({
+    id: 1,
+    requestId: openRequest.id,
+  });
   prisma.volunteerResponse.create.mockResolvedValue({
     id: 1,
     requestId: openRequest.id,
@@ -137,6 +147,61 @@ describe('POST /api/requests/:id/accept', () => {
         action: 'ACCEPTED',
       },
     });
+    expect(prisma.conversation.findFirst).toHaveBeenCalledWith({
+      where: {
+        request: {
+          requesterId: openRequest.requesterId,
+          volunteerId: APPROVED_VOLUNTEER.id,
+        },
+      },
+    });
+    expect(prisma.conversation.create).toHaveBeenCalledWith({
+      data: {
+        requestId: openRequest.id,
+      },
+    });
+  });
+
+  it('reuses an existing conversation when volunteer accepts another request', async () => {
+    prisma.user.findUnique.mockResolvedValue(APPROVED_VOLUNTEER);
+
+    const secondRequest = {
+      ...openRequest,
+      id: 20,
+    };
+
+    const secondAcceptedRequest = {
+      ...secondRequest,
+      status: 'ACCEPTED',
+      volunteerId: APPROVED_VOLUNTEER.id,
+    };
+
+    prisma.helpRequest.findUnique
+      .mockResolvedValueOnce(secondRequest)
+      .mockResolvedValueOnce(secondAcceptedRequest);
+
+    prisma.conversation.findFirst.mockResolvedValue({
+      id: 1,
+      requestId: openRequest.id,
+    });
+
+    const res = await postResponse(
+      `/api/requests/${secondRequest.id}/accept`,
+      APPROVED_VOLUNTEER.id
+    );
+
+    expect(res.status).toBe(200);
+
+    expect(prisma.conversation.findFirst).toHaveBeenCalledWith({
+      where: {
+        request: {
+          requesterId: secondRequest.requesterId,
+          volunteerId: APPROVED_VOLUNTEER.id,
+        },
+      },
+    });
+
+    expect(prisma.conversation.create).not.toHaveBeenCalled();
   });
 
   it('returns 409 when a second volunteer accepts after assignment (T3/T9)', async () => {
