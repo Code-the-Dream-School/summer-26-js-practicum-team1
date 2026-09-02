@@ -66,7 +66,7 @@ This document is the source of truth for schema, API, and UI behavior. Implement
 | Channel | MVP | Rationale |
 |---------|-----|-----------|
 | **In-app** | **Yes** | Matches chat MVP pattern (polling, no external provider). Requester already uses `RequesterDashboard`. |
-| **Email** | No | No mail infrastructure; adds template + deliverability work. |
+| **Email** | **Phase 2 (HELPER-144)** | SendGrid or `log` mode; second `NotificationDelivery` row on same notification. |
 | **Push** | No | No WebSocket/push stack. |
 
 **MVP delivery model:** write `Notification` + `NotificationDelivery` rows in the database. “Delivered” means the row is readable via `GET /api/notifications`. The requester UI polls this endpoint while the dashboard is open.
@@ -444,7 +444,44 @@ Match chat MVP: poll `GET /api/notifications?unreadOnly=true` every **30 seconds
 
 1. **Withdraw after accept** — if a volunteer drops an assignment later, do we notify the requester again when it reopens? Out of scope until withdraw story is defined.
 2. **Header bell** — MVP dashboard-only vs global nav badge?
-3. **Email phase 2** — use same `Notification` row + second `NotificationDelivery` channel row?
+3. **Email phase 2** — implemented in HELPER-144: same `Notification` row + `NotificationDelivery` with `channel = EMAIL`. See §16.
+
+---
+
+## 16. Email channel (HELPER-144)
+
+### 16.1 Delivery model
+
+Same trigger and dedupe key as in-app. One `Notification` row; two delivery rows:
+
+| Channel | MVP behavior |
+|---------|----------------|
+| `IN_APP` | Unchanged (§4) |
+| `EMAIL` | Sent to `User.email` for `recipientId` after in-app attempt |
+
+Accept still returns 200 if email fails; `NotificationDelivery` for `EMAIL` records `FAILED` and retry applies (§10).
+
+### 16.2 Environment
+
+| Variable | Purpose |
+|----------|---------|
+| `EMAIL_DELIVERY_MODE` | `log` (dev default) or `sendgrid` |
+| `EMAIL_FROM` | From address, e.g. `Neighborhood Helper <noreply@example.com>` |
+| `SENDGRID_API_KEY` | Required when mode is `sendgrid` |
+| `CLIENT_URL` | Dashboard link in email body |
+
+### 16.3 Email content (privacy)
+
+Same fields as in-app alert: volunteer display name, request title, acceptance time. No volunteer phone/email, no request address.
+
+**Subject:** `{volunteerName} accepted your help request`
+
+**Action link:** `{CLIENT_URL}/requester-dashboard`
+
+### 16.4 Implementation
+
+- `backend/src/services/emailDelivery.service.js` — template + SendGrid/log sender
+- `notification.service.js` — `attemptEmailDelivery()` after `attemptInAppDelivery()`
 
 ---
 

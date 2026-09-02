@@ -1,3 +1,7 @@
+jest.mock('../src/services/emailDelivery.service', () => ({
+  sendAcceptanceEmail: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../src/config/prisma', () => ({
   $transaction: jest.fn(),
   notification: {
@@ -6,6 +10,7 @@ jest.mock('../src/config/prisma', () => ({
   },
   notificationDelivery: {
     create: jest.fn(),
+    createMany: jest.fn(),
     update: jest.fn(),
     upsert: jest.fn(),
     findMany: jest.fn(),
@@ -22,6 +27,7 @@ jest.mock('../src/config/prisma', () => ({
 }));
 
 const prisma = require('../src/config/prisma');
+const emailDelivery = require('../src/services/emailDelivery.service');
 const {
   onHelpRequestAccepted,
   buildDedupeKey,
@@ -37,7 +43,10 @@ describe('notification.service', () => {
       category: 'GROCERY',
       urgency: 'MEDIUM',
     });
-    prisma.user.findUnique.mockResolvedValue({ name: 'Emma Garcia' });
+    prisma.user.findUnique.mockResolvedValue({
+      name: 'Emma Garcia',
+      email: 'alice@example.com',
+    });
     prisma.volunteerResponse.findUnique.mockResolvedValue({
       createdAt: new Date('2026-08-28T14:32:01.123Z'),
     });
@@ -52,7 +61,7 @@ describe('notification.service', () => {
           }),
         },
         notificationDelivery: {
-          create: jest.fn().mockResolvedValue({ id: 1 }),
+          createMany: jest.fn().mockResolvedValue({ count: 2 }),
         },
       };
       return callback(tx);
@@ -65,7 +74,7 @@ describe('notification.service', () => {
     });
   });
 
-  it('creates an acceptance notification with request and volunteer details', async () => {
+  it('creates an acceptance notification with in-app and email delivery', async () => {
     const notification = await onHelpRequestAccepted({
       requestId: 12,
       requesterId: 3,
@@ -74,8 +83,34 @@ describe('notification.service', () => {
 
     expect(notification.id).toBe(1);
     expect(prisma.$transaction).toHaveBeenCalled();
+    expect(emailDelivery.sendAcceptanceEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'alice@example.com',
+        payload: expect.objectContaining({
+          requestTitle: 'Groceries',
+          volunteerName: 'Emma Garcia',
+        }),
+      })
+    );
     expect(prisma.notificationDelivery.update).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: {
+          notificationId_channel: {
+            notificationId: 1,
+            channel: 'IN_APP',
+          },
+        },
+        data: expect.objectContaining({ status: 'DELIVERED' }),
+      })
+    );
+    expect(prisma.notificationDelivery.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          notificationId_channel: {
+            notificationId: 1,
+            channel: 'EMAIL',
+          },
+        },
         data: expect.objectContaining({ status: 'DELIVERED' }),
       })
     );
@@ -88,22 +123,32 @@ describe('notification.service', () => {
         id: 1,
         attemptCount: 1,
         failureReason: 'write failed',
+      })
+      .mockResolvedValue({
+        id: 2,
+        attemptCount: 1,
+        failureReason: null,
       });
 
     const notification = await createNotificationWithDelivery({
       recipientId: 3,
       type: 'HELP_REQUEST_ACCEPTED',
       dedupeKey: buildDedupeKey(99),
-      payload: { requestId: 99 },
+      payload: {
+        requestId: 99,
+        requestTitle: 'Groceries',
+        volunteerName: 'Emma Garcia',
+        acceptedAt: '2026-08-28T14:32:01.123Z',
+      },
     });
 
     expect(notification.id).toBe(1);
-    expect(prisma.notificationDelivery.update).toHaveBeenCalledTimes(2);
-    expect(prisma.notificationDelivery.update).toHaveBeenLastCalledWith(
+    expect(prisma.notificationDelivery.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ status: 'FAILED' }),
       })
     );
+    expect(emailDelivery.sendAcceptanceEmail).toHaveBeenCalled();
   });
 
   it('uses a stable dedupe key per request', () => {
