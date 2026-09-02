@@ -18,7 +18,7 @@ const team = [
   {
     name: 'Derya Kendircikahraman',
     role: 'Frontend / Backend',
-    bio: "On the backend, I built registration and volunteer profile APIs, accept/decline with notifications, and admin endpoints. On the frontend, I built the volunteer profile page, admin user detail, browse accept/decline, and requester dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
+    bio: "I built backend APIs for registration, volunteer profiles, accept/decline, and admin users, and frontend pages for profile setup, admin user detail, browse actions, and requester alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
     photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
@@ -101,6 +101,7 @@ function TeamCard({ member }) {
         border: `1px solid transparent`,
         borderRadius: 3,
         p: 3,
+        width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -339,13 +340,13 @@ function ContactPage() {
       <Grid
         container
         spacing={4}
-        sx={{ justifyContent: 'center', alignItems: 'center' }}
+        sx={{ justifyContent: 'center', alignItems: 'stretch' }}
       >
         {team.map((member) => (
           <Grid
             size={{ xs: 12, sm: 6, md: 4 }}
             key={member.name + member.email}
-            sx={{ display: 'flex', justifyContent: 'center' }}
+            sx={{ display: 'flex' }}
           >
             <TeamCard member={member} />
           </Grid>
