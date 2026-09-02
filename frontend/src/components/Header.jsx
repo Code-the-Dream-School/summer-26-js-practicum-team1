@@ -21,7 +21,7 @@ import { useGetProfileImage } from '../hooks/useGetProfileImage';
 
 const PAGES = [
   { label: 'About', path: '/' },
-  { label: 'Contact Us', path: '/' },
+  { label: 'Contact Us', path: '/contact' },
 ];
 
 const ROLE_SETTINGS = {
