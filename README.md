@@ -123,13 +123,13 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file inside the `backend` folder:
+Create a `.env` file inside the `backend` folder (or copy from `backend/.env.example`):
 
 ```env
-PORT=5000
+PORT=8080
 DATABASE_URL=your_postgres_url
-
 JWT_SECRET=your_secret_key
+CLIENT_URL=http://localhost:5173
 ```
 
 `DATABASE_URL` should point at a PostgreSQL database you can create locally, e.g.:
@@ -214,36 +214,40 @@ Database-backed tests must never run against your development database. Set up a
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
+Create a `.env` file inside the `frontend` folder (or copy from `frontend/.env.example`):
+
 ```env
-# Backend API URL
-VITE_BASE_URL=""
+# Leave empty to use the Vite dev proxy (/api -> http://localhost:8080)
+VITE_API_URL=
 
-# Local backend server
-VITE_TARGET="http://localhost:8080"
-
-# Production backend URL (Render)
-# VITE_TARGET="https://node-homework-909.onrender.com"
+# Required for location autocomplete
+VITE_GEOAPIFY_API_KEY=your_geoapify_api_key
 ```
 
 Frontend runs on:  
 http://localhost:5173
 
-### Frontend
+See [frontend/README.md](frontend/README.md) for frontend architecture, environment configuration, route map, and local development setup.
+
+### Frontend scripts
 
 ```bash
 npm run dev
 npm run build
 npm run preview
+npm run lint
 ```
 
-### Backend
+### Backend scripts
 
 ```bash
 npm run dev
 npm start
+npm test
 ```
 
 ## 🔐 API Overview
