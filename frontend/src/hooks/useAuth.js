@@ -24,7 +24,7 @@ export function useAuth() {
 
   const googleLoginMutation = useMutation({
     mutationFn: googleLogin,
-    onSuccess: (data) => queryClient.setQueriesData(['me'], data),
+    onSuccess: (data) => queryClient.setQueryData(['me'], data),
   });
 
   const registerMutation = useMutation({
