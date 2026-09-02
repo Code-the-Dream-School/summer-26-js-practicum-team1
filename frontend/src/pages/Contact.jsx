@@ -16,7 +16,7 @@ import deryaProfilePhoto from '../assets/derya-profile.png';
 
 const team = [
   {
-    name: 'Derya Kendircikahraman',
+    name: 'Derya Kendirci',
     role: 'Frontend / Backend',
     bio: "On the backend, I built registration APIs, volunteer profile APIs, accept/decline with notifications, and admin user detail endpoints. On the frontend, I built volunteer preferences, admin user detail, browse accept/decline actions, and dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
     photo: deryaProfilePhoto,
