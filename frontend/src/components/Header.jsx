@@ -20,8 +20,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGetProfileImage } from '../hooks/useGetProfileImage';
 
 const PAGES = [
-  { label: 'About', path: '/' },
-  { label: 'Contact Us', path: '/' },
+  { label: 'About', path: '/about' },
+  { label: 'Contact Us', path: '/contact' },
 ];
 
 const ROLE_SETTINGS = {
@@ -29,12 +29,14 @@ const ROLE_SETTINGS = {
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
     { label: 'My Requests', path: '/requester-dashboard' },
-    { label: 'Create New Help Request', path: '/helpRequest' },
+    { label: 'New Help Request', path: '/helpRequest' },
+    { label: 'Messages 💬', path: '/chat' },
   ],
   volunteer: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
-    { label: 'My Offers', path: '/' },
+    { label: 'Messages 💬', path: '/chat' },
+    { label: 'Browse Requests', path: '/browse' },
   ],
   admin: [
     { label: 'Profile', path: '/profile' },

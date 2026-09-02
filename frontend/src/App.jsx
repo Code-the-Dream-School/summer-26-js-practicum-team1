@@ -16,16 +16,20 @@ import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import ChatPage from './pages/ChatPage';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
-
+import VolunteerDashboard from './pages/volunteer/VolunteerDashboard';
 function App() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
         {/* Public routes */}
         <Route index element={<HomePage />} />
+        <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
 
@@ -61,12 +65,16 @@ function App() {
           }
         >
           <Route path="/chat/:requestId" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
         {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
         {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
-
+        {/* VolunteerDashbord Routes */}
+        <Route element={<RoleProtectedRoute allowedRoles={['volunteer']} />}>
+          <Route path="volunteer-dashboard" element={<VolunteerDashboard />} />
+        </Route>
         {/* Volunteer Routes */}
         <Route
           element={<RoleProtectedRoute allowedRoles={['volunteer', 'admin']} />}

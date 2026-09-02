@@ -13,6 +13,7 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import hero from '../assets/hero.png';
 import { COLORS } from '../utils/constants';
+import Footer from '../components/Footer';
 
 const requesterSteps = [
   {
@@ -427,6 +428,8 @@ function HomePage() {
           </Stack>
         </Box>
       </Container>
+
+      <Footer />
     </>
   );
 }
