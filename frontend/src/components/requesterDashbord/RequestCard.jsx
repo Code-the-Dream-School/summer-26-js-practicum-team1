@@ -1,3 +1,4 @@
+
 import {
   Avatar,
   Box,
@@ -44,7 +45,8 @@ function RequestCard({
 
   const isPending = requestStatus === 'PENDING';
 
-  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
+  const canChat =
+    requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
 
@@ -59,13 +61,18 @@ function RequestCard({
       document.activeElement.blur();
     }
   };
+
   // Navigate to the request details page
   const handleToggleDetails = () => {
-    //navigate(`/requests/${request.id}`);
+    // navigate(`/requests/${request.id}`);
   };
 
   const handleOpenChat = () => {
-    navigate(`/chat/${request.id}`);
+    navigate(`/chat/${request.id}`, {
+      state: {
+        participantId: request.volunteerId,
+      },
+    });
   };
 
   const handleEditClick = () => {
@@ -99,7 +106,7 @@ function RequestCard({
           flexDirection: 'column',
         }}
       >
-               {/* TITLE + EDIT/CANCEL + STATUS */}
+        {/* TITLE + EDIT/CANCEL + STATUS */}
 
         <Box
           sx={{
@@ -201,7 +208,7 @@ function RequestCard({
             />
           </Box>
         </Box>
-       
+
         {/* CATEGORY */}
 
         <Typography
@@ -277,101 +284,101 @@ function RequestCard({
 
         {/* URGENCY + ACTIONS */}
 
-<Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 2,
-    mt: 1,
-    flexWrap: 'wrap',
-  }}
->
-  {/* URGENCY - LEFT */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            mt: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {/* URGENCY - LEFT */}
 
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-    }}
-  >
-    <Typography
-      variant="body2"
-      sx={{
-        color: COLORS.textMuted,
-        fontSize: '1rem',
-        fontWeight: 700,
-      }}
-    >
-      Urgency:
-    </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: COLORS.textMuted,
+                fontSize: '1rem',
+                fontWeight: 700,
+              }}
+            >
+              Urgency:
+            </Typography>
 
-    <Chip
-      label={request.urgency}
-      size="small"
-      sx={{
-        minHeight: 32,
-        fontSize: '0.9rem',
-        backgroundColor: urgencyStyle.bg,
-        color: urgencyStyle.text,
-        fontWeight: 700,
-      }}
-    />
-  </Box>
+            <Chip
+              label={request.urgency}
+              size="small"
+              sx={{
+                minHeight: 32,
+                fontSize: '0.9rem',
+                backgroundColor: urgencyStyle.bg,
+                color: urgencyStyle.text,
+                fontWeight: 700,
+              }}
+            />
+          </Box>
 
-  {/* ACTIONS - RIGHT */}
+          {/* ACTIONS - RIGHT */}
 
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 1,
-    }}
-  >
-    {/* MESSAGE BUTTON */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            {/* MESSAGE BUTTON */}
 
-    {canChat && (
-      <Button
-        variant="contained"
-        startIcon={<ChatBubbleIcon />}
-        onClick={handleOpenChat}
-        sx={{
-          minHeight: 42,
-          px: 2.5,
-          borderRadius: 2,
-          textTransform: 'none',
-          fontWeight: 600,
-          boxShadow: 2,
-          transition: 'all 0.2s ease',
+            {canChat && (
+              <Button
+                variant="contained"
+                startIcon={<ChatBubbleIcon />}
+                onClick={handleOpenChat}
+                sx={{
+                  minHeight: 42,
+                  px: 2.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 2,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: 4,
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                Message
+              </Button>
+            )}
 
-          '&:hover': {
-            boxShadow: 4,
-            transform: 'translateY(-1px)',
-          },
-        }}
-      >
-        Message
-      </Button>
-    )}
+            {/* VIEW DETAILS BUTTON */}
 
-    {/* VIEW DETAILS BUTTON */}
+            <Button
+              onClick={handleToggleDetails}
+              sx={{
+                minHeight: 44,
+                px: 2,
+                fontSize: '1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                color: COLORS.primary,
+              }}
+            >
+              {isExpanded ? 'Hide Details' : 'View Details'}
+            </Button>
+          </Box>
+        </Box>
 
-    <Button
-      onClick={handleToggleDetails}
-      sx={{
-        minHeight: 44,
-        px: 2,
-        fontSize: '1rem',
-        fontWeight: 600,
-        textTransform: 'none',
-        color: COLORS.primary,
-      }}
-    >
-      {isExpanded ? 'Hide Details' : 'View Details'}
-    </Button>
-  </Box>
-</Box>
         {/* EXPANDED DETAILS */}
 
         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
@@ -589,3 +596,4 @@ function RequestCard({
 }
 
 export default RequestCard;
+

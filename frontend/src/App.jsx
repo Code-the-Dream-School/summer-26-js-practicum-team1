@@ -16,6 +16,7 @@ import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import ChatPage from './pages/ChatPage';
+import Contact from './pages/Contact';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
@@ -26,6 +27,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         {/* Public routes */}
         <Route index element={<HomePage />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
 
@@ -61,6 +63,7 @@ function App() {
           }
         >
           <Route path="/chat/:requestId" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
