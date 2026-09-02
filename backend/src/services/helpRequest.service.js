@@ -134,7 +134,31 @@ async function cancelHelpRequest({ id, requesterId }) {
     },
   });
 }
+async function getVolunteerAcceptedRequests({ volunteerId }) {
+  const requests = await prisma.helpRequest.findMany({
+    where: {
+      volunteerId,
+      status: RequestStatus.ACCEPTED,
+    },
+    orderBy: {
+      scheduledAt: 'asc',
+    },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          profileImage: true,
+          profileImageType: true,
+        },
+      },
+    },
+  });
 
+  return requests;
+}
 async function getAcceptedVolunteerProfile({ requestId, requesterId }) {
   const helpRequest = await prisma.helpRequest.findFirst({
     where: {
@@ -486,8 +510,6 @@ async function getBrowseHelpRequests({ user, query }) {
   };
 }
 
-
-
 async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
@@ -529,8 +551,6 @@ async function getCategoryFacets({ user, query }) {
       return acc;
     }, {});
 }
-
-
 
 const isOpenRequest = (request) =>
   request.status === RequestStatus.PENDING && request.volunteerId === null;
@@ -591,7 +611,21 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
           action: 'ACCEPTED',
         },
       });
-
+      const existingConversation = await tx.conversation.findFirst({
+        where: {
+          request: {
+            requesterId: request.requesterId,
+            volunteerId,
+          },
+        },
+      });
+      if (!existingConversation) {
+        await tx.conversation.create({
+          data: {
+            requestId,
+          },
+        });
+      }
       return tx.helpRequest.findUnique({ where: { id: requestId } });
     });
   } catch (err) {
@@ -660,6 +694,7 @@ module.exports = {
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
+  getVolunteerAcceptedRequests,
   getBrowseHelpRequests,
   getCategoryFacets,
   acceptHelpRequest,
