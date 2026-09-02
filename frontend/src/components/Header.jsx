@@ -34,6 +34,7 @@ const ROLE_SETTINGS = {
   volunteer: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
+    { label: 'Browse Requests', path: '/browse' },
     { label: 'My Offers', path: '/' },
   ],
   admin: [
