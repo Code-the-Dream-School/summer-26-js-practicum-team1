@@ -36,6 +36,7 @@ function RequestCard({
   onEdit,
   onCancel,
   onVolunteerProfile,
+  unreadCount,
 }) {
   const navigate = useNavigate();
 
@@ -332,6 +333,24 @@ function RequestCard({
               }}
             >
               {volunteer.name || 'Volunteer'}
+
+              {unreadCount > 0 && (
+                <Chip
+                  label={unreadCount}
+                  size="small"
+                  sx={{
+                    ml: 1,
+                    height: 20,
+                    minWidth: 20,
+                    backgroundColor: 'error.main',
+                    color: 'white',
+                    fontWeight: 700,
+                    '& .MuiChip-label': {
+                      px: 0.75,
+                    },
+                  }}
+                />
+              )}
             </Button>
           )}
 

@@ -12,12 +12,14 @@ import {
   Tooltip,
   CircularProgress,
   MenuItem,
+  Chip,
   Box,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGetProfileImage } from '../hooks/useGetProfileImage';
+import { useGetUnreadCount } from '../hooks/useChat';
 
 const PAGES = [
   { label: 'About', path: '/' },
@@ -30,12 +32,12 @@ const ROLE_SETTINGS = {
     { label: 'Account', path: '/' },
     { label: 'My Requests', path: '/requester-dashboard' },
     { label: 'New Help Request', path: '/helpRequest' },
-    { label: 'Messages 💬', path: '/chat' },
+    { label: 'Messages', path: '/chat' },
   ],
   volunteer: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
-    { label: 'Messages 💬', path: '/chat' },
+    { label: 'Messages', path: '/chat' },
     { label: 'Browse Requests', path: '/browse' },
   ],
   admin: [
@@ -48,7 +50,7 @@ const ROLE_SETTINGS = {
 };
 
 /** Renders a list of { label, path } as MenuItems, closing the parent menu on click. */
-function NavMenuItems({ items, onItemClick }) {
+function NavMenuItems({ items, onItemClick, totalUnreadCount }) {
   return items.map(({ label, path }) => (
     <MenuItem
       key={label}
@@ -62,7 +64,35 @@ function NavMenuItems({ items, onItemClick }) {
         },
       }}
     >
-      <Typography sx={{ textAlign: 'center' }}>{label}</Typography>
+      {label === 'Messages' ? (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1,
+          }}
+        >
+          <Typography>{label}</Typography>
+
+          {totalUnreadCount > 0 && (
+            <Chip
+              label={totalUnreadCount}
+              size="small"
+              color="error"
+              sx={{
+                height: 22,
+                minWidth: 22,
+                '& .MuiChip-label': {
+                  px: 0.75,
+                },
+              }}
+            />
+          )}
+        </Box>
+      ) : (
+        <Typography sx={{ textAlign: 'center' }}>{label}</Typography>
+      )}
     </MenuItem>
   ));
 }
@@ -107,6 +137,10 @@ function Header() {
     isLoading,
     isError,
   } = useGetProfileImage({ enabled: Boolean(user) });
+
+  const { data: unreadData } = useGetUnreadCount();
+
+  const totalUnreadCount = unreadData?.totalUnreadCount ?? 0;
 
   const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
   const handleOpenUserMenu = (event) => setAnchorElUser(event.currentTarget);
@@ -164,7 +198,11 @@ function Header() {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
-              <NavMenuItems items={PAGES} onItemClick={handleCloseNavMenu} />
+              <NavMenuItems
+                items={PAGES}
+                onItemClick={handleCloseNavMenu}
+                totalUnreadCount={totalUnreadCount}
+              />
 
               {!user && (
                 <>
@@ -203,6 +241,7 @@ function Header() {
                 <NavMenuItems
                   items={settings}
                   onItemClick={handleCloseNavMenu}
+                  totalUnreadCount={totalUnreadCount}
                 />
               )}
 
@@ -284,6 +323,7 @@ function Header() {
                 <NavMenuItems
                   items={settings}
                   onItemClick={handleCloseUserMenu}
+                  totalUnreadCount={totalUnreadCount}
                 />
                 <MenuItem
                   onClick={handleLogout}
