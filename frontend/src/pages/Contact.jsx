@@ -18,7 +18,7 @@ const team = [
   {
     name: 'Derya Kendircikahraman',
     role: 'Frontend / Backend',
-    bio: "I built backend APIs for registration, volunteer profiles, accept/decline, and admin users, and frontend pages for profile setup, admin user detail, browse actions, and requester alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
+    bio: "On the backend, I built registration and volunteer profile APIs, accept/decline with notifications, and admin endpoints. On the frontend, I built the volunteer profile page, admin user detail, browse accept/decline actions, and requester dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
     photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
