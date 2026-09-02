@@ -20,7 +20,7 @@ const ERROR_MESSAGES = {
 
 const ROLE_REDIRECTS = {
   requester: '/requester-dashboard',
-  volunteer: '/',
+  volunteer: '/volunteer-dashboard',
   admin: '/admin/dashboard',
 };
 

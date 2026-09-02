@@ -5,6 +5,7 @@ jest.mock('../src/services/chat.service');
 const {
   getMessages,
   sendMessage,
+  getConversations,
   markMessagesRead,
 } = require('../src/controllers/chat.controller');
 
@@ -75,6 +76,51 @@ describe('Chat Controller', () => {
 
       expect(next).toHaveBeenCalled();
       expect(chatService.getMessages).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getConversations', () => {
+    it('should return conversations for the authenticated user', async () => {
+      const conversations = [
+        {
+          conversationId: 5,
+          requestId: 25,
+          participant: {
+            id: 12,
+            name: 'Volunteer User',
+          },
+          lastMessage: {
+            content: 'Hello, I can help you.',
+            createdAt: new Date(),
+            senderId: 12,
+          },
+        },
+      ];
+
+      chatService.getConversations.mockResolvedValue(conversations);
+
+      await getConversations(req, res, next);
+
+      expect(chatService.getConversations).toHaveBeenCalledWith(10);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: conversations,
+      });
+
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should pass service errors to next', async () => {
+      const error = new Error('Failed to retrieve conversations');
+
+      chatService.getConversations.mockRejectedValue(error);
+
+      await getConversations(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
     });
   });
 

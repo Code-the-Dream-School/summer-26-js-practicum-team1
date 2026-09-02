@@ -166,14 +166,10 @@ function EditProfileDialog({ open, onClose, form, setForm }) {
         <Button
           onClick={onClose}
           disabled={updateProfile.isPending}
+          varient="outline"
+
           sx={{
-            borderRadius: 1,
-            boxShadow: 3,
-            transition: '0.3s',
-            '&:hover': {
-              boxShadow: 8,
-              transform: 'translateY(-4px)',
-            },
+            border: 1,
           }}
         >
           Cancel
@@ -185,12 +181,6 @@ function EditProfileDialog({ open, onClose, form, setForm }) {
           disabled={updateProfile.isPending}
           sx={{
             borderRadius: 1,
-            boxShadow: 3,
-            transition: '0.3s',
-            '&:hover': {
-              boxShadow: 8,
-              transform: 'translateY(-4px)',
-            },
           }}
         >
           {updateProfile.isPending ? 'Saving...' : 'Save Changes'}

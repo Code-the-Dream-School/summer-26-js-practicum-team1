@@ -12,17 +12,18 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchOutlinedIcon from '@mui/icons-material/LaunchOutlined';
 import { COLORS } from '../utils/constants';
+import deryaProfilePhoto from '../assets/derya-profile.png';
 
 const team = [
   {
-    name: 'Team Member Name',
+    name: 'Derya Kendirci',
     role: 'Frontend / Backend',
-    bio: 'Short one or two sentence bio about what this teammate focused on for Neighborhood Helper and what they enjoy building.',
-    photo: undefined,
-    email: 'name1@example.com',
-    github: 'https://github.com/username',
+    bio: "On the backend, I built registration APIs, volunteer profile APIs, accept/decline with notifications, and admin user detail endpoints. On the frontend, I built volunteer preferences, admin user detail, browse accept/decline actions, and dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
+    photo: deryaProfilePhoto,
+    email: 'deryakendircikahraman@gmail.com',
+    github: 'https://github.com/deryakendircikahraman',
     extraLinkLabel: 'Portfolio',
-    extraLink: 'https://example.com',
+    extraLink: 'https://deryakendirci.vercel.app/',
   },
   {
     name: 'Emmanuel Cobian',
@@ -100,6 +101,7 @@ function TeamCard({ member }) {
         border: `1px solid transparent`,
         borderRadius: 3,
         p: 3,
+        width: '100%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -338,13 +340,13 @@ function ContactPage() {
       <Grid
         container
         spacing={4}
-        sx={{ justifyContent: 'center', alignItems: 'center' }}
+        sx={{ justifyContent: 'center', alignItems: 'stretch' }}
       >
         {team.map((member) => (
           <Grid
             size={{ xs: 12, sm: 6, md: 4 }}
             key={member.name + member.email}
-            sx={{ display: 'flex', justifyContent: 'center' }}
+            sx={{ display: 'flex' }}
           >
             <TeamCard member={member} />
           </Grid>

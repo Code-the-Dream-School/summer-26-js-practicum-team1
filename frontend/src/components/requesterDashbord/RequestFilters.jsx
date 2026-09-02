@@ -21,7 +21,10 @@ function RequestFilters({
   sortBy,
   setSortBy,
   onNewRequest,
+  dashboardType = 'requester',
 }) {
+  const isVolunteerDashboard = dashboardType === 'volunteer';
+
   return (
     <Stack
       direction={{
@@ -39,7 +42,6 @@ function RequestFilters({
       }}
     >
       {/* SEARCH */}
-
       <TextField
         variant="outlined"
         fullWidth
@@ -55,7 +57,11 @@ function RequestFilters({
           >
             <SearchIcon fontSize="small" />
 
-            <span>Search your requests</span>
+            <span>
+              {isVolunteerDashboard
+                ? 'Search accepted requests'
+                : 'Search your requests'}
+            </span>
           </Box>
         }
         placeholder="Search by title or description"
@@ -86,45 +92,46 @@ function RequestFilters({
         }}
       />
 
-      {/* STATUS FILTER */}
+      {/* STATUS FILTER - REQUESTER ONLY */}
+      {!isVolunteerDashboard && (
+        <ButtonGroup
+          size="small"
+          sx={{
+            flexShrink: 0,
+          }}
+        >
+          {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
+            <Button
+              key={key}
+              onClick={() => setFilter(key)}
+              variant={filter === key ? 'contained' : 'outlined'}
+              sx={{
+                minHeight: 44,
+                px: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
 
-      <ButtonGroup
-        size="small"
-        sx={{
-          flexShrink: 0,
-        }}
-      >
-        {['ALL', 'PENDING', 'ACCEPTED'].map((key) => (
-          <Button
-            key={key}
-            onClick={() => setFilter(key)}
-            variant={filter === key ? 'contained' : 'outlined'}
-            sx={{
-              minHeight: 44,
-              px: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              whiteSpace: 'nowrap',
-
-              backgroundColor: filter === key ? COLORS.primary : 'transparent',
-
-              borderColor: COLORS.border,
-
-              color: filter === key ? '#FFFFFF' : COLORS.textMuted,
-
-              '&:hover': {
                 backgroundColor:
-                  filter === key ? COLORS.primaryHover : COLORS.bgSubtle,
-              },
-            }}
-          >
-            {key.charAt(0) + key.slice(1).toLowerCase()}
-          </Button>
-        ))}
-      </ButtonGroup>
+                  filter === key ? COLORS.primary : 'transparent',
+
+                borderColor: COLORS.border,
+
+                color: filter === key ? '#FFFFFF' : COLORS.textMuted,
+
+                '&:hover': {
+                  backgroundColor:
+                    filter === key ? COLORS.primaryHover : COLORS.bgSubtle,
+                },
+              }}
+            >
+              {key.charAt(0) + key.slice(1).toLowerCase()}
+            </Button>
+          ))}
+        </ButtonGroup>
+      )}
 
       {/* SORT */}
-
       <Select
         value={sortBy}
         onChange={(event) => setSortBy(event.target.value)}
@@ -148,13 +155,13 @@ function RequestFilters({
         <MenuItem value="URGENCY">Sort: urgency</MenuItem>
       </Select>
 
-      {/* NEW REQUEST */}
-
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={onNewRequest}
-        sx={{
+      {/* NEW REQUEST - REQUESTER ONLY */}
+      {!isVolunteerDashboard && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={onNewRequest}
+          sx={{
           minHeight: 44,
           minWidth: 160,
           px: 2,
@@ -163,16 +170,41 @@ function RequestFilters({
           fontWeight: 700,
           whiteSpace: 'nowrap',
 
-          backgroundColor: '#2E7D32',
+  '&:hover': {
+    boxShadow: 4,
+    transform: 'translateY(-1px)',
+  },
+}}
+        >
+          New Request
+        </Button>
+      )}
 
-          '&:hover': {
-            backgroundColor: '#1B5E20',
-          },
-        }}
-      >
-        New Request
-      </Button>
+      {/* BROWSE REQUESTS - VOLUNTEER ONLY */}
+      {isVolunteerDashboard && (
+        <Button
+          variant="contained"
+          onClick={onNewRequest}
+         sx={{
+          minHeight: 44,
+          minWidth: 160,
+          px: 2,
+          borderRadius: 2,
+          textTransform: 'none',
+          fontWeight: 700,
+          whiteSpace: 'nowrap',
+
+  '&:hover': {
+    boxShadow: 4,
+    transform: 'translateY(-1px)',
+  },
+}}
+        >
+          Browse Requests
+        </Button>
+      )}
     </Stack>
   );
 }
+
 export default RequestFilters;

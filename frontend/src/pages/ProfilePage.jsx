@@ -134,18 +134,21 @@ function ProfilePage() {
 
   return (
     <>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{
-          margin: 3,
-          marginLeft: 0,
-          fontWeight: 700,
-          mb: 3,
-        }}
-      >
-        MY PROFILE
-      </Typography>
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            mb: 0.5,
+          }}
+        >
+          MY PROFILE
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary">
+          Update your information so others can get to know you.
+        </Typography>
+      </Box>
 
       <Box
         sx={{
@@ -175,7 +178,6 @@ function ProfilePage() {
                   }
                 }}
                 sx={{
-                  boxShadow: 2,
                   transition: '0.3s',
                   flexShrink: 0,
                   '&:hover': {

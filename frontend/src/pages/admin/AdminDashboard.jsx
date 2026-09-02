@@ -106,14 +106,7 @@ function AdminDashboard() {
             onClick={handleNavigationVolunteers}
 
             sx={{
-              boxShadow: 3,
               width: 400,
-              transition: '0.3s',
-
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
             }}
           >
             Pending Volunteers
@@ -125,14 +118,7 @@ function AdminDashboard() {
             onClick={handleNavigationUsers}
 
             sx={{
-              boxShadow: 3,
               width: 400,
-              transition: '0.3s',
-
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
             }}
           >
             View Users
