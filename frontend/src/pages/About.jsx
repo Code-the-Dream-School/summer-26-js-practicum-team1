@@ -72,7 +72,7 @@ function AboutPage() {
   return (
     <>
       <Container sx={{ py: { xs: 5, md: 7 } }}>
-        <Box sx={{ maxWidth: 640 }}>
+        <Box sx={{ maxWidth: 640, mx: 'auto', textAlign: 'center' }}>
           <Typography
             sx={{
               color: COLORS.forest,
