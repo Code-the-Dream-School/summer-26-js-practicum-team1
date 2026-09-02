@@ -99,31 +99,46 @@ function RequestCard({
           flexDirection: 'column',
         }}
       >
-        {/* STATUS + ACTION BUTTONS */}
+        {/* TITLE + STATUS */}
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: 0.5,
-            mb: 2,
-          }}
-        >
-          {/* STATUS */}
+<Box
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 2,
+    mb: 2,
+  }}
+>
+  {/* TITLE */}
 
-          <Chip
-            label={statusStyle.label}
-            size="small"
-            sx={{
-              fontWeight: 500,
-              flexShrink: 0,
-              minHeight: 32,
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.text,
-            }}
-          />
+  <Typography
+    variant="h6"
+    sx={{
+      color: COLORS.text,
+      fontWeight: 800,
+      mb: 0,
+      flex: 1,
+    }}
+  >
+    {request.title}
+  </Typography>
 
+  {/* STATUS */}
+
+  <Chip
+    label={statusStyle.label}
+    size="small"
+    sx={{
+      fontWeight: 500,
+      flexShrink: 0,
+      minHeight: 32,
+      backgroundColor: statusStyle.bg,
+      color: statusStyle.text,
+    }}
+  />
+
+ 
           {/* EDIT + CANCEL ONLY FOR PENDING */}
 
           {isPending && (
@@ -176,18 +191,7 @@ function RequestCard({
             </>
           )}
         </Box>
-        {/* TITLE */}
-
-        <Typography
-          variant="h6"
-          sx={{
-            color: COLORS.text,
-            fontWeight: 800,
-            mb: 1.5,
-          }}
-        >
-          {request.title}
-        </Typography>
+       
         {/* CATEGORY */}
 
         <Typography
@@ -261,95 +265,103 @@ function RequestCard({
           </Typography>
         </Box>
 
-        {/* URGENCY */}
+        {/* URGENCY + ACTIONS */}
 
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            mb: 1.5,
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: COLORS.textMuted,
-              fontSize: '1rem',
-              fontWeight: 700,
-            }}
-          >
-            Urgency:
-          </Typography>
+<Box
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 2,
+    mt: 1,
+    flexWrap: 'wrap',
+  }}
+>
+  {/* URGENCY - LEFT */}
 
-          <Chip
-            label={request.urgency}
-            size="small"
-            sx={{
-              minHeight: 32,
-              fontSize: '0.9rem',
-              backgroundColor: urgencyStyle.bg,
-              color: urgencyStyle.text,
-              fontWeight: 700,
-            }}
-          />
-        </Box>
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 2,
+    }}
+  >
+    <Typography
+      variant="body2"
+      sx={{
+        color: COLORS.textMuted,
+        fontSize: '1rem',
+        fontWeight: 700,
+      }}
+    >
+      Urgency:
+    </Typography>
 
-        {/* ACTIONS */}
+    <Chip
+      label={request.urgency}
+      size="small"
+      sx={{
+        minHeight: 32,
+        fontSize: '0.9rem',
+        backgroundColor: urgencyStyle.bg,
+        color: urgencyStyle.text,
+        fontWeight: 700,
+      }}
+    />
+  </Box>
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            mt: 'auto',
-            pt: 1,
-            gap: 1,
-          }}
-        >
-          {/* MESSAGE BUTTON */}
+  {/* ACTIONS - RIGHT */}
 
-          {canChat && (
-            <Button
-              variant="contained"
-              startIcon={<ChatBubbleIcon />}
-              onClick={handleOpenChat}
-              sx={{
-                minHeight: 42,
-                px: 2.5,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                boxShadow: 2,
-                transition: 'all 0.2s ease',
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 1,
+    }}
+  >
+    {/* MESSAGE BUTTON */}
 
-                '&:hover': {
-                  boxShadow: 4,
-                  transform: 'translateY(-1px)',
-                },
-              }}
-            >
-              Message
-            </Button>
-          )}
+    {canChat && (
+      <Button
+        variant="contained"
+        startIcon={<ChatBubbleIcon />}
+        onClick={handleOpenChat}
+        sx={{
+          minHeight: 42,
+          px: 2.5,
+          borderRadius: 2,
+          textTransform: 'none',
+          fontWeight: 600,
+          boxShadow: 2,
+          transition: 'all 0.2s ease',
 
-          {/* VIEW DETAILS BUTTON */}
+          '&:hover': {
+            boxShadow: 4,
+            transform: 'translateY(-1px)',
+          },
+        }}
+      >
+        Message
+      </Button>
+    )}
 
-          <Button
-            onClick={handleToggleDetails}
-            sx={{
-              minHeight: 44,
-              px: 2,
-              fontSize: '1rem',
-              fontWeight: 600,
-              textTransform: 'none',
-              color: COLORS.primary,
-            }}
-          >
-            {isExpanded ? 'Hide Details' : 'View Details'}
-          </Button>
-        </Box>
+    {/* VIEW DETAILS BUTTON */}
 
+    <Button
+      onClick={handleToggleDetails}
+      sx={{
+        minHeight: 44,
+        px: 2,
+        fontSize: '1rem',
+        fontWeight: 600,
+        textTransform: 'none',
+        color: COLORS.primary,
+      }}
+    >
+      {isExpanded ? 'Hide Details' : 'View Details'}
+    </Button>
+  </Box>
+</Box>
         {/* EXPANDED DETAILS */}
 
         <Collapse in={isExpanded} timeout="auto" unmountOnExit>
