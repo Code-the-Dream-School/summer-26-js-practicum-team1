@@ -49,8 +49,17 @@ const markMessagesRead = asyncHandler(async (req, res) => {
   });
 });
 
+const getConversations = asyncHandler(async (req, res) => {
+  const conversations = await chatService.getConversations(req.user.id);
+
+  return res.status(200).json({
+    success: true,
+    data: conversations,
+  });
+});
 module.exports = {
   getMessages,
   sendMessage,
   markMessagesRead,
+  getConversations,
 };

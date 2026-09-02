@@ -66,7 +66,11 @@ function RequestCard({
   };
 
   const handleOpenChat = () => {
-    navigate(`/chat/${request.id}`);
+    navigate(`/chat/${request.id}`, {
+      state: {
+        participantId: request.volunteerId,
+      },
+    });
   };
 
   const handleEditClick = () => {
@@ -178,18 +182,18 @@ function RequestCard({
             </>
           )}
         </Box>
- {/* TITLE */}
+        {/* TITLE */}
 
-<Typography
-  variant="h6"
-  sx={{
-    color: COLORS.text,
-    fontWeight: 800,
-    mb: 1.5,
-  }}
->
-  {request.title}
-</Typography>
+        <Typography
+          variant="h6"
+          sx={{
+            color: COLORS.text,
+            fontWeight: 800,
+            mb: 1.5,
+          }}
+        >
+          {request.title}
+        </Typography>
         {/* CATEGORY */}
 
         <Typography
@@ -204,7 +208,6 @@ function RequestCard({
           {CATEGORY_BY_API_VALUE[request.category]?.label || request.category}
         </Typography>
 
-      
         {/* DATE + TIME */}
 
         <Box
@@ -312,27 +315,24 @@ function RequestCard({
         >
           {/* MESSAGE BUTTON */}
 
-          {canChat && (
+          {canChat && volunteer && (
             <Button
               variant="contained"
               startIcon={<ChatBubbleIcon />}
               onClick={handleOpenChat}
               sx={{
+                width: 140,
                 minHeight: 42,
-                px: 2.5,
+                px: 2,
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: 2,
-                transition: 'all 0.2s ease',
-
-                '&:hover': {
-                  boxShadow: 4,
-                  transform: 'translateY(-1px)',
-                },
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               }}
             >
-              Message
+              {volunteer.name || 'Volunteer'}
             </Button>
           )}
 

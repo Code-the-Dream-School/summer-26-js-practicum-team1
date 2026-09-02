@@ -6,6 +6,10 @@ const chatApi = axios.create({
   withCredentials: true,
 });
 
+export async function getConversations() {
+  const { data } = await chatApi.get('/api/chat/conversations');
+  return data.data;
+}
 export async function getMessages(requestId) {
   const { data } = await chatApi.get(
     `/api/chat/requests/${requestId}/messages`

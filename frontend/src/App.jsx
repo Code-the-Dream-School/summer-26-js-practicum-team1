@@ -63,6 +63,7 @@ function App() {
           }
         >
           <Route path="/chat/:requestId" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}

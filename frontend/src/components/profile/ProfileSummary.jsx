@@ -193,12 +193,17 @@ function ProfileSummary({
 
         <Chip
           label={roleLabel}
-
-          color="warning"
           sx={{
             fontWeight: 600,
             borderRadius: 2,
             flexShrink: 0,
+            backgroundColor:
+              user.role === 'ADMIN'
+                ? '#B33F32'
+                : user.role === 'VOLUNTEER'
+                  ? '#3F6B4E'
+                  : '#C1791E',
+            color: '#fff',
           }}
         />
       </Stack>
