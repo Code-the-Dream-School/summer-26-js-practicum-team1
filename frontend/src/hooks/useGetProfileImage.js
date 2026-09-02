@@ -10,10 +10,12 @@ export function useGetProfileImage(options = {}) {
     ...options,
   });
 
-  const imageUrl = useMemo(
-    () => (blob ? URL.createObjectURL(blob) : null),
-    [blob]
-  );
+  const imageUrl = useMemo(() => {
+    if (blob instanceof Blob && blob.size > 0) {
+      return URL.createObjectURL(blob);
+    }
+    return null;
+  }, [blob]);
 
   useEffect(() => {
     if (!imageUrl) {
