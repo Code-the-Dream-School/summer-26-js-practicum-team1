@@ -37,6 +37,12 @@ function App() {
           element={<RequestorRegistration />}
         />
 
+        {/* Volunteer Registration */}
+        <Route
+          path="volunteerRegistration"
+          element={<VolunteerRegistrationPage />}
+        />
+
         {/* General Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="volunteer-pending" element={<VolunteerPendingPage />} />
@@ -67,10 +73,6 @@ function App() {
         >
           <Route path="/chat/:requestId" element={<ChatPage />} />
         </Route>
-
-        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
-        {/* <Route path="requesterRegistration" element={<RequestorRegistration/>}/> */}
 
         {/* Volunteer Routes */}
         <Route
