@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -28,6 +28,7 @@ const Chat = ({ requestId, participant }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const navigate = useNavigate();
+  const messagesEndRef = useRef(null);
 
   const {
     data: messages = [],
@@ -36,13 +37,17 @@ const Chat = ({ requestId, participant }) => {
   } = useChatMessages(requestId);
 
   const profileImageSrc = getParticipantImage(
-    participant.profileImage,
-    participant.profileImageType
+    participant?.profileImage,
+    participant?.profileImageType
   );
 
   const sendMessage = useSendMessage(requestId);
 
   const { mutate: markMessagesRead } = useMarkMessagesRead(requestId);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     const hasUnreadMessages = messages.some(
@@ -272,6 +277,7 @@ const Chat = ({ requestId, participant }) => {
             );
           })
         )}
+        <div ref={messagesEndRef} />
       </Box>
 
       <Box
