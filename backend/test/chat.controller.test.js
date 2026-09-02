@@ -7,6 +7,7 @@ const {
   sendMessage,
   getConversations,
   markMessagesRead,
+  getUnreadMessageCount,
 } = require('../src/controllers/chat.controller');
 
 describe('Chat Controller', () => {
@@ -119,6 +120,61 @@ describe('Chat Controller', () => {
       chatService.getConversations.mockRejectedValue(error);
 
       await getConversations(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('getUnreadMessageCount', () => {
+    it('should return unread message counts for the authenticated user', async () => {
+      const unreadCount = {
+        totalUnreadCount: 3,
+        byRequest: {
+          12: 2,
+          15: 1,
+        },
+      };
+
+      chatService.getUnreadMessageCount.mockResolvedValue(unreadCount);
+
+      await getUnreadMessageCount(req, res, next);
+
+      expect(chatService.getUnreadMessageCount).toHaveBeenCalledWith(10);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: unreadCount,
+      });
+
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should return zero when there are no unread messages', async () => {
+      const unreadCount = {
+        totalUnreadCount: 0,
+        byRequest: {},
+      };
+
+      chatService.getUnreadMessageCount.mockResolvedValue(unreadCount);
+
+      await getUnreadMessageCount(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        data: unreadCount,
+      });
+    });
+
+    it('should pass service errors to next', async () => {
+      const error = new Error('Failed to retrieve unread message count');
+
+      chatService.getUnreadMessageCount.mockRejectedValue(error);
+
+      await getUnreadMessageCount(req, res, next);
 
       expect(next).toHaveBeenCalledWith(error);
     });
