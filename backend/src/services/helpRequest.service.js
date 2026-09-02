@@ -5,6 +5,7 @@ const notificationService = require('./notification.service');
 
 async function createHelpRequest({ requesterId, data }) {
   const scheduledDate = new Date(data.scheduledAt);
+
   if (scheduledDate <= new Date()) {
     throw new ApiError(400, 'scheduledAt must be a future date');
   }
@@ -26,7 +27,7 @@ async function createHelpRequest({ requesterId, data }) {
 }
 
 async function getHelpRequests({ requesterId }) {
-  const rows = await prisma.helpRequest.findMany({
+  const requests = await prisma.helpRequest.findMany({
     where: {
       requesterId,
     },
@@ -35,7 +36,7 @@ async function getHelpRequests({ requesterId }) {
     },
     include: {
       volunteer: {
-        include: {
+        select: {
           user: {
             select: {
               id: true,
@@ -49,24 +50,187 @@ async function getHelpRequests({ requesterId }) {
     },
   });
 
-  return rows.map((row) => {
-    const { volunteer, ...request } = row;
+  return requests.map((request) => ({
+    ...request,
+    volunteer: request.volunteer?.user || null,
+  }));
+}
 
-    if (!volunteer) {
-      return request;
-    }
+async function getHelpRequestById({ id, requesterId }) {
+  const helpRequest = await prisma.helpRequest.findUnique({
+    where: {
+      id,
+      requesterId,
+    },
+  });
 
-    return {
-      ...request,
-      volunteer: {
-        id: volunteer.userId,
-        name: volunteer.user.name,
-        email: volunteer.user.email,
-        phone: volunteer.user.phone,
-      },
-    };
+  if (!helpRequest) {
+    throw new ApiError(404, 'Help request not found');
+  }
+
+  return helpRequest;
+}
+
+async function updateHelpRequest({ id, requesterId, data }) {
+  const existingRequest = await prisma.helpRequest.findUnique({
+    where: {
+      id,
+      requesterId,
+    },
+  });
+
+  if (!existingRequest) {
+    throw new ApiError(404, 'Help request not found');
+  }
+
+  if (existingRequest.status !== RequestStatus.PENDING) {
+    throw new ApiError(400, 'Only pending requests can be edited');
+  }
+
+  const scheduledDate = new Date(data.scheduledAt);
+
+  if (scheduledDate <= new Date()) {
+    throw new ApiError(400, 'scheduledAt must be a future date');
+  }
+
+  return prisma.helpRequest.update({
+    where: {
+      id,
+    },
+    data: {
+      title: data.title,
+      category: data.category,
+      urgency: data.urgency,
+      scheduledAt: scheduledDate,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      description: data.description || null,
+    },
   });
 }
+
+async function cancelHelpRequest({ id, requesterId }) {
+  const existingRequest = await prisma.helpRequest.findFirst({
+    where: {
+      id,
+      requesterId,
+    },
+  });
+
+  if (!existingRequest) {
+    throw new ApiError(404, 'Help request not found');
+  }
+
+  if (existingRequest.status !== RequestStatus.PENDING) {
+    throw new ApiError(400, 'Only pending requests can be cancelled');
+  }
+
+  return prisma.helpRequest.update({
+    where: {
+      id,
+    },
+    data: {
+      status: RequestStatus.CANCELLED,
+    },
+  });
+}
+
+async function getAcceptedVolunteerProfile({ requestId, requesterId }) {
+  const helpRequest = await prisma.helpRequest.findFirst({
+    where: {
+      id: requestId,
+      requesterId,
+    },
+    select: {
+      status: true,
+      volunteerId: true,
+    },
+  });
+
+  if (!helpRequest) {
+    throw new ApiError(404, 'Help request not found');
+  }
+
+  if (helpRequest.status !== RequestStatus.ACCEPTED) {
+    throw new ApiError(
+      400,
+      'Volunteer profile is only available for accepted requests'
+    );
+  }
+
+  if (!helpRequest.volunteerId) {
+    throw new ApiError(404, 'No volunteer has been assigned to this request');
+  }
+
+  const volunteer = await prisma.user.findUnique({
+    where: {
+      id: helpRequest.volunteerId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      profileImage: true,
+      profileImageType: true,
+
+      volunteerProfile: {
+        select: {
+          bio: true,
+          verificationStatus: true,
+          serviceArea: true,
+          serviceLatitude: true,
+          serviceLongitude: true,
+          availability: true,
+
+          supportCategories: {
+            select: {
+              supportCategory: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!volunteer) {
+    throw new ApiError(404, 'Volunteer not found');
+  }
+
+  return {
+    id: volunteer.id,
+    name: volunteer.name,
+    email: volunteer.email,
+    phone: volunteer.phone,
+    profileImage: volunteer.profileImage,
+    profileImageType: volunteer.profileImageType,
+
+    volunteerProfile: volunteer.volunteerProfile
+      ? {
+          bio: volunteer.volunteerProfile.bio,
+          verificationStatus: volunteer.volunteerProfile.verificationStatus,
+          serviceArea: volunteer.volunteerProfile.serviceArea,
+          serviceLatitude: volunteer.volunteerProfile.serviceLatitude,
+          serviceLongitude: volunteer.volunteerProfile.serviceLongitude,
+          availability: volunteer.volunteerProfile.availability,
+
+          interests: volunteer.volunteerProfile.supportCategories.map(
+            (row) => row.supportCategory
+          ),
+        }
+      : null,
+  };
+}
+
+// --------------------------------------------------
+// Browse Help Requests
+// --------------------------------------------------
 
 const DEFAULT_SORT_DIR = {
   createdAt: 'desc',
@@ -74,16 +238,25 @@ const DEFAULT_SORT_DIR = {
   urgency: 'desc',
   distance: 'asc',
 };
-const URGENCY_RANK = { LOW: 0, MEDIUM: 1, HIGH: 2 };
+
+const URGENCY_RANK = {
+  LOW: 0,
+  MEDIUM: 1,
+  HIGH: 2,
+};
 
 function haversineMiles(lat1, lng1, lat2, lng2) {
   const EARTH_RADIUS_MI = 3959;
+
   const toRad = (deg) => (deg * Math.PI) / 180;
+
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);
+
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+
   return EARTH_RADIUS_MI * 2 * Math.asin(Math.sqrt(Math.min(1, a)));
 }
 
@@ -92,6 +265,7 @@ function buildRequestWhere({ user, query, excludeCategory = false }) {
   const andConditions = [];
 
   const statuses = query.status?.split(',');
+
   where.status = statuses ? { in: statuses } : RequestStatus.PENDING;
 
   const isPendingOnly =
@@ -104,22 +278,36 @@ function buildRequestWhere({ user, query, excludeCategory = false }) {
   }
 
   if (!excludeCategory && query.category) {
-    where.category = { in: query.category.split(',') };
+    where.category = {
+      in: query.category.split(','),
+    };
   }
 
-  if (query.urgency) where.urgency = { in: query.urgency.split(',') };
+  if (query.urgency) {
+    where.urgency = {
+      in: query.urgency.split(','),
+    };
+  }
 
   if (query.scheduledAfter || query.scheduledBefore) {
     where.scheduledAt = {
-      ...(query.scheduledAfter && { gte: new Date(query.scheduledAfter) }),
-      ...(query.scheduledBefore && { lte: new Date(query.scheduledBefore) }),
+      ...(query.scheduledAfter && {
+        gte: new Date(query.scheduledAfter),
+      }),
+      ...(query.scheduledBefore && {
+        lte: new Date(query.scheduledBefore),
+      }),
     };
   }
 
   if (query.createdAfter || query.createdBefore) {
     where.createdAt = {
-      ...(query.createdAfter && { gte: new Date(query.createdAfter) }),
-      ...(query.createdBefore && { lte: new Date(query.createdBefore) }),
+      ...(query.createdAfter && {
+        gte: new Date(query.createdAfter),
+      }),
+      ...(query.createdBefore && {
+        lte: new Date(query.createdBefore),
+      }),
     };
   }
 
@@ -132,13 +320,25 @@ function buildRequestWhere({ user, query, excludeCategory = false }) {
   if (query.q) {
     andConditions.push({
       OR: [
-        { title: { contains: query.q, mode: 'insensitive' } },
-        { description: { contains: query.q, mode: 'insensitive' } },
+        {
+          title: {
+            contains: query.q,
+            mode: 'insensitive',
+          },
+        },
+        {
+          description: {
+            contains: query.q,
+            mode: 'insensitive',
+          },
+        },
       ],
     });
   }
 
-  if (andConditions.length) where.AND = andConditions;
+  if (andConditions.length) {
+    where.AND = andConditions;
+  }
 
   const hasGeo =
     query.lat !== undefined &&
@@ -146,40 +346,68 @@ function buildRequestWhere({ user, query, excludeCategory = false }) {
     query.radiusMi !== undefined;
 
   const lat = hasGeo ? Number(query.lat) : null;
+
   const lng = hasGeo ? Number(query.lng) : null;
+
   const radiusMi = hasGeo ? Number(query.radiusMi) : null;
 
   if (hasGeo) {
     const latDelta = radiusMi / 69;
+
     const lngDelta = radiusMi / (69 * Math.cos((lat * Math.PI) / 180));
-    where.latitude = { gte: lat - latDelta, lte: lat + latDelta };
-    where.longitude = { gte: lng - lngDelta, lte: lng + lngDelta };
+
+    where.latitude = {
+      gte: lat - latDelta,
+      lte: lat + latDelta,
+    };
+
+    where.longitude = {
+      gte: lng - lngDelta,
+      lte: lng + lngDelta,
+    };
   }
 
-  return { where, hasGeo, lat, lng, radiusMi };
+  return {
+    where,
+    hasGeo,
+    lat,
+    lng,
+    radiusMi,
+  };
 }
 
-const getBrowseHelpRequests = async ({ user, query }) => {
+async function getBrowseHelpRequests({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
     query,
   });
 
   const [sortField, sortDirRaw] = (query.sort || 'createdAt:desc').split(':');
+
   const sortDir = sortDirRaw || DEFAULT_SORT_DIR[sortField] || 'desc';
 
   if (sortField === 'distance' && !hasGeo) {
     throw new ApiError(400, 'sort=distance requires lat, lng, and radiusMi');
   }
 
-  const options = { where };
+  const options = {
+    where,
+  };
+
   const page = query.page;
   const pageSize = query.pageSize;
 
   const requiresInMemoryProcessing = hasGeo || sortField === 'distance';
 
   if (!requiresInMemoryProcessing) {
-    options.orderBy = [{ [sortField]: sortDir }, { id: 'asc' }];
+    options.orderBy = [
+      {
+        [sortField]: sortDir,
+      },
+      {
+        id: 'asc',
+      },
+    ];
 
     const [data, totalCount] = await Promise.all([
       prisma.helpRequest.findMany({
@@ -187,7 +415,10 @@ const getBrowseHelpRequests = async ({ user, query }) => {
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
-      prisma.helpRequest.count({ where }),
+
+      prisma.helpRequest.count({
+        where,
+      }),
     ]);
 
     return {
@@ -207,6 +438,7 @@ const getBrowseHelpRequests = async ({ user, query }) => {
     data = data
       .map((request) => ({
         ...request,
+
         distanceMi: haversineMiles(
           lat,
           lng,
@@ -219,23 +451,33 @@ const getBrowseHelpRequests = async ({ user, query }) => {
 
   const compareBy = {
     distance: (a, b) => a.distanceMi - b.distanceMi,
+
     urgency: (a, b) => URGENCY_RANK[a.urgency] - URGENCY_RANK[b.urgency],
+
     createdAt: (a, b) => a.createdAt - b.createdAt,
+
     scheduledAt: (a, b) => a.scheduledAt - b.scheduledAt,
   };
 
   data.sort((a, b) => {
     const diff = compareBy[sortField](a, b);
-    if (diff !== 0) return sortDir === 'asc' ? diff : -diff;
-    return a.id - b.id;  
+
+    if (diff !== 0) {
+      return sortDir === 'asc' ? diff : -diff;
+    }
+
+    return a.id - b.id;
   });
 
   const totalCount = data.length;
+
   const start = (page - 1) * pageSize;
+
   const paginated = data.slice(start, start + pageSize);
 
   return {
     data: paginated,
+
     meta: {
       page,
       pageSize,
@@ -243,9 +485,11 @@ const getBrowseHelpRequests = async ({ user, query }) => {
       totalPages: Math.ceil(totalCount / pageSize),
     },
   };
-};
+}
 
-const getCategoryFacets = async ({ user, query }) => {
+
+
+async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
     user,
     query,
@@ -259,26 +503,35 @@ const getCategoryFacets = async ({ user, query }) => {
       _count: true,
     });
 
-    return groups.reduce((acc, g) => {
-      acc[g.category] = g._count;
+    return groups.reduce((acc, group) => {
+      acc[group.category] = group._count;
+
       return acc;
     }, {});
   }
 
   const rows = await prisma.helpRequest.findMany({
     where,
-    select: { category: true, latitude: true, longitude: true },
+
+    select: {
+      category: true,
+      latitude: true,
+      longitude: true,
+    },
   });
 
   return rows
     .filter(
-      (r) => haversineMiles(lat, lng, r.latitude, r.longitude) <= radiusMi
+      (row) => haversineMiles(lat, lng, row.latitude, row.longitude) <= radiusMi
     )
-    .reduce((acc, r) => {
-      acc[r.category] = (acc[r.category] || 0) + 1;
+    .reduce((acc, row) => {
+      acc[row.category] = (acc[row.category] || 0) + 1;
+
       return acc;
     }, {});
-};
+}
+
+
 
 const isOpenRequest = (request) =>
   request.status === RequestStatus.PENDING && request.volunteerId === null;
@@ -424,6 +677,10 @@ async function declineHelpRequest({ requestId, volunteerId }) {
 module.exports = {
   createHelpRequest,
   getHelpRequests,
+  getHelpRequestById,
+  updateHelpRequest,
+  cancelHelpRequest,
+  getAcceptedVolunteerProfile,
   getBrowseHelpRequests,
   getCategoryFacets,
   acceptHelpRequest,

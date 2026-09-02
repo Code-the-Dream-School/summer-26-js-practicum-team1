@@ -1,7 +1,12 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const { logon, logoff, me, register } = require('../controllers/auth.controller');
+const {
+  logon,
+  logoff,
+  me,
+  register,
+} = require('../controllers/auth.controller');
 const jwtMiddleware = require('../middleware/jwt.middleware');
 const validate = require('../middleware/validate.middleware');
 const csrfMiddleware = require('../middleware/csrf.middleware');
@@ -27,7 +32,7 @@ const registerLimiter = rateLimit({
 });
 
 router.post('/logon', loginLimiter, validate(authSchema), logon);
-router.post('/logoff', jwtMiddleware, csrfMiddleware, logoff);  
+router.post('/logoff', jwtMiddleware, csrfMiddleware, logoff);
 router.get('/me', jwtMiddleware, me);
 router.post(
   '/register',

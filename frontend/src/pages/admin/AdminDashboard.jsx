@@ -59,14 +59,23 @@ function AdminDashboard() {
 
   return (
     <>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{ margin: 3, marginLeft: 0, fontWeight: 700, mb: 3 }}
-      >
-        ADMIN DASHBOARD
-      </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h5"
+          align="left"
+          sx={{ marginLeft: 0, fontWeight: 700 }}
+        >
+          ADMIN DASHBOARD
+        </Typography>
 
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ textAlign: { xs: 'center', sm: 'left' } }}
+        >
+          Explore User Details.
+        </Typography>
+      </Box>
       <Grid container spacing={6}>
         {dashboardCards.map((card) => (
           <Grid
@@ -93,11 +102,10 @@ function AdminDashboard() {
           <Button
             size="medium"
             variant="contained"
-            color="success"
+            color="primary"
             onClick={handleNavigationVolunteers}
 
             sx={{
-              borderRadius: 2,
               boxShadow: 3,
               width: 400,
               transition: '0.3s',
@@ -113,11 +121,10 @@ function AdminDashboard() {
           <Button
             size="medium"
             variant="contained"
-            color="success"
+            color="primary"
             onClick={handleNavigationUsers}
 
             sx={{
-              borderRadius: 2,
               boxShadow: 3,
               width: 400,
               transition: '0.3s',

@@ -11,7 +11,6 @@ import {
   Pagination,
 } from '@mui/material';
 import {
-  COLORS,
   DEFAULT_DISTANCE_MI,
   CATEGORIES,
   URGENCY_LEVELS,
@@ -19,6 +18,7 @@ import {
   fieldSx,
   inputLabelSx,
 } from '../utils/browse.constants.js';
+import { COLORS } from '../utils/constants.js';
 import {
   toggleInArray,
   friendlyErrorMessage,
@@ -159,11 +159,8 @@ function Browse() {
 
   const { categoryCounts } = useCategoryFacets(filters);
 
-  const {
-    acceptRequest,
-    declineRequest,
-    respondingRequestId,
-  } = useRespondToHelpRequest();
+  const { acceptRequest, declineRequest, respondingRequestId } =
+    useRespondToHelpRequest();
 
   const [declinedRequestIds, setDeclinedRequestIds] = useState(() => new Set());
   const [feedback, setFeedback] = useState(null);

@@ -3,9 +3,9 @@ import Pill from './Pill';
 import {
   CATEGORY_BY_API_VALUE,
   URGENCY_BY_API_VALUE,
-  COLORS,
 } from '../../utils/browse.constants';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import { COLORS } from '../../utils/constants';
 
 function formatScheduledLabel(scheduledAt) {
   if (!scheduledAt) return 'Flexible anytime';
