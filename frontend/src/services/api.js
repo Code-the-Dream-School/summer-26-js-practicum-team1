@@ -79,7 +79,7 @@ function buildHelpRequestParams(filters = {}) {
  * should return category counts for the other active filters.
  */
 function buildFacetsParams(filters = {}) {
-  const { category, ...rest } = filters;
+  const { category: _category, ...rest } = filters;
 
   return buildFilterParams(rest);
 }
