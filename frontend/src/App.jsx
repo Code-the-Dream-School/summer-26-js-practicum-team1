@@ -1,21 +1,26 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
+
 import HomePage from './pages/HomePage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import VolunteerApprovals from './pages/admin/VolunteerApprovals';
-import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
-import UsersList from './pages/admin/UsersList';
-import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import Login from './pages/Login';
 import SignupPage from './pages/SignupPage';
+
+import AdminDashboard from './pages/admin/AdminDashboard';
+import VolunteerApprovals from './pages/admin/VolunteerApprovals';
+import UsersList from './pages/admin/UsersList';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
+
 import RequesterDashboard from './pages/Requester/RequesterDashboard';
 import RequestorRegistration from './pages/Register';
 import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import ChatPage from './pages/ChatPage';
 import About from './pages/About';
+import Contact from './pages/Contact';
+
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleProtectedRoute from './components/auth/RoleProtectedRoute';
 
 function App() {
   return (
@@ -24,27 +29,28 @@ function App() {
         {/* Public routes */}
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
-        {/* Placeholder for future routes to volunteer registration and requestor registration pages */}
-        {/* <Route path="volunteerRegistration" element={<VolunteerRegistration/>}/> */}
+
+        {/* Requester Registration */}
         <Route
           path="requesterRegistration"
           element={<RequestorRegistration />}
         />
 
-        {/* Protected Routes */}
+        {/* General Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* Requester Routes */}
         <Route element={<RoleProtectedRoute allowedRoles={['requester']} />}>
-          <Route path="/requester-dashboard" element={<RequesterDashboard />} />
-          <Route path="/helpRequest" element={<NewhelpRequest />} />
+          <Route path="requester-dashboard" element={<RequesterDashboard />} />
+          <Route path="helpRequest" element={<NewhelpRequest />} />
         </Route>
 
-        {/* Admin routes */}
+        {/* Admin Routes */}
         <Route element={<RoleProtectedRoute allowedRoles={['admin']} />}>
           <Route path="admin/dashboard" element={<AdminDashboard />} />
           <Route path="admin/volunteers" element={<VolunteerApprovals />} />
@@ -59,6 +65,7 @@ function App() {
           }
         >
           <Route path="/chat/:requestId" element={<ChatPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
 
         {/* Placeholder for future routes to volunteer registration and requestor registration pages */}

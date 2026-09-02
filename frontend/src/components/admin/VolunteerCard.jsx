@@ -131,14 +131,6 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
           onClick={() =>
             navigate(`/admin/users/${userId}?from=pending-volunteers`)
           }
-          sx={{
-            boxShadow: 3,
-            transition: '0.3s',
-            '&:hover': {
-              boxShadow: 8,
-              transform: 'translateY(-4px)',
-            },
-          }}
         >
           View Profile
         </Button>
@@ -149,16 +141,6 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
             variant="contained"
 
             onClick={() => approveMutation.mutate(userId)}
-
-            sx={{
-              boxShadow: 3,
-              transition: '0.3s',
-
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
-            }}
           >
             Approve
           </Button>
@@ -168,14 +150,6 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
             variant="contained"
 
             onClick={() => rejectMutation.mutate(userId)}
-            sx={{
-              boxShadow: 3,
-              transition: '0.3s',
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
-            }}
           >
             Reject
           </Button>

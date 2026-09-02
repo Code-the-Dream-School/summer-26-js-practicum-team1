@@ -99,10 +99,12 @@ describe('PUT /api/profile/volunteer', () => {
   });
 
   it('rejects serviceArea without coordinates', async () => {
-    const res = await request(app).put('/api/profile/volunteer').send({
-      serviceArea: 'San Jose',
-      interestIds: [1],
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        serviceArea: 'San Jose',
+        interestIds: [1],
+      });
 
     expect(res.status).toBe(400);
     expect(
@@ -111,9 +113,11 @@ describe('PUT /api/profile/volunteer', () => {
   });
 
   it('rejects invalid volunteer payload', async () => {
-    const res = await request(app).put('/api/profile/volunteer').send({
-      interestIds: ['not-a-number'],
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        interestIds: ['not-a-number'],
+      });
 
     expect(res.status).toBe(400);
     expect(
@@ -122,13 +126,15 @@ describe('PUT /api/profile/volunteer', () => {
   });
 
   it('rejects slots where endTime is not after startTime', async () => {
-    const res = await request(app).put('/api/profile/volunteer').send({
-      interestIds: [1],
-      availability: {
-        frequency: 'WEEKLY',
-        slots: [{ dayOfWeek: 'MON', startTime: '12:00', endTime: '09:00' }],
-      },
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        interestIds: [1],
+        availability: {
+          frequency: 'WEEKLY',
+          slots: [{ dayOfWeek: 'MON', startTime: '12:00', endTime: '09:00' }],
+        },
+      });
 
     expect(res.status).toBe(400);
     expect(
@@ -137,16 +143,18 @@ describe('PUT /api/profile/volunteer', () => {
   });
 
   it('rejects overlapping slots on the same day', async () => {
-    const res = await request(app).put('/api/profile/volunteer').send({
-      interestIds: [1],
-      availability: {
-        frequency: 'WEEKLY',
-        slots: [
-          { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' },
-          { dayOfWeek: 'MON', startTime: '11:00', endTime: '14:00' },
-        ],
-      },
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        interestIds: [1],
+        availability: {
+          frequency: 'WEEKLY',
+          slots: [
+            { dayOfWeek: 'MON', startTime: '09:00', endTime: '12:00' },
+            { dayOfWeek: 'MON', startTime: '11:00', endTime: '14:00' },
+          ],
+        },
+      });
 
     expect(res.status).toBe(400);
     expect(
@@ -157,9 +165,11 @@ describe('PUT /api/profile/volunteer', () => {
   it('rejects a requester', async () => {
     jwtMiddleware.__setRole('REQUESTER');
 
-    const res = await request(app).put('/api/profile/volunteer').send({
-      interestIds: [1],
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        interestIds: [1],
+      });
 
     expect(res.status).toBe(403);
     expect(
@@ -170,9 +180,11 @@ describe('PUT /api/profile/volunteer', () => {
   it('rejects a pending volunteer', async () => {
     jwtMiddleware.__setVerificationStatus('PENDING');
 
-    const res = await request(app).put('/api/profile/volunteer').send({
-      interestIds: [1],
-    });
+    const res = await request(app)
+      .put('/api/profile/volunteer')
+      .send({
+        interestIds: [1],
+      });
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ error: 'Volunteer account not approved' });

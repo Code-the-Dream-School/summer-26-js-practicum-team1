@@ -43,15 +43,15 @@ Role is always `REQUESTER`. It is set by the server. It is not accepted from the
 
 ## Fields
 
-| Field | API key | Required | Rules |
-|-------|---------|----------|-------|
-| Full Name | `name` | yes | trim, 2–100 chars, letters / spaces / hyphens / apostrophes |
-| Email | `email` | yes | trim, lowercase, valid email, max 255, unique |
-| Password | `password` | yes | 8–72 chars, at least one uppercase, lowercase, and number; not trimmed; stored as bcrypt hash |
-| Date of Birth | `dob` | yes | `YYYY-MM-DD`, not future, age 18–120 |
-| Gender | `gender` | yes | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY` |
-| Phone | `phone` | no | max 20; digits, spaces, `+ - ( )`; empty → `null` |
-| Profile picture | `profileImage` | no | JPEG or PNG only; max 2MB; stored as `profileImage` (`Bytes`); sent as multipart file |
+| Field           | API key        | Required | Rules                                                                                         |
+| --------------- | -------------- | -------- | --------------------------------------------------------------------------------------------- |
+| Full Name       | `name`         | yes      | trim, 2–100 chars, letters / spaces / hyphens / apostrophes                                   |
+| Email           | `email`        | yes      | trim, lowercase, valid email, max 255, unique                                                 |
+| Password        | `password`     | yes      | 8–72 chars, at least one uppercase, lowercase, and number; not trimmed; stored as bcrypt hash |
+| Date of Birth   | `dob`          | yes      | `YYYY-MM-DD`, not future, age 18–120                                                          |
+| Gender          | `gender`       | yes      | `MALE`, `FEMALE`, `OTHER`, `PREFER_NOT_TO_SAY`                                                |
+| Phone           | `phone`        | no       | max 20; digits, spaces, `+ - ( )`; empty → `null`                                             |
+| Profile picture | `profileImage` | no       | JPEG or PNG only; max 2MB; stored as `profileImage` (`Bytes`); sent as multipart file         |
 
 Age is derived from `dob` for display only. It is not sent to the API.
 
@@ -63,16 +63,16 @@ Unknown fields (including `role`) are rejected.
 
 ## Validation errors
 
-| Field | Messages |
-|-------|----------|
-| name | `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters` |
-| email | `Email is required`, `Enter a valid email address` |
-| password | `Password is required`, `Password must be at least 8 characters`, `Password must be at most 72 characters`, `Password must include uppercase, lowercase, and a number` |
-| dob | `Date of birth is required`, `Date of birth must be YYYY-MM-DD`, `Date of birth cannot be in the future`, `You must be at least 18 years old`, `Enter a valid date of birth` |
-| gender | `Gender is required`, `Please select a valid gender` |
-| phone | `Phone must be at most 20 characters`, `Enter a valid phone number` |
-| profileImage | `Profile picture must be a JPEG or PNG image`, `Profile picture must be at most 2MB` |
-| email (duplicate) | `This email is already registered` |
+| Field             | Messages                                                                                                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| name              | `Name is required`, `Name must be at least 2 characters`, `Name must be at most 100 characters`, `Name contains invalid characters`                                          |
+| email             | `Email is required`, `Enter a valid email address`                                                                                                                           |
+| password          | `Password is required`, `Password must be at least 8 characters`, `Password must be at most 72 characters`, `Password must include uppercase, lowercase, and a number`       |
+| dob               | `Date of birth is required`, `Date of birth must be YYYY-MM-DD`, `Date of birth cannot be in the future`, `You must be at least 18 years old`, `Enter a valid date of birth` |
+| gender            | `Gender is required`, `Please select a valid gender`                                                                                                                         |
+| phone             | `Phone must be at most 20 characters`, `Enter a valid phone number`                                                                                                          |
+| profileImage      | `Profile picture must be a JPEG or PNG image`, `Profile picture must be at most 2MB`                                                                                         |
+| email (duplicate) | `This email is already registered`                                                                                                                                           |
 
 ---
 
@@ -119,9 +119,7 @@ Text fields may be sent as JSON, or as `multipart/form-data` when uploading a pr
 {
   "success": false,
   "message": "Validation failed",
-  "details": [
-    { "field": "email", "message": "Enter a valid email address" }
-  ]
+  "details": [{ "field": "email", "message": "Enter a valid email address" }]
 }
 ```
 

@@ -1,4 +1,4 @@
-import { COLORS } from "./constants";
+import { COLORS } from './constants';
 
 export const DEFAULT_DISTANCE_MI = 5;
 

@@ -80,9 +80,7 @@ describe('POST /api/auth/register', () => {
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('Validation failed');
     expect(res.body.details).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ field: 'password' }),
-      ])
+      expect.arrayContaining([expect.objectContaining({ field: 'password' })])
     );
     expect(prisma.user.create).not.toHaveBeenCalled();
   });

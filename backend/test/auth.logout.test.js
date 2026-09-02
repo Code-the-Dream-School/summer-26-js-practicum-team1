@@ -35,7 +35,9 @@ const jwtCookie = (res) =>
 const auditLines = (logSpy) =>
   logSpy.mock.calls
     .map(([line]) => line)
-    .filter((line) => typeof line === 'string' && line.includes('logout_attempt'));
+    .filter(
+      (line) => typeof line === 'string' && line.includes('logout_attempt')
+    );
 
 describe('POST /api/auth/logoff', () => {
   let logSpy;
