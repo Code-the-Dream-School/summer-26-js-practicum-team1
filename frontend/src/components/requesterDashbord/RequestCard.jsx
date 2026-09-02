@@ -99,97 +99,107 @@ function RequestCard({
           flexDirection: 'column',
         }}
       >
-        {/* TITLE + STATUS */}
+               {/* TITLE + EDIT/CANCEL + STATUS */}
 
-<Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 2,
-    mb: 2,
-  }}
->
-  {/* TITLE */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            mb: 2,
+          }}
+        >
+          {/* TITLE */}
 
-  <Typography
-    variant="h6"
-    sx={{
-      color: COLORS.text,
-      fontWeight: 800,
-      mb: 0,
-      flex: 1,
-    }}
-  >
-    {request.title}
-  </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              color: COLORS.text,
+              fontWeight: 800,
+              mb: 0,
+              flex: 1,
+            }}
+          >
+            {request.title}
+          </Typography>
 
-  {/* STATUS */}
+          {/* EDIT + CANCEL + STATUS */}
 
-  <Chip
-    label={statusStyle.label}
-    size="small"
-    sx={{
-      fontWeight: 500,
-      flexShrink: 0,
-      minHeight: 32,
-      backgroundColor: statusStyle.bg,
-      color: statusStyle.text,
-    }}
-  />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexShrink: 0,
+            }}
+          >
+            {/* EDIT + CANCEL ONLY FOR PENDING */}
 
- 
-          {/* EDIT + CANCEL ONLY FOR PENDING */}
+            {isPending && (
+              <>
+                {/* EDIT */}
 
-          {isPending && (
-            <>
-              {/* EDIT */}
+                <Tooltip title="Edit request">
+                  <IconButton
+                    onClick={handleEditClick}
+                    aria-label="Edit help request"
+                    size="small"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      color: COLORS.primary,
+                      borderRadius: 2,
 
-              <Tooltip title="Edit request">
-                <IconButton
-                  onClick={handleEditClick}
-                  aria-label="Edit help request"
-                  size="small"
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    flexShrink: 0,
-                    color: COLORS.primary,
-                    borderRadius: 2,
+                      '&:hover': {
+                        backgroundColor: COLORS.bgSubtle,
+                      },
+                    }}
+                  >
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
 
-                    '&:hover': {
-                      backgroundColor: COLORS.bgSubtle,
-                    },
-                  }}
-                >
-                  <EditOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+                {/* CANCEL */}
 
-              {/* CANCEL */}
+                <Tooltip title="Cancel request">
+                  <IconButton
+                    onClick={handleCancelClick}
+                    aria-label="Cancel help request"
+                    size="small"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      color: COLORS.primary,
+                      borderRadius: 2,
 
-              <Tooltip title="Cancel request">
-                <IconButton
-                  onClick={handleCancelClick}
-                  aria-label="Cancel help request"
-                  size="small"
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    flexShrink: 0,
-                    color: COLORS.primary,
-                    borderRadius: 2,
+                      '&:hover': {
+                        backgroundColor: COLORS.bgSubtle,
+                      },
+                    }}
+                  >
+                    <DeleteForeverOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
 
-                    '&:hover': {
-                      backgroundColor: COLORS.bgSubtle,
-                    },
-                  }}
-                >
-                  <DeleteForeverOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
+            {/* STATUS */}
+
+            <Chip
+              label={statusStyle.label}
+              size="small"
+              sx={{
+                fontWeight: 500,
+                flexShrink: 0,
+                minHeight: 32,
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.text,
+              }}
+            />
+          </Box>
         </Box>
        
         {/* CATEGORY */}
