@@ -319,7 +319,11 @@ const Chat = ({ requestId, participant }) => {
             },
           }}
         >
-          <SendIcon />
+          {sendMessage.isPending ? (
+            <CircularProgress size={20} color="inherit" />
+          ) : (
+            <SendIcon />
+          )}
         </Button>
       </Box>
     </Box>
