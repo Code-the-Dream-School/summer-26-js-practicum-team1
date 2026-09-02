@@ -16,6 +16,7 @@ import Browse from './pages/Browse';
 import ProfilePage from './pages/ProfilePage';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import ChatPage from './pages/ChatPage';
+import About from './pages/About';
 import Contact from './pages/Contact';
 
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -27,6 +28,7 @@ function App() {
       <Route path="/" element={<MainLayout />}>
         {/* Public routes */}
         <Route index element={<HomePage />} />
+        <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
