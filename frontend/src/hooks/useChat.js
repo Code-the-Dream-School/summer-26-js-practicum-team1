@@ -59,5 +59,11 @@ export function useMarkMessagesRead(requestId) {
 
       return markMessagesRead(requestId, me?.csrfToken);
     },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['chat', 'unread-count'],
+      });
+    },
   });
 }

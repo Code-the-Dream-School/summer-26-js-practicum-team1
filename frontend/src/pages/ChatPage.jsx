@@ -6,7 +6,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import Chat from '../components/chat/Chat';
 import ConversationList from '../components/chat/ConversationList';
 
-import { useGetConversation } from '../hooks/useChat';
+import { useGetConversation, useGetUnreadCount } from '../hooks/useChat';
 
 const ChatPage = () => {
   const { requestId } = useParams();
@@ -25,6 +25,10 @@ const ChatPage = () => {
     : null;
 
   const activeConversation = selectedConversation || conversationFromRequest;
+
+  const { data: unreadData } = useGetUnreadCount();
+
+  const unreadByRequest = unreadData?.byRequest ?? {};
 
   if (isLoading) {
     return (
@@ -82,6 +86,7 @@ const ChatPage = () => {
           conversations={conversations}
           selectedConversationId={activeConversation?.conversationId}
           onSelect={setSelectedConversation}
+          unreadByRequest={unreadByRequest}
         />
 
         <Box sx={{ flex: 1 }}>
