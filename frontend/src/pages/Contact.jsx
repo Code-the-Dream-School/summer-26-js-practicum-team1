@@ -17,11 +17,13 @@ import deryaProfilePhoto from '../assets/derya-profile.png';
 const team = [
   {
     name: 'Derya Kendircikahraman',
-    role: 'Backend / Full Stack',
-    bio: "I worked on our registration APIs, volunteer profile and preferences, admin user detail views, and the volunteer accept/decline flow with in-app notifications for requesters. The accept-and-notify path was my favorite to build because it ties the whole product together—one volunteer commits, the requester knows right away, and the database has to stay correct even when two people click at the same time.",
+    role: 'Frontend / Backend',
+    bio: "On the backend, I built registration and volunteer profile APIs, accept/decline with notifications, and admin user endpoints. On the frontend, I built the volunteer profile page, admin user detail view, browse accept/decline actions, and requester dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
     photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
+    extraLinkLabel: 'Portfolio',
+    extraLink: 'https://deryakendirci.vercel.app/',
   },
   {
     name: 'Emmanuel Cobian',
