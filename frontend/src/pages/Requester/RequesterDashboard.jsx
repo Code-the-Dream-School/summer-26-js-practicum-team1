@@ -1,493 +1,140 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Collapse,
-  MenuItem,
-  Select,
-  Typography,
-} from '@mui/material';
+
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
+import { searchPlaces } from '../../services/geoapify';
+import {
+  getMe,
+  getHelpRequests,
+  getHelpRequestById,
+  updateHelpRequest,
+  cancelHelpRequest,
+} from '../../services/api';
 
-import AddIcon from '@mui/icons-material/Add';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import RequestCard from '../../components/requesterDashbord/RequestCard.jsx';
+import RequestFilters from '../../components/requesterDashbord/RequestFilters.jsx';
+import VolunteerProfileDialog from '../../components/requesterDashbord/VolunteerProfileDialog.jsx';
+import EditRequestDialog from '../../components/requesterDashbord/EditRequestDialog.jsx';
+import CancelRequestDialog from '../../components/requesterDashbord/CancelRequestDialog.jsx';
 
-import { getMe, getHelpRequests } from '../../services/api';
+import { COLORS } from '../../utils/constants.js';
 
-const URGENCY_STYLES = {
-  HIGH: {
-    border: '#9b1518ff',
-    bg: '#e82618ff',
-    text: '#FFF1F0',
-  },
+import {
+  formatDateTimeLocal,
+  URGENCY_RANK,
+} from '../../utils/requester.constants.js';
 
-  MEDIUM: {
-    border: '#FFB020',
-    bg: '#FFB020',
-    text: '#FFF8E1',
-  },
-
-  LOW: {
-    border: '#22C55E',
-    bg: '#15803D',
-    text: '#FFF8E1',
-  },
-};
-
-const STATUS_STYLES = {
-  PENDING: {
-    label: 'Pending',
-    bg: '#FEF3C7',
-    text: '#e33f3fff',
-  },
-  ACCEPTED: {
-    label: 'Accepted',
-    bg: '#DCFCE7',
-    text: '#166534',
-  },
-  COMPLETED: {
-    label: 'Completed',
-    bg: '#E0E7FF',
-    text: '#3730A3',
-  },
-  CANCELLED: {
-    label: 'Cancelled',
-    bg: '#FEE2E2',
-    text: '#991B1B',
-  },
-};
-
-function getUrgencyStyle(urgency) {
-  return URGENCY_STYLES[urgency] || URGENCY_STYLES.LOW;
-}
-
-function getStatusStyle(status) {
-  return STATUS_STYLES[status] || STATUS_STYLES.PENDING;
-}
-
-function RequestCard({
-  request,
-  expandedRequest,
-  setExpandedRequest,
-}) {
-  const accepted = request.status === 'ACCEPTED';
-
-  const urgencyStyle = getUrgencyStyle(request.urgency);
-  const statusStyle = getStatusStyle(request.status);
-
-  const isExpanded = expandedRequest === request.id;
-
-  const handleToggleDetails = () => {
-    setExpandedRequest(isExpanded ? null : request.id);
-  };
-
-  return (
-    <Card
-  sx={{
-    borderRadius: 3,
-    borderLeft: `4px solid ${urgencyStyle.border}`,
-    boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignSelf: 'start',
-  }}
->
-  <CardContent
-    sx={{
-      p: { xs: 2.5, md: 3 },
-      display: 'flex',
-      flexDirection: 'column',
-    }}
-  >
-        {/* Status */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'flex-start',
-            mb: 2,
-          }}
-        >
-          <Chip
-            label={statusStyle.label}
-            size="small"
-            sx={{
-              fontWeight: 600,
-              flexShrink: 0,
-              minHeight: 32,
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.text,
-            }}
-          />
-        </Box>
-
-        {/* Category */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            mb: 1.5,
-          }}
-        >
-          {request.category}
-        </Typography>
-
-        {/* Date and Time */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 1,
-            mb: 1.5,
-          }}
-        >
-          <CalendarMonthOutlinedIcon
-            sx={{
-              fontSize: 20,
-              mt: 0.2,
-            }}
-            color="action"
-          />
-
-          <Box>
-            {/* Date */}
-            <Typography
-              variant="body2"
-            
-               sx={{
-    color: '#166534',
-    fontSize: '1rem',
-    fontWeight: 700,
-    mt: 0.5,
-  }}
-            >
-              Date:{' '}
-  <Box
-    component="span"
-    sx={{ color: '#aa7b23', fontWeight: 700 }}
-  >
-    {request.scheduledAt
-      ? new Date(request.scheduledAt).toLocaleDateString()
-      : 'Date not available'}
-  </Box>
-</Typography>
-
-            {/* Time */}
-            <Typography
-              variant="body2"
-            
-               sx={{
-    color: '#166534',
-    fontSize: '1rem',
-    fontWeight: 700,
-    mt: 0.5,
-  }}
-            >
-              Time:{' '}
-             <Box
-    component="span"
-    sx={{ color: '#aa7b23ff', fontWeight: 700 }}
-  >
-    {request.scheduledAt
-      ? new Date(request.scheduledAt).toLocaleTimeString([], {
-          hour: 'numeric',
-          minute: '2-digit',
-        })
-      : 'Time not available'}
-  </Box>
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Urgency */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            mb: 1.5,
-          }}
-        >
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              fontSize: '1rem',
-              fontWeight: 700,
-            }}
-          >
-            Urgency:
-          </Typography>
-
-          <Chip
-            label={request.urgency}
-            size="small"
-            sx={{
-              minHeight: 32,
-              fontSize: '0.9rem',
-              backgroundColor: urgencyStyle.bg,
-              color: urgencyStyle.text,
-              fontWeight: 700,
-            }}
-          />
-        </Box>
-
-        {/* View Details Button */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            mt: 'auto',
-            pt: 1,
-          }}
-        >
-          <Button
-            onClick={handleToggleDetails}
-            sx={{
-              minHeight: 44,
-              px: 2,
-              fontSize: '1rem',
-              fontWeight: 600,
-              textTransform: 'none',
-            }}
-          >
-            {isExpanded ? 'Hide Details' : 'View Details'}
-          </Button>
-        </Box>
-
-        {/* Expanded Details */}
-        <Collapse
-          in={isExpanded}
-          timeout="auto"
-          unmountOnExit
-        >
-          <Box
-            sx={{
-              mt: 2,
-              pt: 2,
-              borderTop: '1px solid #E2E8F0',
-            }}
-          >
-            {/* Title */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Title:</strong> {request.title}
-            </Typography>
-
-            {/* Description */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mt: 1.5,
-                fontSize: '1rem',
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>Description:</strong>{' '}
-              {request.description ||
-                'No description provided.'}
-            </Typography>
-
-            {/* Location */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 1,
-                mt: 1.5,
-              }}
-            >
-              <LocationOnOutlinedIcon
-                sx={{
-                  fontSize: 20,
-                  mt: 0.2,
-                }}
-                color="action"
-              />
-
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  fontSize: '1rem',
-                  lineHeight: 1.5,
-                  overflowWrap: 'anywhere',
-                }}
-              >
-                <strong>Location:</strong>{' '}
-                {request.address ||
-                  'Address not available'}
-              </Typography>
-            </Box>
-
-            {/* Category */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mt: 1.5,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Category:</strong>{' '}
-              {request.category}
-            </Typography>
-
-            {/* Urgency */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mt: 1.5,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Urgency:</strong>{' '}
-              {request.urgency}
-            </Typography>
-
-            {/* Status */}
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{
-                mt: 1.5,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Status:</strong>{' '}
-              {statusStyle.label}
-            </Typography>
-
-            {/* Volunteer Information */}
-            {accepted && request.volunteer && (
-              <Box
-                sx={{
-                  mt: 2,
-                  pt: 2,
-                  borderTop: '1px solid #E2E8F0',
-                }}
-              >
-                <Typography
-                  variant="subtitle1"
-                  fontWeight={700}
-                  sx={{
-                    mb: 1.5,
-                    fontSize: '1rem',
-                  }}
-                >
-                  Volunteer Details
-                </Typography>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      fontSize: 16,
-                    }}
-                  >
-                    {request.volunteer.name
-                      ?.charAt(0)
-                      ?.toUpperCase()}
-                  </Avatar>
-
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: '0.95rem',
-                      }}
-                    >
-                      Volunteer
-                    </Typography>
-
-                    <Typography
-                      variant="body1"
-                      fontWeight={600}
-                      sx={{
-                        fontSize: '1rem',
-                      }}
-                    >
-                      {request.volunteer.name ||
-                        'Not available'}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Volunteer Phone */}
-                {request.volunteer.phone && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1.5,
-                      fontSize: '1rem',
-                    }}
-                  >
-                    <strong>Phone:</strong>{' '}
-                    {request.volunteer.phone}
-                  </Typography>
-                )}
-
-                {/* Volunteer Email */}
-                {request.volunteer.email && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1,
-                      fontSize: '1rem',
-                    }}
-                  >
-                    <strong>Email:</strong>{' '}
-                    {request.volunteer.email}
-                  </Typography>
-                )}
-              </Box>
-            )}
-          </Box>
-        </Collapse>
-      </CardContent>
-    </Card>
-  );
-}
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
+
   const [requests, setRequests] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState('');
+
+  /* SEARCH + FILTER + SORT */
+
+  const [search, setSearch] = useState('');
+
   const [filter, setFilter] = useState('ALL');
+
   const [sortBy, setSortBy] = useState('SOONEST');
 
-  const [expandedRequest, setExpandedRequest] =
-    useState(null);
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  /* EXPANDED REQUEST */
+
+  const [expandedRequest, setExpandedRequest] = useState(null);
+
+  /* VOLUNTEER PROFILE DIALOG  */
+
+  const [volunteerDialogOpen, setVolunteerDialogOpen] = useState(false);
+
+  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
+
+  /* EDIT STATE*/
+
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+
+  const [editRequest, setEditRequest] = useState(null);
+
+  const [editLoading, setEditLoading] = useState(false);
+
+  const [updating, setUpdating] = useState(false);
+
+  const [editError, setEditError] = useState('');
+
+  const [editForm, setEditForm] = useState({
+    title: '',
+    category: '',
+    urgency: '',
+    scheduledAt: '',
+    address: '',
+    latitude: '',
+    longitude: '',
+    description: '',
+  });
+
+  const debouncedEditAddress = useDebouncedValue(editForm.address, 300);
+
+  useEffect(() => {
+    if (!editRequest) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    const address = debouncedEditAddress.trim();
+
+    if (address.length < 2) {
+      setLocationSuggestions([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSuggestions = async () => {
+      try {
+        setIsSearchingLocation(true);
+
+        const suggestions = await searchPlaces(address);
+
+        if (!cancelled) {
+          setLocationSuggestions(suggestions);
+        }
+      } catch (err) {
+        console.error('Failed to search edit address:', err);
+
+        if (!cancelled) {
+          setLocationSuggestions([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsSearchingLocation(false);
+        }
+      }
+    };
+
+    loadSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedEditAddress, editRequest]);
+  /*CANCEL STATE */
+
+  const [cancelRequest, setCancelRequest] = useState(null);
+
+  const [cancelling, setCancelling] = useState(false);
+
+  /* LOAD DASHBOARD */
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -505,16 +152,12 @@ export default function RequesterDashboard() {
         setUser(currentUser);
 
         const response = await getHelpRequests();
-        setRequests(response.data || []);
-      } catch (err) {
-        console.error(
-          'Failed to load dashboard:',
-          err
-        );
 
-        setError(
-          'Unable to load your requests. Please try again.'
-        );
+        setRequests(response?.data || []);
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+
+        setError('Unable to load your requests. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -523,259 +166,482 @@ export default function RequesterDashboard() {
     loadDashboard();
   }, [navigate]);
 
+  /* NEW REQUEST */
+
   const handleNewRequest = () => {
     navigate('/helpRequest');
   };
 
-  const urgencyRank = {
-    HIGH: 0,
-    MEDIUM: 1,
-    LOW: 2,
+  /*  VOLUNTEER PROFILE */
+
+  const handleVolunteerProfile = (volunteer) => {
+    if (!volunteer) {
+      return;
+    }
+
+    setSelectedVolunteer(volunteer);
+
+    setVolunteerDialogOpen(true);
   };
 
+  const handleCloseVolunteerDialog = () => {
+    setVolunteerDialogOpen(false);
+
+    setSelectedVolunteer(null);
+  };
+
+  /* EDIT REQUEST */
+
+  const handleEdit = async (request) => {
+    try {
+      setEditError('');
+
+      setEditLoading(true);
+
+      const csrfToken = user?.csrfToken;
+
+      if (!csrfToken) {
+        setEditError(
+          'CSRF token is missing. Please refresh the page and try again.'
+        );
+
+        return;
+      }
+
+      const currentRequest = await getHelpRequestById(request.id, csrfToken);
+
+      setEditRequest(currentRequest);
+
+      setEditForm({
+        title: currentRequest.title || '',
+
+        category: currentRequest.category || '',
+
+        urgency: currentRequest.urgency || '',
+
+        scheduledAt: formatDateTimeLocal(currentRequest.scheduledAt),
+
+        address: currentRequest.address || '',
+
+        latitude:
+          currentRequest.latitude !== null &&
+          currentRequest.latitude !== undefined
+            ? String(currentRequest.latitude)
+            : '',
+
+        longitude:
+          currentRequest.longitude !== null &&
+          currentRequest.longitude !== undefined
+            ? String(currentRequest.longitude)
+            : '',
+
+        description: currentRequest.description || '',
+      });
+    } catch (err) {
+      console.error('Failed to load request for editing:', err);
+
+      setEditError('Unable to load this request for editing.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  /* CLOSE EDIT DIALOG  */
+
+  const handleCloseEditDialog = () => {
+    if (!updating) {
+      setEditRequest(null);
+
+      setEditError('');
+    }
+  };
+
+  /* EDIT FIELD CHANGE */
+
+  const handleEditChange = (event) => {
+    const { name, value } = event.target;
+
+    setEditForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleEditAddressChange = (event) => {
+    const { value } = event.target;
+
+    setEditForm((current) => ({
+      ...current,
+      address: value,
+
+      latitude: '',
+      longitude: '',
+    }));
+  };
+  const handleSelectEditAddress = (location) => {
+    setEditForm((current) => ({
+      ...current,
+      address: location.label,
+      latitude: String(location.latitude),
+      longitude: String(location.longitude),
+    }));
+
+    setLocationSuggestions([]);
+  };
+  /* UPDATE REQUEST */
+
+  const handleUpdateRequest = async () => {
+    if (!editForm.latitude || !editForm.longitude) {
+      setEditError(
+        'Please select an address from the location suggestions so the location coordinates can be updated.'
+      );
+
+      setUpdating(false);
+      return;
+    }
+
+    try {
+      setUpdating(true);
+
+      setEditError('');
+
+      setError('');
+
+      const updatedData = {
+        title: editForm.title.trim(),
+
+        category: editForm.category,
+
+        urgency: editForm.urgency,
+
+        scheduledAt: new Date(editForm.scheduledAt).toISOString(),
+
+        address: editForm.address.trim(),
+
+        latitude: Number(editForm.latitude),
+
+        longitude: Number(editForm.longitude),
+
+        description: editForm.description.trim(),
+      };
+
+      const csrfToken = user?.csrfToken;
+
+      if (!csrfToken) {
+        setEditError(
+          'CSRF token is missing. Please refresh the page and try again.'
+        );
+
+        return;
+      }
+
+      const updatedRequest = await updateHelpRequest(
+        editRequest.id,
+        updatedData,
+        csrfToken
+      );
+
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === editRequest.id
+            ? {
+                ...request,
+
+                ...(updatedRequest?.data || updatedRequest),
+              }
+            : request
+        )
+      );
+
+      setEditRequest(null);
+    } catch (err) {
+      console.error('Failed to update request:', err);
+
+      console.error('Status:', err?.response?.status);
+
+      console.error('Server response:', err?.response?.data);
+
+      setEditError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          'Unable to update this request. Please try again.'
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  /* OPEN CANCEL DIALOG */
+
+  const handleCancel = (request) => {
+    setCancelRequest(request);
+  };
+
+  /* CLOSE CANCEL DIALOG */
+
+  const handleCloseCancelDialog = () => {
+    if (!cancelling) {
+      setCancelRequest(null);
+    }
+  };
+
+  /* CONFIRM CANCEL */
+
+  const handleConfirmCancel = async () => {
+    if (!cancelRequest) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+
+      setError('');
+
+      const csrfToken = user?.csrfToken;
+
+      if (!csrfToken) {
+        setError(
+          'CSRF token is missing. Please refresh the page and try again.'
+        );
+
+        return;
+      }
+
+      await cancelHelpRequest(cancelRequest.id, csrfToken);
+
+      setRequests((currentRequests) =>
+        currentRequests.map((request) =>
+          request.id === cancelRequest.id
+            ? {
+                ...request,
+                status: 'CANCELLED',
+              }
+            : request
+        )
+      );
+
+      setCancelRequest(null);
+    } catch (err) {
+      console.error('Failed to cancel request:', err);
+
+      setError('Unable to cancel this request. Please try again.');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  /* FILTER + SEARCH + SORT  */
+
   const visibleRequests = useMemo(() => {
-    let list = requests;
+    let list = [...requests];
+
+    /* STATUS FILTER */
 
     if (filter === 'PENDING') {
-      list = requests.filter(
-        (request) => request.status === 'PENDING'
+      list = list.filter(
+        (request) => String(request.status || '').toUpperCase() === 'PENDING'
       );
     }
 
     if (filter === 'ACCEPTED') {
-      list = requests.filter(
-        (request) => request.status === 'ACCEPTED'
+      list = list.filter(
+        (request) => String(request.status || '').toUpperCase() === 'ACCEPTED'
       );
     }
 
-    const sorted = [...list];
+    /* SEARCH */
+
+    if (debouncedSearch.trim()) {
+      const searchText = debouncedSearch.toLowerCase().trim();
+
+      list = list.filter(
+        (request) =>
+          request.title?.toLowerCase().includes(searchText) ||
+          request.description?.toLowerCase().includes(searchText) ||
+          request.category?.toLowerCase().includes(searchText) ||
+          request.address?.toLowerCase().includes(searchText)
+      );
+    }
+
+    /* SORT */
 
     if (sortBy === 'URGENCY') {
-      sorted.sort(
+      list.sort(
         (a, b) =>
-          (urgencyRank[a.urgency] ?? 3) -
-          (urgencyRank[b.urgency] ?? 3)
+          (URGENCY_RANK[a.urgency] ?? 3) - (URGENCY_RANK[b.urgency] ?? 3)
       );
     } else {
-      sorted.sort(
-        (a, b) =>
-          new Date(a.scheduledAt || 0) -
-          new Date(b.scheduledAt || 0)
+      list.sort(
+        (a, b) => new Date(a.scheduledAt || 0) - new Date(b.scheduledAt || 0)
       );
     }
 
-    return sorted;
-  }, [requests, filter, sortBy]);
+    return list;
+  }, [requests, filter, sortBy, debouncedSearch]);
+
+  /* LOADING */
 
   if (loading) {
     return (
       <Box
         sx={{
           minHeight: '100vh',
+
           display: 'flex',
+
           alignItems: 'center',
+
           justifyContent: 'center',
         }}
       >
-        <CircularProgress />
+        <CircularProgress color="success" />
       </Box>
     );
   }
 
   return (
-    <Box
-      
-    >
-      {/* Welcome section - centered across the full page */}
+    <Box>
+      {/*PAGE HEADER  */}
+
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
+          My Help Requests
+        </Typography>
+
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: COLORS.textMuted,
+          }}
+        >
+          Manage and track your help requests
+        </Typography>
+      </Box>
+      {error && (
+        <Typography
+          color="error"
+          sx={{
+            mb: 2,
+            fontSize: '1rem',
+          }}
+        >
+          {error}
+        </Typography>
+      )}
+
+      {/* SEARCH + FILTER + SORT  */}
+
+      <RequestFilters
+        search={search}
+        setSearch={setSearch}
+        filter={filter}
+        setFilter={setFilter}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        onNewRequest={handleNewRequest}
+      />
+
+      {/*REQUEST COUNT */}
+
       <Box
         sx={{
-          width: '100%',
-          textAlign: 'center',
-          pt: {
-            xs: 3,
-            md: 4,
-          },
-          pb: {
-            xs: 3,
-            md: 4,
-          },
-          px: 2,
+          mb: 2,
+
+          display: 'flex',
+
+          justifyContent: 'space-between',
+
+          alignItems: 'center',
         }}
       >
         <Typography
-          variant="h4"
-          fontWeight={700}
-          gutterBottom
+          variant="body2"
           sx={{
-            fontSize: {
-              xs: '1.75rem',
-              md: '2rem',
-            },
+            color: 'text.primary',
           }}
         >
-          Welcome back, {user?.name || 'User'}! 👋
+          Showing {visibleRequests.length}{' '}
+          {visibleRequests.length === 1 ? 'request' : 'requests'}
         </Typography>
+      </Box>
 
+      {/* REQUEST LIST */}
+
+      {visibleRequests.length === 0 ? (
         <Typography
-          variant="body1"
           color="text.secondary"
           sx={{
-            fontSize: {
-              xs: '1rem',
-              md: '1.1rem',
-            },
+            fontSize: '1rem',
+            mt: 4,
           }}
         >
-          How can we help you today?
+          {search.trim()
+            ? 'No requests match your search.'
+            : `You don't have any ${
+                filter !== 'ALL' ? filter.toLowerCase() : ''
+              } requests.`}
         </Typography>
-      </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
 
-      {/* Main Content */}
-      <Box
-        
-      >
-        {/* Error message */}
-        {error && (
-          <Typography
-            color="error"
-            sx={{
-              mb: 3,
-              fontSize: '1rem',
-            }}
-          >
-            {error}
-          </Typography>
-        )}
+            flexDirection: 'column',
 
-        {/* Filters, sorting, and New Request */}
-       <Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 7,
-    mb: 3,
-    flexWrap: 'wrap',
-  }}
->
-          {/* Filter chips */}
-          {['ALL', 'PENDING', 'ACCEPTED'].map(
-            (key) => (
-              <Chip
-                key={key}
-                
-                label={
-                  key.charAt(0) +
-                  key.slice(1).toLowerCase()
-                }
-                onClick={() => setFilter(key)}
-                sx={{
-                  minHeight: 44,
-                  px: 1,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  backgroundColor:
-                    filter === key
-                      ? '#1E293B'
-                      : 'transparent',
-                  color:
-                    filter === key
-                      ? '#FFFFFF'
-                      : 'text.secondary',
-                  border:
-                    filter === key
-                      ? 'none'
-                      : '1px solid #E2E8F0',
-                  '&:hover': {
-                    backgroundColor:
-                      filter === key
-                        ? '#1E293B'
-                        : '#F1F5F9',
-                  },
-                }}
-              />
-            )
-          )}
-
-          {/* Sorting */}
-          <Select
-  value={sortBy}
-  onChange={(event) =>
-    setSortBy(event.target.value)
-  }
-  sx={{
-  
-    minWidth: 180,
-    minHeight: 44,
-    backgroundColor: '#FFFFFF',
-    fontSize: '1rem',
-  }}
->
-            <MenuItem value="SOONEST">
-              Sort: soonest
-            </MenuItem>
-
-            <MenuItem value="URGENCY">
-              Sort: urgency
-            </MenuItem>
-          </Select>
-
-          {/* New Request */}
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleNewRequest}
-            sx={{
-              minHeight: 40,
-              px: 1.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 700,
-              fontSize: '1rem',
-            }}
-          >
-            New Request
-          </Button>
+            gap: 2,
+          }}
+        >
+          {visibleRequests.map((request) => (
+            <RequestCard
+              key={request.id}
+              request={request}
+              expandedRequest={expandedRequest}
+              setExpandedRequest={setExpandedRequest}
+              onEdit={handleEdit}
+              onCancel={handleCancel}
+              onVolunteerProfile={handleVolunteerProfile}
+            />
+          ))}
         </Box>
+      )}
 
-        {/* Request list */}
-        {visibleRequests.length === 0 ? (
-          <Typography
-            color="text.secondary"
-            sx={{
-              fontSize: '1rem',
-            }}
-          >
-            You don't have any{' '}
-            {filter !== 'ALL'
-              ? filter.toLowerCase()
-              : ''}{' '}
-            requests.
-          </Typography>
-        ) : (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: '1fr',
-                lg: 'repeat(3, 1fr)',
-              },
-              gap: 4,
-            }}
-          >
-            {visibleRequests.map((request) => (
-              <RequestCard
-                key={request.id}
-                request={request}
-                expandedRequest={expandedRequest}
-                setExpandedRequest={
-                  setExpandedRequest
-                }
-              />
-            ))}
-          </Box>
-        )}
-      </Box>
+      <VolunteerProfileDialog
+        open={volunteerDialogOpen}
+        volunteer={selectedVolunteer}
+        onClose={handleCloseVolunteerDialog}
+      />
+      {/* EDIT REQUEST DIALOG */}
+
+      <EditRequestDialog
+        open={Boolean(editRequest)}
+        editLoading={editLoading}
+        updating={updating}
+        editError={editError}
+        editForm={editForm}
+        locationSuggestions={locationSuggestions}
+        isSearchingLocation={isSearchingLocation}
+        onClose={handleCloseEditDialog}
+        onChange={handleEditChange}
+        onAddressChange={handleEditAddressChange}
+        onSelectAddress={handleSelectEditAddress}
+        onUpdate={handleUpdateRequest}
+      />
+
+      {/* CANCEL REQUEST DIALOG */}
+
+      <CancelRequestDialog
+        open={Boolean(cancelRequest)}
+        cancelRequest={cancelRequest}
+        cancelling={cancelling}
+        onClose={handleCloseCancelDialog}
+        onConfirm={handleConfirmCancel}
+      />
     </Box>
   );
 }

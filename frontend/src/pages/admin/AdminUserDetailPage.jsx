@@ -122,192 +122,200 @@ function AdminUserDetailPage() {
   }
 
   return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        borderRadius: '24px',
-        p: { xs: 3, sm: 4 },
-      }}
-    >
+    <>
+      <Typography variant="h5" sx={{ fontWeight: 700, mb: 4 }}>
+        User Profile
+      </Typography>
       <Box
         sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          mb: 3,
-          gap: 2,
-          flexWrap: 'wrap',
+          borderRadius: { xs: 2, sm: 3 },
+          boxShadow: 3,
+          p: { xs: 3, sm: 4, md: 5 },
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#52462A' }}>
-          User Profile
-        </Typography>
-        <Button variant="outlined" onClick={handleBack}>
-          Back
-        </Button>
-      </Box>
-
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={2}
-        sx={{
-          alignItems: { xs: 'center', sm: 'flex-start' },
-          mb: 3,
-          pb: 3,
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Avatar
-          src={profileImageUrl || undefined}
-          alt={selectedUser?.name}
-          sx={{ width: 88, height: 88, bgcolor: 'primary.main', fontSize: 32 }}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: 3,
+            gap: 2,
+            flexWrap: 'wrap',
+          }}
         >
-          {selectedUser?.name?.charAt(0)?.toUpperCase()}
-        </Avatar>
-
-        <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#52462A' }}>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
             {selectedUser?.name}
           </Typography>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              mt: 1,
-              flexWrap: 'wrap',
-              justifyContent: { xs: 'center', sm: 'flex-start' },
-              gap: 1,
-            }}
-          >
-            <Chip label={roleLabel} size="small" color="primary" />
-            {volunteer?.verificationStatus && (
-              <Chip
-                label={volunteer.verificationStatus}
-                size="small"
-                color={
-                  VERIFICATION_COLORS[volunteer.verificationStatus] || 'default'
-                }
-              />
-            )}
-          </Stack>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Member since {formatDate(selectedUser?.createdAt)}
-          </Typography>
+          <Button variant="contained" onClick={handleBack}>
+            Back
+          </Button>
         </Box>
-      </Stack>
 
-      <ProfileSection title="Account information">
-        <Stack spacing={2}>
-          <ProfileField
-            icon={<EmailOutlinedIcon />}
-            label="Email"
-            value={displayValue(selectedUser?.email)}
-          />
-          <ProfileField
-            icon={<PhoneOutlinedIcon />}
-            label="Phone"
-            value={displayValue(selectedUser?.phone)}
-          />
-          <ProfileField
-            icon={<CakeIcon />}
-            label="Date of birth"
-            value={formatDate(selectedUser?.dob)}
-          />
-          <ProfileField
-            icon={<DescriptionOutlinedIcon />}
-            label="Gender"
-            value={displayValue(selectedUser?.gender)}
-          />
-        </Stack>
-      </ProfileSection>
-
-      {selectedUser?.role === 'REQUESTER' && (
-        <ProfileSection title="Requester profile">
-          {requesterProfile ? (
-            <Stack spacing={2}>
-              <ProfileField
-                icon={<LocationCityOutlinedIcon />}
-                label="City"
-                value={displayValue(requesterProfile.city)}
-              />
-              <ProfileField
-                icon={<HomeOutlinedIcon />}
-                label="Address"
-                value={displayValue(requesterProfile.address)}
-              />
-              <ProfileField
-                icon={<DescriptionOutlinedIcon />}
-                label="Bio"
-                value={displayValue(requesterProfile.bio)}
-              />
-              <ProfileField
-                icon={<ContactPhoneOutlinedIcon />}
-                label="Emergency contact"
-                value={displayValue(requesterProfile.emergencyContact)}
-              />
-            </Stack>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No requester profile on file.
-            </Typography>
-          )}
-        </ProfileSection>
-      )}
-
-      {showVolunteer && (
-        <ProfileSection title="Volunteer profile">
-          <Box
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          sx={{
+            alignItems: { xs: 'center', sm: 'flex-start' },
+            mb: 3,
+            pb: 3,
+            borderBottom: 1,
+            borderColor: 'divider',
+          }}
+        >
+          <Avatar
+            src={profileImageUrl || undefined}
+            alt={selectedUser?.name}
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 1,
-              mb: 2,
+              width: 88,
+              height: 88,
+              bgcolor: 'primary.main',
+              fontSize: 32,
             }}
           >
-            <Typography variant="body2" color="text.secondary">
-              Interests, availability, and service area.
+            {selectedUser?.name?.charAt(0)?.toUpperCase()}
+          </Avatar>
+
+          <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                mt: 1,
+                flexWrap: 'wrap',
+                justifyContent: { xs: 'center', sm: 'flex-start' },
+                gap: 1,
+              }}
+            >
+              <Chip label={roleLabel} size="small" color="primary" />
+              {volunteer?.verificationStatus && (
+                <Chip
+                  label={volunteer.verificationStatus}
+                  size="small"
+                  color={
+                    VERIFICATION_COLORS[volunteer.verificationStatus] ||
+                    'default'
+                  }
+                />
+              )}
+            </Stack>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Member since {formatDate(selectedUser?.createdAt)}
             </Typography>
-            {!isEditingVolunteer && volunteer && (
-              <IconButton
-                aria-label="Edit volunteer profile"
-                onClick={() => setIsEditingVolunteer(true)}
-                sx={{ color: '#8C8164' }}
-              >
-                <EditOutlinedIcon />
-              </IconButton>
-            )}
           </Box>
+        </Stack>
 
-          {!volunteer && !isEditingVolunteer && (
-            <Alert severity="info">
-              No volunteer profile on file for this user.
-            </Alert>
-          )}
-
-          {saveMutation.isError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {saveMutation.error?.response?.data?.message ||
-                saveMutation.error?.response?.data?.error ||
-                'Failed to save volunteer profile.'}
-            </Alert>
-          )}
-
-          {isEditingVolunteer ? (
-            <VolunteerPreferencesForm
-              key={id}
-              initialPreferences={volunteer}
-              isSaving={saveMutation.isPending}
-              onCancel={() => setIsEditingVolunteer(false)}
-              onSave={(payload) => saveMutation.mutateAsync(payload)}
+        <ProfileSection title="Account information">
+          <Stack spacing={2}>
+            <ProfileField
+              icon={<EmailOutlinedIcon />}
+              label="Email"
+              value={displayValue(selectedUser?.email)}
             />
-          ) : (
-            volunteer && <VolunteerPreferencesView preferences={volunteer} />
-          )}
+            <ProfileField
+              icon={<PhoneOutlinedIcon />}
+              label="Phone"
+              value={displayValue(selectedUser?.phone)}
+            />
+            <ProfileField
+              icon={<CakeIcon />}
+              label="Date of birth"
+              value={formatDate(selectedUser?.dob)}
+            />
+            <ProfileField
+              icon={<DescriptionOutlinedIcon />}
+              label="Gender"
+              value={displayValue(selectedUser?.gender)}
+            />
+          </Stack>
         </ProfileSection>
-      )}
-    </Box>
+
+        {selectedUser?.role === 'REQUESTER' && (
+          <ProfileSection title="Requester profile">
+            {requesterProfile ? (
+              <Stack spacing={2}>
+                <ProfileField
+                  icon={<LocationCityOutlinedIcon />}
+                  label="City"
+                  value={displayValue(requesterProfile.city)}
+                />
+                <ProfileField
+                  icon={<HomeOutlinedIcon />}
+                  label="Address"
+                  value={displayValue(requesterProfile.address)}
+                />
+                <ProfileField
+                  icon={<DescriptionOutlinedIcon />}
+                  label="Bio"
+                  value={displayValue(requesterProfile.bio)}
+                />
+                <ProfileField
+                  icon={<ContactPhoneOutlinedIcon />}
+                  label="Emergency contact"
+                  value={displayValue(requesterProfile.emergencyContact)}
+                />
+              </Stack>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No requester profile on file.
+              </Typography>
+            )}
+          </ProfileSection>
+        )}
+
+        {showVolunteer && (
+          <ProfileSection title="Volunteer profile">
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+                mb: 2,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Interests, availability, and service area.
+              </Typography>
+              {!isEditingVolunteer && volunteer && (
+                <IconButton
+                  aria-label="Edit volunteer profile"
+                  onClick={() => setIsEditingVolunteer(true)}
+                  sx={{ color: '#8C8164' }}
+                >
+                  <EditOutlinedIcon />
+                </IconButton>
+              )}
+            </Box>
+
+            {!volunteer && !isEditingVolunteer && (
+              <Alert severity="info">
+                No volunteer profile on file for this user.
+              </Alert>
+            )}
+
+            {saveMutation.isError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {saveMutation.error?.response?.data?.message ||
+                  saveMutation.error?.response?.data?.error ||
+                  'Failed to save volunteer profile.'}
+              </Alert>
+            )}
+
+            {isEditingVolunteer ? (
+              <VolunteerPreferencesForm
+                key={id}
+                initialPreferences={volunteer}
+                isSaving={saveMutation.isPending}
+                onCancel={() => setIsEditingVolunteer(false)}
+                onSave={(payload) => saveMutation.mutateAsync(payload)}
+              />
+            ) : (
+              volunteer && <VolunteerPreferencesView preferences={volunteer} />
+            )}
+          </ProfileSection>
+        )}
+      </Box>
+    </>
   );
 }
 

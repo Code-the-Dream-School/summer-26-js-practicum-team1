@@ -10,11 +10,11 @@ import {
 } from '@mui/material';
 import {
   DEFAULT_DISTANCE_MI,
-  COLORS,
   CATEGORIES,
   URGENCY_LEVELS,
   DAYS_OF_WEEK,
 } from '../../utils/browse.constants';
+import { COLORS } from '../../utils/constants';
 
 function FilterSidebar({
   selectedCategories,

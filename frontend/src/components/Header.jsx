@@ -21,7 +21,7 @@ import { useGetProfileImage } from '../hooks/useGetProfileImage';
 
 const PAGES = [
   { label: 'About', path: '/' },
-  { label: 'Contact Us', path: '/' },
+  { label: 'Contact Us', path: '/contact' },
 ];
 
 const ROLE_SETTINGS = {
@@ -29,13 +29,14 @@ const ROLE_SETTINGS = {
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
     { label: 'My Requests', path: '/requester-dashboard' },
-    { label: 'Create New Help Request', path: '/helpRequest' },
+    { label: 'New Help Request', path: '/helpRequest' },
+    { label: 'Messages 💬', path: '/chat' },
   ],
   volunteer: [
     { label: 'Profile', path: '/profile' },
     { label: 'Account', path: '/' },
+    { label: 'Messages 💬', path: '/chat' },
     { label: 'Browse Requests', path: '/browse' },
-    { label: 'My Offers', path: '/' },
   ],
   admin: [
     { label: 'Profile', path: '/profile' },
@@ -84,7 +85,6 @@ function Brand({ display, variant, sx }) {
         sx={{
           mr: 2,
           display,
-          fontFamily: 'monospace',
           fontWeight: 700,
           color: 'inherit',
           textDecoration: 'none',

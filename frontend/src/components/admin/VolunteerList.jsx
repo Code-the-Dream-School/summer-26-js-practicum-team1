@@ -55,8 +55,7 @@ function VolunteerList({ volunteers = [] }) {
           sx={{
             mb: 3,
             boxShadow: 3,
-            borderRadius: 3,
-
+            borderRadius: 1,
             '& .MuiOutlinedInput-notchedOutline': {
               border: 'none',
             },
@@ -74,7 +73,7 @@ function VolunteerList({ volunteers = [] }) {
           sx={{
             mb: 3,
             boxShadow: 3,
-            borderRadius: 3,
+            borderRadius: 1,
 
             '& .MuiOutlinedInput-notchedOutline': {
               border: 'none',

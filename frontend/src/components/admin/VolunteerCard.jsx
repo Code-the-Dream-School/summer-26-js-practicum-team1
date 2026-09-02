@@ -10,9 +10,14 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
+
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
+import EmailIcon from '@mui/icons-material/Email';
+import CakeIcon from '@mui/icons-material/Cake';
+import WcIcon from '@mui/icons-material/Wc';
 import { useAdminUserProfileImage } from '../../hooks/admin/useAdminUserProfileImage';
 import { useNavigate } from 'react-router-dom';
-import { red, grey } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import { useApproveVolunteer } from '../../hooks/admin/useApproveVolunteer';
 import { useRejectVolunteer } from '../../hooks/admin/useRejectVolunteer';
 
@@ -49,7 +54,7 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
               sx={{
                 width: 56,
                 height: 56,
-                bgcolor: red[500],
+                bgcolor: 'primary.main',
                 transition: '0.2s',
                 '&:hover': {
                   transform: 'scale(1.05)',
@@ -62,35 +67,58 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
           </IconButton>
         }
 
-        title={<Typography variant="h6">{name}</Typography>}
+        title={<Typography variant="h5">{name}</Typography>}
 
-        action={<Chip label={status} color="warning" size="small" />}
+        action={
+          <Chip
+            label={status}
+            sx={{ backgroundColor: '#C1791E', color: '#fff' }}
+            size="small"
+          />
+        }
         subheader={
           <Stack
-            spacing={3}
-            direction={{
-              xs: 'column',
-              sm: 'row',
-            }}
+            spacing={{ xs: 1.5, sm: 3 }}
+            direction={{ xs: 'column', sm: 'row' }}
             sx={{ mt: 1 }}
           >
-            <Typography variant="body2">📞 {phone}</Typography>
-
-            <Typography variant="body2">📧 {email}</Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              🎂{' '}
-              {dob
-                ? new Date(dob).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })
-                : 'N/A'}
-            </Typography>
-
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              ⚧ {gender}
-            </Typography>
+            {[
+              {
+                icon: (
+                  <LocalPhoneIcon color="warning" sx={{ fontSize: '1.1rem' }} />
+                ),
+                value: phone,
+              },
+              {
+                icon: <EmailIcon color="primary" sx={{ fontSize: '1.1rem' }} />,
+                value: email,
+              },
+              {
+                icon: <CakeIcon color="error" sx={{ fontSize: '1.1rem' }} />,
+                value: dob
+                  ? new Date(dob).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })
+                  : 'N/A',
+              },
+              { icon: <WcIcon sx={{ fontSize: '1.1rem' }} />, value: gender },
+            ].map((item, index) => (
+              <Typography
+                key={index}
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 0.75,
+                }}
+              >
+                {item.icon}
+                {item.value}
+              </Typography>
+            ))}
           </Stack>
         }
       />
@@ -99,57 +127,29 @@ function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
       <CardActions sx={{ gap: 2, p: 2, justifyContent: 'space-between' }}>
         <Button
           variant="outlined"
+          color="primary"
           onClick={() =>
             navigate(`/admin/users/${userId}?from=pending-volunteers`)
           }
-          sx={{
-            borderRadius: 3,
-            boxShadow: 2,
-            transition: '0.3s',
-            '&:hover': {
-              boxShadow: 5,
-              transform: 'translateY(-2px)',
-            },
-          }}
         >
           View Profile
         </Button>
 
         <Stack direction="row" spacing={2}>
           <Button
-            color="success"
+            color="primary"
             variant="contained"
 
             onClick={() => approveMutation.mutate(userId)}
-            sx={{
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: '0.3s',
-
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
-            }}
           >
             Approve
           </Button>
 
           <Button
             color="error"
-            variant="outlined"
+            variant="contained"
 
             onClick={() => rejectMutation.mutate(userId)}
-            sx={{
-              borderRadius: 3,
-              boxShadow: 3,
-              transition: '0.3s',
-
-              '&:hover': {
-                boxShadow: 8,
-                transform: 'translateY(-4px)',
-              },
-            }}
           >
             Reject
           </Button>

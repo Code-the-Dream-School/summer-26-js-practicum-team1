@@ -1,7 +1,6 @@
 import { Stack, Skeleton, Box } from '@mui/material';
 import RequestCardSkeleton from './RequestCardSkeleton';
 import FilterSidebarSkeleton from './FilterSidebarSkeleton';
-import { COLORS } from '../../utils/browse.constants';
 
 function BrowseSkeleton() {
   return (
