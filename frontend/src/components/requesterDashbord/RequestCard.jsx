@@ -36,6 +36,7 @@ function RequestCard({
   onEdit,
   onCancel,
   onVolunteerProfile,
+  unreadCount,
    dashboardType,
 }) {
   const navigate = useNavigate();
@@ -346,27 +347,45 @@ const { volunteer } = useAcceptedVolunteerProfile(
             {/* MESSAGE BUTTON */}
 
             {canChat && (
-              <Button
-                variant="contained"
-                startIcon={<ChatBubbleIcon />}
-                onClick={handleOpenChat}
-                sx={{
-                  minHeight: 42,
-                  px: 2.5,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  boxShadow: 2,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    boxShadow: 4,
-                    transform: 'translateY(-1px)',
-                  },
-                }}
-              >
-                Message
-              </Button>
-            )}
+  <Button
+    variant="contained"
+    startIcon={<ChatBubbleIcon />}
+    onClick={handleOpenChat}
+    sx={{
+      minHeight: 42,
+      px: 2.5,
+      borderRadius: 2,
+      textTransform: 'none',
+      fontWeight: 600,
+      boxShadow: 2,
+      transition: 'all 0.2s ease',
+      '&:hover': {
+        boxShadow: 4,
+        transform: 'translateY(-1px)',
+      },
+    }}
+  >
+    Message
+
+    {unreadCount > 0 && (
+      <Chip
+        label={unreadCount}
+        size="small"
+        sx={{
+          ml: 1,
+          height: 20,
+          minWidth: 20,
+          backgroundColor: 'error.main',
+          color: 'white',
+          fontWeight: 700,
+          '& .MuiChip-label': {
+            px: 0.75,
+          },
+        }}
+      />
+    )}
+  </Button>
+)}
 
             {/* VIEW DETAILS BUTTON */}
 
