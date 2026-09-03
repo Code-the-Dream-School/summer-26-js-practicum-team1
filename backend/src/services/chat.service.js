@@ -27,10 +27,16 @@ const getAuthorizedConversation = async (
     throw new ApiError(403, 'You are not a participant in this request');
   }
 
-  if (canSend && request.status !== 'ACCEPTED') {
-    throw new ApiError(403, 'Messages can only be sent for accepted requests');
+  if (
+    canSend &&
+    request.status !== 'ACCEPTED' &&
+    request.status !== 'COMPLETED'
+  ) {
+    throw new ApiError(
+      403,
+      'Messages can only be sent for accepted or completed requests'
+    );
   }
-
   if (
     !canSend &&
     request.status !== 'ACCEPTED' &&
