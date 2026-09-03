@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   Box,
@@ -37,6 +36,7 @@ function RequestCard({
   onCancel,
   onVolunteerProfile,
   unreadCount,
+  userRole,
 }) {
   const navigate = useNavigate();
 
@@ -46,8 +46,7 @@ function RequestCard({
 
   const isPending = requestStatus === 'PENDING';
 
-  const canChat =
-    requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
+  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
 
@@ -65,13 +64,15 @@ function RequestCard({
 
   // Navigate to the request details page
   const handleToggleDetails = () => {
-    // navigate(`/requests/${request.id}`);
+    navigate(`/requests/${request.id}`);
   };
 
+  //chat helper
   const handleOpenChat = () => {
     navigate(`/chat/${request.id}`, {
       state: {
-        participantId: request.volunteerId,
+        participantId:
+          userRole === 'VOLUNTEER' ? request.requesterId : request.volunteerId,
       },
     });
   };
@@ -86,16 +87,18 @@ function RequestCard({
     onCancel(request);
   };
 
+  const participantName =
+    userRole === 'VOLUNTEER'
+      ? request.requester?.name
+      : request.volunteer?.name;
+
   return (
     <Card
       id={`request-card-${request.id}`}
       sx={{
         borderRadius: 3,
         border: `1px solid ${COLORS.border}`,
-        boxShadow: 'none',
-        '&:hover': {
-          borderColor: COLORS.borderHover,
-        },
+        boxShadow: 3,
       }}
     >
       <CardContent
@@ -347,8 +350,8 @@ function RequestCard({
                 onClick={handleOpenChat}
                 sx={{
                   minHeight: 42,
+                  width: 150,
                   px: 2.5,
-                  borderRadius: 2,
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: 2,
@@ -359,7 +362,24 @@ function RequestCard({
                   },
                 }}
               >
-                Message
+                {participantName || 'User'}
+                {unreadCount > 0 && (
+                  <Chip
+                    label={unreadCount}
+                    size="small"
+                    sx={{
+                      ml: 1,
+                      height: 20,
+                      minWidth: 20,
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      fontWeight: 700,
+                      '& .MuiChip-label': {
+                        px: 0.75,
+                      },
+                    }}
+                  />
+                )}
               </Button>
             )}
 
@@ -376,25 +396,6 @@ function RequestCard({
                 color: COLORS.primary,
               }}
             >
-              {volunteer.name || 'Volunteer'}
-
-              {unreadCount > 0 && (
-                <Chip
-                  label={unreadCount}
-                  size="small"
-                  sx={{
-                    ml: 1,
-                    height: 20,
-                    minWidth: 20,
-                    backgroundColor: 'error.main',
-                    color: 'white',
-                    fontWeight: 700,
-                    '& .MuiChip-label': {
-                      px: 0.75,
-                    },
-                  }}
-                />
-              )}
               {isExpanded ? 'Hide Details' : 'View Details'}
             </Button>
           </Box>
@@ -617,4 +618,3 @@ function RequestCard({
 }
 
 export default RequestCard;
-

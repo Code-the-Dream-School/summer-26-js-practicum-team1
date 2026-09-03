@@ -66,6 +66,8 @@ function RequestFilters({
         }
         placeholder="Search by title or description"
         sx={{
+          boxShadow: 2,
+          borderRadius: 1,
           '& .MuiInputLabel-root': {
             color: COLORS.textFaint,
           },
@@ -137,8 +139,10 @@ function RequestFilters({
         onChange={(event) => setSortBy(event.target.value)}
         size="small"
         sx={{
+          boxShadow: 2,
+          borderRadius: 1,
           minWidth: 180,
-          minHeight: 44,
+          minHeight: 54,
           backgroundColor: '#fff',
 
           '& fieldset': {
@@ -162,19 +166,18 @@ function RequestFilters({
           startIcon={<AddIcon />}
           onClick={onNewRequest}
           sx={{
-          minHeight: 44,
-          minWidth: 160,
-          px: 2,
-          borderRadius: 2,
-          textTransform: 'none',
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
+            minHeight: 44,
+            minWidth: 160,
+            px: 2,
+            textTransform: 'none',
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
 
-  '&:hover': {
-    boxShadow: 4,
-    transform: 'translateY(-1px)',
-  },
-}}
+            '&:hover': {
+              boxShadow: 4,
+              transform: 'translateY(-1px)',
+            },
+          }}
         >
           New Request
         </Button>
@@ -185,20 +188,19 @@ function RequestFilters({
         <Button
           variant="contained"
           onClick={onNewRequest}
-         sx={{
-          minHeight: 44,
-          minWidth: 160,
-          px: 2,
-          borderRadius: 2,
-          textTransform: 'none',
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
+          sx={{
+            minHeight: 44,
+            minWidth: 160,
+            px: 2,
+            textTransform: 'none',
+            fontWeight: 700,
+            whiteSpace: 'nowrap',
 
-  '&:hover': {
-    boxShadow: 4,
-    transform: 'translateY(-1px)',
-  },
-}}
+            '&:hover': {
+              boxShadow: 4,
+              transform: 'translateY(-1px)',
+            },
+          }}
         >
           Browse Requests
         </Button>
