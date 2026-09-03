@@ -148,9 +148,40 @@ const getUnreadMessageCount = async (userId) => {
       },
     },
     select: {
-      conversation: {
+      conversationId: true,
+    },
+  });
+
+  const unreadByConversation = {};
+
+  messages.forEach((message) => {
+    unreadByConversation[message.conversationId] =
+      (unreadByConversation[message.conversationId] || 0) + 1;
+  });
+
+  const requests = await prisma.helpRequest.findMany({
+    where: {
+      OR: [{ requesterId: userId }, { volunteerId: userId }],
+    },
+    select: {
+      id: true,
+      requesterId: true,
+      volunteerId: true,
+    },
+  });
+
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      request: {
+        OR: [{ requesterId: userId }, { volunteerId: userId }],
+      },
+    },
+    select: {
+      id: true,
+      request: {
         select: {
-          requestId: true,
+          requesterId: true,
+          volunteerId: true,
         },
       },
     },
@@ -158,16 +189,26 @@ const getUnreadMessageCount = async (userId) => {
 
   const byRequest = {};
 
-  messages.forEach((message) => {
-    const requestId = message.conversation.requestId;
+  requests.forEach((request) => {
+    const conversation = conversations.find(
+      (conversation) =>
+        conversation.request.requesterId === request.requesterId &&
+        conversation.request.volunteerId === request.volunteerId
+    );
 
-    byRequest[requestId] = (byRequest[requestId] || 0) + 1;
+    if (!conversation) {
+      return;
+    }
+
+    const unreadCount = unreadByConversation[conversation.id] || 0;
+
+    if (unreadCount > 0) {
+      byRequest[request.id] = unreadCount;
+    }
   });
 
-  const totalUnreadCount = messages.length;
-
   return {
-    totalUnreadCount,
+    totalUnreadCount: messages.length,
     byRequest,
   };
 };
