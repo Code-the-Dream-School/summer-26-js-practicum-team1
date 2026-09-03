@@ -128,6 +128,44 @@ const markMessagesRead = async (requestId, userId) => {
   });
 };
 
+const getUnreadMessageCount = async (userId) => {
+  const messages = await prisma.message.findMany({
+    where: {
+      readAt: null,
+      senderId: {
+        not: userId,
+      },
+      conversation: {
+        request: {
+          OR: [{ requesterId: userId }, { volunteerId: userId }],
+        },
+      },
+    },
+    select: {
+      conversation: {
+        select: {
+          requestId: true,
+        },
+      },
+    },
+  });
+
+  const byRequest = {};
+
+  messages.forEach((message) => {
+    const requestId = message.conversation.requestId;
+
+    byRequest[requestId] = (byRequest[requestId] || 0) + 1;
+  });
+
+  const totalUnreadCount = messages.length;
+
+  return {
+    totalUnreadCount,
+    byRequest,
+  };
+};
+
 const getConversations = async (userId) => {
   const conversations = await prisma.conversation.findMany({
     where: {
@@ -210,9 +248,11 @@ const getConversations = async (userId) => {
     })
     .filter(Boolean);
 };
+
 module.exports = {
   getMessages,
   sendMessage,
   markMessagesRead,
   getConversations,
+  getUnreadMessageCount,
 };

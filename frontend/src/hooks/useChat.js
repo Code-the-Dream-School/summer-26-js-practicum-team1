@@ -5,7 +5,16 @@ import {
   sendMessage,
   markMessagesRead,
   getConversations,
+  getUnreadMessageCount,
 } from '../services/chatApi';
+
+export function useGetUnreadCount() {
+  return useQuery({
+    queryKey: ['chat', 'unread-count'],
+    queryFn: getUnreadMessageCount,
+    refetchInterval: 15000,
+  });
+}
 
 export function useChatMessages(requestId) {
   return useQuery({
@@ -49,6 +58,12 @@ export function useMarkMessagesRead(requestId) {
       const me = queryClient.getQueryData(['me']);
 
       return markMessagesRead(requestId, me?.csrfToken);
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['chat', 'unread-count'],
+      });
     },
   });
 }

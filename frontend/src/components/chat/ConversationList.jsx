@@ -4,6 +4,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Chip,
   Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -13,6 +14,7 @@ const ConversationList = ({
   conversations,
   selectedConversationId,
   onSelect,
+  unreadByRequest,
 }) => {
   return (
     <Box
@@ -32,6 +34,7 @@ const ConversationList = ({
         {conversations.map((conversation) => {
           const name = conversation.participant.name;
           const lastMessage = conversation.lastMessage;
+          const unreadCount = unreadByRequest?.[conversation.requestId] ?? 0;
           const isSelected =
             conversation.conversationId === selectedConversationId;
           const profileImageSrc = getParticipantImage(
@@ -86,21 +89,42 @@ const ConversationList = ({
                       {name}
                     </Typography>
 
-                    {lastMessage && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ flexShrink: 0 }}
-                      >
-                        {new Date(lastMessage.createdAt).toLocaleTimeString(
-                          [],
-                          {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          }
-                        )}
-                      </Typography>
-                    )}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.75,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {unreadCount > 0 && (
+                        <Chip
+                          label={unreadCount}
+                          size="small"
+                          color="error"
+                          sx={{
+                            minWidth: 22,
+                            height: 22,
+                            fontWeight: 700,
+                            '& .MuiChip-label': {
+                              px: 0.75,
+                            },
+                          }}
+                        />
+                      )}
+
+                      {lastMessage && (
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(lastMessage.createdAt).toLocaleTimeString(
+                            [],
+                            {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                            }
+                          )}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
                 }
                 secondary={

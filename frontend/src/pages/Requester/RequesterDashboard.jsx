@@ -26,6 +26,7 @@ import {
 } from '../../utils/requester.constants.js';
 
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { useGetUnreadCount } from '../../hooks/useChat';
 import { useNotifications } from '../../hooks/useNotifications';
 
 function formatAcceptedNotification(notification) {
@@ -52,6 +53,11 @@ export default function RequesterDashboard() {
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState('');
+
+  /*Message Notification*/
+  const { data: unreadData } = useGetUnreadCount();
+
+  const unreadByRequest = unreadData?.byRequest ?? {};
 
   /* SEARCH + FILTER + SORT */
 
@@ -677,6 +683,7 @@ export default function RequesterDashboard() {
               onEdit={handleEdit}
               onCancel={handleCancel}
               onVolunteerProfile={handleVolunteerProfile}
+              unreadCount={unreadByRequest[request.id] ?? 0}
             />
           ))}
         </Box>
