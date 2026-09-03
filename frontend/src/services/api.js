@@ -142,6 +142,8 @@ export async function registerUser(userData) {
       throw validationError;
     }
 
+    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
+
     throw new Error('REGISTRATION_FAILED');
   }
 }

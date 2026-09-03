@@ -2,6 +2,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { COLORS } from './utils/constants';
 import App from './App';
@@ -46,9 +48,11 @@ createRoot(document.getElementById('root')).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </LocalizationProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>

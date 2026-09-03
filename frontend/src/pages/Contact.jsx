@@ -13,6 +13,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchOutlinedIcon from '@mui/icons-material/LaunchOutlined';
 import { COLORS } from '../utils/constants';
 import deryaProfilePhoto from '../assets/derya-profile.png';
+import AarthyMayakrishnan from '../assets/AarthyMayakrishnan.jpg';
 import cesarProfilePhoto from '../assets/cesarve-profile.jpg';
 
 const team = [
@@ -35,6 +36,16 @@ const team = [
     github: 'https://github.com/EmmanuelCobian',
     extraLinkLabel: 'Portfolio',
     extraLink: 'https://emmanuelcobian.vercel.app',
+  },
+  {
+    name: 'Aarthy Mayakrishnan',
+    role: 'Full Stack Developer',
+    bio: 'My journey from the Neighborhood Helper app idea to bringing it to life has been an exciting and rewarding experience. I contributed to the Admin Dashboard UI, Volunteer Approvals UI, User Management backend, Requester Profile frontend and backend, and Messaging/Chat feature across both frontend and backend.I especially enjoyed developing the chat feature and connecting its UI with the backend functionality.',
+    photo: AarthyMayakrishnan,
+    email: 'aarthy.maaya@gmail.com',
+    github: 'https://github.com/Theera12',
+    extraLinkLabel: 'Portfolio',
+    extraLink: 'https://example.com',
   },
   {
     name: 'Cesar D. Verastegui',
