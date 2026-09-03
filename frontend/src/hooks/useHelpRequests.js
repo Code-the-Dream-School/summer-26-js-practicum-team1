@@ -6,6 +6,7 @@ import {
   createHelpRequest,
   getVolunteerAcceptedRequests,
   getAcceptedVolunteerProfile,
+  getHelpRequestById,
 } from '../services/api';
 
 export function useBrowseHelpRequests(filters) {
@@ -64,6 +65,7 @@ export function useHelpRequests() {
     createError: createMutation.error,
   };
 }
+
 export function useAcceptedVolunteerProfile(requestId, enabled = true) {
   const query = useQuery({
     queryKey: ['accepted-volunteer-profile', requestId],
@@ -79,6 +81,7 @@ export function useAcceptedVolunteerProfile(requestId, enabled = true) {
     error: query.error,
   };
 }
+
 export function useVolunteerAcceptedRequests() {
   const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: ['volunteer-accepted-requests'],
@@ -89,6 +92,19 @@ export function useVolunteerAcceptedRequests() {
     helpRequests: data || [],
     isLoading,
     isFetching,
+  };
+}
+
+export function useHelpRequest(requestId) {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['help-request', requestId],
+    queryFn: () => getHelpRequestById(requestId),
+    enabled: requestId != null,
+  });
+
+  return {
+    helpRequest: data,
+    isLoading,
     isError,
     error,
   };

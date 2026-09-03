@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Box, Alert, Button, CircularProgress, Typography } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 import { searchPlaces } from '../../services/geoapify';
@@ -26,6 +26,21 @@ import {
 } from '../../utils/requester.constants.js';
 
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { useNotifications } from '../../hooks/useNotifications';
+
+function formatAcceptedNotification(notification) {
+  const { volunteerName, requestTitle, acceptedAt } = notification.payload;
+  const acceptedLabel = acceptedAt
+    ? new Date(acceptedAt).toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+    : '';
+
+  return `${volunteerName} accepted your request "${requestTitle}"${acceptedLabel ? ` — ${acceptedLabel}` : ''}`;
+}
 
 export default function RequesterDashboard() {
   const navigate = useNavigate();
@@ -51,6 +66,37 @@ export default function RequesterDashboard() {
   /* EXPANDED REQUEST */
 
   const [expandedRequest, setExpandedRequest] = useState(null);
+
+  const { notifications, markRead } = useNotifications({
+    enabled: !loading,
+    unreadOnly: true,
+  });
+
+  const handleDismissNotification = async (notification) => {
+    try {
+      await markRead(notification.id);
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err);
+    }
+  };
+
+  const handleViewAcceptedRequest = async (notification) => {
+    const requestId = Number(notification.payload?.requestId);
+    if (!Number.isInteger(requestId) || requestId <= 0) {
+      return;
+    }
+
+    setFilter('ALL');
+    setExpandedRequest(requestId);
+
+    window.setTimeout(() => {
+      document
+        .getElementById(`request-card-${requestId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+
+    await handleDismissNotification(notification);
+  };
 
   /* VOLUNTEER PROFILE DIALOG  */
 
@@ -208,7 +254,7 @@ export default function RequesterDashboard() {
         return;
       }
 
-      const currentRequest = await getHelpRequestById(request.id, csrfToken);
+      const currentRequest = await getHelpRequestById(request.id);
 
       setEditRequest(currentRequest);
 
@@ -534,6 +580,31 @@ export default function RequesterDashboard() {
           {error}
         </Typography>
       )}
+
+      {notifications.map((notification) => (
+        <Alert
+          key={notification.id}
+          severity="success"
+          sx={{ mb: 2 }}
+          onClose={() => handleDismissNotification(notification)}
+          action={
+            notification.payload?.requestId ? (
+              <Button
+                color="inherit"
+                size="small"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleViewAcceptedRequest(notification);
+                }}
+              >
+                View request
+              </Button>
+            ) : null
+          }
+        >
+          {formatAcceptedNotification(notification)}
+        </Alert>
+      ))}
 
       {/* SEARCH + FILTER + SORT  */}
 

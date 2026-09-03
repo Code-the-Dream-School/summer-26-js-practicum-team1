@@ -52,7 +52,7 @@ function RequestCard({
 
   const statusStyle = getStatusStyle(requestStatus);
 
-  const isExpanded = expandedRequest === request.id;
+  const isExpanded = Number(expandedRequest) === Number(request.id);
 
   const { volunteer } = useAcceptedVolunteerProfile(request.id, accepted);
 
@@ -87,6 +87,7 @@ function RequestCard({
 
   return (
     <Card
+      id={`request-card-${request.id}`}
       sx={{
         borderRadius: 3,
         border: `1px solid ${COLORS.border}`,

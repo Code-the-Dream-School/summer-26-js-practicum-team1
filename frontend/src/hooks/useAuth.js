@@ -45,13 +45,14 @@ export function useAuth() {
     login: loginMutation.mutateAsync,
     googleLogin: googleLoginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
-    register: registerMutation.mutateAsync,
     loginError: loginMutation.error,
     googleLoginError: googleLoginMutation.error,
-    registerError: registerMutation.error,
     isLoggingIn: loginMutation.isPending,
     isGoogleLoggingIn: googleLoginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
+    register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
   };
 }
+

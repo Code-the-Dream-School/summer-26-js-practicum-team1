@@ -7,7 +7,8 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { COLORS } from '../utils/constants';
 import { useAuth } from '../hooks/useAuth';
 import logo from '../assets/logo.png';
 import { GoogleLogin } from '@react-oauth/google';
@@ -25,6 +26,8 @@ const ROLE_REDIRECTS = {
 };
 
 function Login() {
+  const location = useLocation();
+  const successMessage = location.state?.message;
   const {
     register,
     handleSubmit,
@@ -57,6 +60,11 @@ function Login() {
   const onSubmit = async (formData) => {
     try {
       const data = await login(formData);
+
+      if(data.role?.toLowerCase() === 'volunteer' && data.verificationStatus === 'pending') {
+        navigate('/volunteer-pending');
+        return;
+      }
 
       navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
     } catch (err) {
@@ -96,8 +104,9 @@ function Login() {
         sx={{
           width: '100%',
           maxWidth: { xs: 400, sm: 460, md: 500 },
-          bgcolor: 'background.paper',
-          borderRadius: '24px',
+          bgcolor: COLORS.bgSubtle,
+          borderRadius: 3,
+          boxShadow: 2,
           p: { xs: 3, sm: 4, md: 5 },
         }}
       >
@@ -117,6 +126,12 @@ function Login() {
           Welcome back
         </Typography>
 
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
+
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
             Email
@@ -127,7 +142,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="email"
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('email', {
               required: 'Email is required',
               pattern: {
@@ -150,7 +165,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="current-password"
-            sx={{ mb: 1 }}
+            sx={{ mb: 1, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors.password?.message}
