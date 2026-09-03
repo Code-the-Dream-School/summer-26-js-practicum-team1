@@ -101,6 +101,8 @@ const browseHelpRequestQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),
   pageSize: Joi.number().integer().min(1).max(25).default(5),
 
+  view: Joi.string().valid('list', 'map').default('list'),
+
   ...commonFilterFields,
 
   sort: Joi.string()

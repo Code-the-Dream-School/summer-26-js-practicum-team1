@@ -12,40 +12,25 @@ const api = axios.create({
 function buildFilterParams(filters = {}) {
   const params = {};
 
-  if (filters.category) {
-    params.category = filters.category;
-  }
+  if (filters.category?.length) params.category = filters.category.join(',');
+  if (filters.urgency?.length) params.urgency = filters.urgency.join(',');
+  if (filters.status?.length) params.status = filters.status.join(',');
+  if (filters.daysOfWeek?.length)
+    params.daysOfWeek = filters.daysOfWeek.join(',');
+  if (filters.q) params.q = filters.q;
 
-  if (filters.urgency) {
-    params.urgency = filters.urgency;
-  }
+  if (filters.scheduledAfter) params.scheduledAfter = filters.scheduledAfter;
+  if (filters.scheduledBefore) params.scheduledBefore = filters.scheduledBefore;
+  if (filters.createdAfter) params.createdAfter = filters.createdAfter;
+  if (filters.createdBefore) params.createdBefore = filters.createdBefore;
+  if (filters.view) params.view = filters.view;
 
-  if (filters.status) {
-    params.status = filters.status;
-  }
-
-  if (filters.search) {
-    params.search = filters.search;
-  }
-
-  if (filters.latitude !== undefined && filters.latitude !== null) {
-    params.latitude = filters.latitude;
-  }
-
-  if (filters.longitude !== undefined && filters.longitude !== null) {
-    params.longitude = filters.longitude;
-  }
-
-  if (filters.radius !== undefined && filters.radius !== null) {
-    params.radius = filters.radius;
-  }
-
-  if (filters.startDate) {
-    params.startDate = filters.startDate;
-  }
-
-  if (filters.endDate) {
-    params.endDate = filters.endDate;
+  const hasGeo =
+    filters.lat != null && filters.lng != null && filters.radiusMi != null;
+  if (hasGeo) {
+    params.lat = filters.lat;
+    params.lng = filters.lng;
+    params.radiusMi = filters.radiusMi;
   }
 
   return params;
@@ -61,13 +46,8 @@ function buildHelpRequestParams(filters = {}) {
     params.sort = `${filters.sortField}:${filters.sortDir || 'desc'}`;
   }
 
-  if (filters.page) {
-    params.page = filters.page;
-  }
-
-  if (filters.pageSize) {
-    params.pageSize = filters.pageSize;
-  }
+  if (filters.page) params.page = filters.page;
+  if (filters.pageSize) params.pageSize = filters.pageSize;
 
   return params;
 }
@@ -224,7 +204,7 @@ export async function getHelpRequests() {
 /**
  * Get help requests for Browse page.
  */
-export async function getBrowseHelpRequests(filters = {}) {
+export async function getBrowseHelpRequests(filters) {
   try {
     const { data } = await api.get('/api/requests', {
       params: buildHelpRequestParams(filters),
@@ -239,11 +219,9 @@ export async function getBrowseHelpRequests(filters = {}) {
     if (!err.response) {
       throw new Error('NETWORK_ERROR');
     }
-
     if (err.response.status === 400) {
       throw new Error(err.response.data?.message || 'INVALID_REQUEST');
     }
-
     throw new Error('FETCH_HELP_REQUESTS_FAILED');
   }
 }

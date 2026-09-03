@@ -42,6 +42,8 @@ import SortControl from '../components/browse/SortControl.jsx';
 import FilterSidebar from '../components/browse/FilterSidebar.jsx';
 import RequestCard from '../components/browse/RequestCard.jsx';
 import BrowseSkeleton from '../components/browse/BrowseSkeleton.jsx';
+import MapView from '../components/browse/MapView.jsx';
+import { useNavigate } from 'react-router-dom';
 
 function Browse() {
   const [search, setSearch] = useState('');
@@ -61,6 +63,8 @@ function Browse() {
   const [prefilledForProfileId, setPrefilledForProfileId] = useState(null);
 
   const debouncedSearch = useDebouncedValue(search, 300);
+
+  const navigate = useNavigate();
 
   const { results: autocompleteResults, isLoading: isAutocompleting } =
     useLocationAutocomplete(locationQuery);
@@ -166,6 +170,7 @@ function Browse() {
       daysOfWeek: selectedDays,
       sortField: sortKey,
       sortDir,
+      view,
     };
 
     if (selectedLocation) {
@@ -187,6 +192,7 @@ function Browse() {
     sortDir,
     selectedLocation,
     distance,
+    view,
   ]);
 
   const filtersKey = JSON.stringify(filters);
@@ -197,8 +203,9 @@ function Browse() {
   }
 
   const browseFilters = useMemo(
-    () => ({ ...filters, page, pageSize: PAGE_SIZE }),
-    [filters, page]
+    () =>
+      view === 'map' ? filters : { ...filters, page, pageSize: PAGE_SIZE },
+    [filters, page, view]
   );
 
   const { helpRequests, meta, isLoading, isFetching, isError, error } =
@@ -362,7 +369,7 @@ function Browse() {
         sx={{
           mt: 4,
           display: 'flex',
-          alignItems: 'flex-start',
+          alignItems: 'stretch',
           justifyContent: 'space-between',
           gap: '32px',
         }}
@@ -394,7 +401,7 @@ function Browse() {
           />
         </Box>
 
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Stack
             direction="row"
             sx={{
@@ -482,18 +489,11 @@ function Browse() {
               </Typography>
             )
           ) : (
-            <Box
-              sx={{
-                border: '1px dashed',
-                borderColor: COLORS.border,
-                borderRadius: 2,
-                p: 6,
-                textAlign: 'center',
-                color: COLORS.textFaint,
-              }}
-            >
-              Map view coming soon.
-            </Box>
+            <MapView
+              requests={helpRequests}
+              selectedLocation={selectedLocation}
+              onSelectRequest={(request) => navigate(`/requests/${request.id}`)}
+            />
           )}
         </Box>
       </Box>

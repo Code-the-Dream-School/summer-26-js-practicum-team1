@@ -214,6 +214,16 @@ describe('GET /api/requests — query validation', () => {
       expect.objectContaining({ page: 1, pageSize: 5 })
     );
   });
+
+  it('accepts view=map', async () => {
+    const res = await browse('?view=map', adminCookie);
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects an invalid view value', async () => {
+    const res = await browse('?view=satellite', adminCookie);
+    expect(res.status).toBe(400);
+  });
 });
 
 describe('GET /api/requests — end-to-end wiring (route -> controller -> service -> prisma)', () => {
@@ -821,6 +831,26 @@ describe('browseHelpRequestQuerySchema', () => {
   it('rejects a malformed sort string', () => {
     const { error } = browseHelpRequestQuerySchema.validate({
       sort: 'urgency:backwards',
+    });
+    expect(error).toBeDefined();
+  });
+
+  it('defaults view to "list" when omitted', () => {
+    const { value } = browseHelpRequestQuerySchema.validate({});
+    expect(value.view).toBe('list');
+  });
+
+  it('accepts view=map', () => {
+    const { error, value } = browseHelpRequestQuerySchema.validate({
+      view: 'map',
+    });
+    expect(error).toBeUndefined();
+    expect(value.view).toBe('map');
+  });
+
+  it('rejects an invalid view value', () => {
+    const { error } = browseHelpRequestQuerySchema.validate({
+      view: 'satellite',
     });
     expect(error).toBeDefined();
   });
