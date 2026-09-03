@@ -14,6 +14,7 @@ import RequestCard from '../../components/requesterDashbord/RequestCard';
 import RequestFilters from '../../components/requesterDashbord/RequestFilters.jsx';
 
 import { useVolunteerAcceptedRequests } from '../../hooks/useHelpRequests';
+import { useGetUnreadCount } from '../../hooks/useChat';
 
 import { COLORS } from '../../utils/constants.js';
 
@@ -26,6 +27,10 @@ function VolunteerDashboard() {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('SOONEST');
   const [expandedRequest, setExpandedRequest] = useState(null);
+
+  const { data: unreadData } = useGetUnreadCount();
+
+  const unreadByRequest = unreadData?.byRequest ?? {};
 
   const filteredRequests = helpRequests.filter((request) => {
     const searchText = search.trim().toLowerCase();
@@ -175,6 +180,8 @@ function VolunteerDashboard() {
                   expandedRequest={expandedRequest}
                   setExpandedRequest={setExpandedRequest}
                   dashboardType="volunteer"
+                  userRole="VOLUNTEER"
+                  unreadCount={unreadByRequest[request.id] ?? 0}
                 />
               </Grid>
             ))}

@@ -36,6 +36,7 @@ function RequestCard({
   onCancel,
   onVolunteerProfile,
   unreadCount,
+  userRole,
 }) {
   const navigate = useNavigate();
 
@@ -66,10 +67,12 @@ function RequestCard({
     // navigate(`/requests/${request.id}`);
   };
 
+  //chat helper
   const handleOpenChat = () => {
     navigate(`/chat/${request.id}`, {
       state: {
-        participantId: request.volunteerId,
+        participantId:
+          userRole === 'VOLUNTEER' ? request.requesterId : request.volunteerId,
       },
     });
   };
@@ -83,6 +86,9 @@ function RequestCard({
     blurActiveElement();
     onCancel(request);
   };
+
+  const participantName =
+    userRole === 'VOLUNTEER' ? request.requester?.name : volunteer?.name;
 
   return (
     <Card
@@ -356,7 +362,7 @@ function RequestCard({
                   },
                 }}
               >
-                {volunteer?.name || 'Volunteer'}
+                {participantName || 'User'}
                 {unreadCount > 0 && (
                   <Chip
                     label={unreadCount}
