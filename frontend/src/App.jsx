@@ -18,6 +18,7 @@ import ProfilePage from './pages/ProfilePage';
 import NewhelpRequest from './pages/Requester/helpRequest';
 import VolunteerPendingPage from './pages/VolunteerPendingPage';
 import ChatPage from './pages/ChatPage';
+import NotFound from './pages/NotFound';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import RequestDetail from './pages/RequestDetail';
@@ -36,7 +37,8 @@ function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignupPage />} />
-
+        <Route path="*" element={<NotFound />} />
+          
         {/* Requester Registration */}
         <Route
           path="requesterRegistration"
