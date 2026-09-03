@@ -8,6 +8,7 @@ import {
   Alert,
   Divider,
   Skeleton,
+  Chip,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlaceIcon from '@mui/icons-material/Place';
@@ -17,6 +18,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import Pill from '../components/browse/Pill';
 import { useHelpRequest } from '../hooks/useHelpRequests';
 import { useRespondToHelpRequest } from '../hooks/useRespondToHelpRequest';
+import { useGetUnreadCount } from '../hooks/useChat';
 import {
   CATEGORY_BY_API_VALUE,
   URGENCY_BY_API_VALUE,
@@ -51,7 +53,7 @@ function RequestDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [feedback, setFeedback] = useState(null);
-
+  const { data: unreadData } = useGetUnreadCount();
   const { helpRequest, isLoading, isError, error } = useHelpRequest(id);
   const {
     acceptRequest,
@@ -151,6 +153,8 @@ function RequestDetail() {
 
   const isResponding = respondingRequestId === Number(id);
   const isCancelled = helpRequest.status === 'CANCELLED';
+
+  const unreadCount = unreadData?.byRequest?.[Number(id)] ?? 0;
 
   const category = CATEGORY_BY_API_VALUE[helpRequest.category];
   const urgency = URGENCY_BY_API_VALUE[helpRequest.urgency];
@@ -365,6 +369,7 @@ function RequestDetail() {
                       textTransform: 'none',
                       borderColor: COLORS.border,
                       color: COLORS.forest,
+                      minWidth: 150,
                       '&:hover': {
                         borderColor: COLORS.borderHover,
                         backgroundColor: COLORS.sage,
@@ -373,6 +378,23 @@ function RequestDetail() {
                   >
                     Message{' '}
                     {helpRequest.requester?.name?.split(' ')[0] || 'requester'}
+                    {unreadCount > 0 && (
+                      <Chip
+                        label={unreadCount}
+                        size="small"
+                        sx={{
+                          ml: 1,
+                          height: 20,
+                          minWidth: 20,
+                          backgroundColor: 'error.main',
+                          color: 'white',
+                          fontWeight: 700,
+                          '& .MuiChip-label': {
+                            px: 0.75,
+                          },
+                        }}
+                      />
+                    )}
                   </Button>
                 )}
 
