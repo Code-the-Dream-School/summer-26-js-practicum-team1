@@ -423,7 +423,7 @@ function RequestCard({
                   },
                 }}
               >
-                Message
+                
                 {participantName || 'User'}
                 {unreadCount > 0 && (
                   <Chip
