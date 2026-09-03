@@ -218,7 +218,9 @@ async function getAcceptedVolunteerProfile({ requestId, requesterId }) {
     throw new ApiError(404, 'Help request not found');
   }
 
-  if (helpRequest.status !== RequestStatus.ACCEPTED) {
+  if (
+  helpRequest.status !== 'ACCEPTED' &&
+  helpRequest.status !== 'COMPLETED') {
     throw new ApiError(
       400,
       'Volunteer profile is only available for accepted requests'

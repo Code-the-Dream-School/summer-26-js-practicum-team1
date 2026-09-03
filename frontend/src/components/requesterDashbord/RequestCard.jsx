@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   Chip,
-  Collapse,
   Tooltip,
   Typography,
   IconButton,
@@ -14,7 +13,6 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
@@ -32,43 +30,32 @@ import { COLORS } from '../../utils/constants.js';
 
 function RequestCard({
   request,
-  expandedRequest,
   onEdit,
   onCancel,
   onVolunteerProfile,
   unreadCount,
-   dashboardType,
+  dashboardType,
 }) {
   const navigate = useNavigate();
 
   const requestStatus = String(request.status || '').toUpperCase();
-
-  const accepted = requestStatus === 'ACCEPTED';
 
   const isPending = requestStatus === 'PENDING';
 
   const canChat =
     requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
-  const urgencyStyle = getUrgencyStyle(request.urgency);
+  const showVolunteer =
+    dashboardType === 'requester' &&
+    (requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED');
 
+  const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(requestStatus);
 
-  const isExpanded = expandedRequest === request.id;
-
-  const shouldFetchVolunteer =
-  dashboardType === 'requester' && accepted;
-
-const { volunteer } = useAcceptedVolunteerProfile(
-  request.id,
-  shouldFetchVolunteer
-);
-
-  const blurActiveElement = () => {
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-  };
+  const { volunteer } = useAcceptedVolunteerProfile(
+    request.id,
+    showVolunteer
+  );
 
   // Navigate to the request details page
   const handleToggleDetails = () => {
@@ -84,13 +71,25 @@ const { volunteer } = useAcceptedVolunteerProfile(
   };
 
   const handleEditClick = () => {
-    blurActiveElement();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     onEdit(request);
   };
 
   const handleCancelClick = () => {
-    blurActiveElement();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
     onCancel(request);
+  };
+
+  const handleVolunteerProfile = () => {
+    if (volunteer && onVolunteerProfile) {
+      onVolunteerProfile(volunteer);
+    }
   };
 
   return (
@@ -151,7 +150,7 @@ const { volunteer } = useAcceptedVolunteerProfile(
           >
             {/* EDIT + CANCEL ONLY FOR PENDING */}
 
-          {dashboardType === 'requester' && isPending && (
+            {dashboardType === 'requester' && isPending && (
               <>
                 {/* EDIT */}
 
@@ -166,7 +165,6 @@ const { volunteer } = useAcceptedVolunteerProfile(
                       flexShrink: 0,
                       color: COLORS.primary,
                       borderRadius: 2,
-
                       '&:hover': {
                         backgroundColor: COLORS.bgSubtle,
                       },
@@ -189,7 +187,6 @@ const { volunteer } = useAcceptedVolunteerProfile(
                       flexShrink: 0,
                       color: COLORS.primary,
                       borderRadius: 2,
-
                       '&:hover': {
                         backgroundColor: COLORS.bgSubtle,
                       },
@@ -290,104 +287,166 @@ const { volunteer } = useAcceptedVolunteerProfile(
           </Typography>
         </Box>
 
-        {/* URGENCY + ACTIONS */}
+        {/* URGENCY */}
 
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
             gap: 2,
             mt: 1,
-            flexWrap: 'wrap',
           }}
         >
-          {/* URGENCY - LEFT */}
-
-          <Box
+          <Typography
+            variant="body2"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
+              color: COLORS.textMuted,
+              fontSize: '1rem',
+              fontWeight: 700,
             }}
           >
-            <Typography
-              variant="body2"
+            Urgency:
+          </Typography>
+
+          <Chip
+            label={request.urgency}
+            size="small"
+            sx={{
+              minHeight: 32,
+              fontSize: '0.9rem',
+              backgroundColor: urgencyStyle.bg,
+              color: urgencyStyle.text,
+              fontWeight: 700,
+            }}
+          />
+        </Box>
+
+        {/* VOLUNTEER + ACTIONS */}
+
+        <Box
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 2,
+    mt: 2,
+    width: '100%',
+    flexWrap: 'wrap',
+  }}
+>
+          {/* VOLUNTEER PROFILE - REQUESTER ONLY */}
+
+          {showVolunteer && volunteer && (
+            <Box
               sx={{
-                color: COLORS.textMuted,
-                fontSize: '1rem',
-                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                mr: 'auto',
               }}
             >
-              Urgency:
-            </Typography>
+              <Avatar
+                src={volunteer.profileImage || undefined}
+                alt={volunteer.name || 'Volunteer'}
+                onClick={handleVolunteerProfile}
+                sx={{
+                  width: 42,
+                  height: 42,
+                  cursor: 'pointer',
+                  bgcolor: '#E8F5E9',
+                  color: '#166534',
+                  fontWeight: 700,
+                  '&:hover': {
+                    boxShadow: '0 0 0 3px #DCFCE7',
+                  },
+                }}
+              >
+                {!volunteer.profileImage &&
+                  volunteer.name?.charAt(0)?.toUpperCase()}
+              </Avatar>
 
-            <Chip
-              label={request.urgency}
-              size="small"
-              sx={{
-                minHeight: 32,
-                fontSize: '0.9rem',
-                backgroundColor: urgencyStyle.bg,
-                color: urgencyStyle.text,
-                fontWeight: 700,
-              }}
-            />
-          </Box>
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: COLORS.textMuted,
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Volunteer
+                </Typography>
 
-          {/* ACTIONS - RIGHT */}
+                <Typography
+                  variant="body1"
+                  fontWeight={600}
+                  onClick={handleVolunteerProfile}
+                  sx={{
+                    color: COLORS.primary,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {volunteer.name || 'Not available'}
+                </Typography>
+              </Box>
+            </Box>
+          )}
 
           <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1,
+    flexShrink: 0,
+    marginLeft: 'auto',
+  }}
+>
             {/* MESSAGE BUTTON */}
 
             {canChat && (
-  <Button
-    variant="contained"
-    startIcon={<ChatBubbleIcon />}
-    onClick={handleOpenChat}
-    sx={{
-      minHeight: 42,
-      px: 2.5,
-      borderRadius: 2,
-      textTransform: 'none',
-      fontWeight: 600,
-      boxShadow: 2,
-      transition: 'all 0.2s ease',
-      '&:hover': {
-        boxShadow: 4,
-        transform: 'translateY(-1px)',
-      },
-    }}
-  >
-    Message
+              <Button
+                variant="contained"
+                startIcon={<ChatBubbleIcon />}
+                onClick={handleOpenChat}
+                sx={{
+                  minHeight: 42,
+                  px: 2.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 2,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: 4,
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                Message
 
-    {unreadCount > 0 && (
-      <Chip
-        label={unreadCount}
-        size="small"
-        sx={{
-          ml: 1,
-          height: 20,
-          minWidth: 20,
-          backgroundColor: 'error.main',
-          color: 'white',
-          fontWeight: 700,
-          '& .MuiChip-label': {
-            px: 0.75,
-          },
-        }}
-      />
-    )}
-  </Button>
-)}
+                {unreadCount > 0 && (
+                  <Chip
+                    label={unreadCount}
+                    size="small"
+                    sx={{
+                      ml: 1,
+                      height: 20,
+                      minWidth: 20,
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      fontWeight: 700,
+                      '& .MuiChip-label': {
+                        px: 0.75,
+                      },
+                    }}
+                  />
+                )}
+              </Button>
+            )}
 
-            {/* VIEW DETAILS BUTTON */}
+            {/* VIEW DETAILS */}
 
             <Button
               onClick={handleToggleDetails}
@@ -400,222 +459,10 @@ const { volunteer } = useAcceptedVolunteerProfile(
                 color: COLORS.primary,
               }}
             >
-              {isExpanded ? 'Hide Details' : 'View Details'}
+              View Details
             </Button>
           </Box>
         </Box>
-
-        {/* EXPANDED DETAILS */}
-
-        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-          <Box
-            sx={{
-              mt: 2,
-              pt: 2,
-              borderTop: `1px solid ${COLORS.border}`,
-            }}
-          >
-            {/* DESCRIPTION */}
-
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1.5,
-                color: COLORS.textMuted,
-                fontSize: '1rem',
-                lineHeight: 1.6,
-              }}
-            >
-              <strong>Description:</strong>{' '}
-              {request.description || 'No description provided.'}
-            </Typography>
-
-            {/* LOCATION */}
-
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 1,
-                mt: 1.5,
-              }}
-            >
-              <LocationOnOutlinedIcon
-                sx={{
-                  fontSize: 20,
-                  mt: 0.2,
-                }}
-                color="action"
-              />
-
-              <Typography
-                variant="body2"
-                sx={{
-                  color: COLORS.textMuted,
-                  fontSize: '1rem',
-                  lineHeight: 1.5,
-                  overflowWrap: 'anywhere',
-                }}
-              >
-                <strong>Location:</strong>{' '}
-                {request.address || 'Address not available'}
-              </Typography>
-            </Box>
-
-            {/* CATEGORY */}
-
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1.5,
-                color: COLORS.textMuted,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Category:</strong> {request.category}
-            </Typography>
-
-            {/* URGENCY */}
-
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1.5,
-                color: COLORS.textMuted,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Urgency:</strong> {request.urgency}
-            </Typography>
-
-            {/* STATUS */}
-
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 1.5,
-                color: COLORS.textMuted,
-                fontSize: '1rem',
-              }}
-            >
-              <strong>Status:</strong> {statusStyle.label}
-            </Typography>
-
-            {/* VOLUNTEER */}
-
-            {dashboardType === 'requester' && accepted && volunteer && (
-              <Box
-                sx={{
-                  mt: 2,
-                  pt: 2,
-                  borderTop: `1px solid ${COLORS.border}`,
-                }}
-              >
-                <Typography
-                  variant="subtitle1"
-                  fontWeight={700}
-                  sx={{
-                    mb: 1.5,
-                    fontSize: '1rem',
-                  }}
-                >
-                  Volunteer Details
-                </Typography>
-
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                  }}
-                >
-                  {/* AVATAR */}
-
-                  <Avatar
-                    src={volunteer.profileImage || undefined}
-                    alt={volunteer.name || 'Volunteer'}
-                    onClick={() => onVolunteerProfile(volunteer)}
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      fontSize: 18,
-                      cursor: 'pointer',
-                      bgcolor: '#E8F5E9',
-                      color: '#166534',
-                      fontWeight: 700,
-
-                      '&:hover': {
-                        boxShadow: '0 0 0 3px #DCFCE7',
-                      },
-                    }}
-                  >
-                    {!volunteer.profileImage &&
-                      volunteer.name?.charAt(0)?.toUpperCase()}
-                  </Avatar>
-
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: '0.95rem',
-                      }}
-                    >
-                      Volunteer
-                    </Typography>
-
-                    <Typography
-                      variant="body1"
-                      fontWeight={600}
-                      onClick={() => onVolunteerProfile(volunteer)}
-                      sx={{
-                        fontSize: '1rem',
-                        cursor: 'pointer',
-                        color: COLORS.primary,
-
-                        '&:hover': {
-                          textDecoration: 'underline',
-                        },
-                      }}
-                    >
-                      {volunteer.name || 'Not available'}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* PHONE */}
-
-                {volunteer.phone && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1.5,
-                      fontSize: '1rem',
-                    }}
-                  >
-                    <strong>Phone:</strong> {volunteer.phone}
-                  </Typography>
-                )}
-
-                {/* EMAIL */}
-
-                {volunteer.email && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mt: 1,
-                      fontSize: '1rem',
-                    }}
-                  >
-                    <strong>Email:</strong> {volunteer.email}
-                  </Typography>
-                )}
-              </Box>
-            )}
-          </Box>
-        </Collapse>
       </CardContent>
     </Card>
   );

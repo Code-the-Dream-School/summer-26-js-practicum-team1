@@ -32,9 +32,11 @@ function HelpRequestForm({
         value={formData.title}
         onChange={onChange}
         placeholder="What help do you need?"
-        inputProps={{
+        slotProps={{
+  htmlInput: {
           maxLength: 100,
-        }}
+         },
+}}
         error={Boolean(fieldErrors.title)}
         helperText={fieldErrors.title}
         sx={{

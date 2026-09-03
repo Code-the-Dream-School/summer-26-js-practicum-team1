@@ -45,16 +45,18 @@ function RequestLocationField({
           minRows={2}
           error={Boolean(fieldErrors.address)}
           helperText={fieldErrors.address}
-          InputProps={{
+          slotProps={{
+  input: {
             startAdornment: (
               <LocationOnOutlinedIcon
                 sx={{
                   mr: 1,
-                  color: '#2E7D32',
-                }}
-              />
-            ),
-          }}
+                   color: '#2E7D32',
+        }}
+      />
+    ),
+  },
+}}
           sx={{
             '& .MuiOutlinedInput-root.Mui-focused fieldset': {
               borderColor: '#2E7D32',
