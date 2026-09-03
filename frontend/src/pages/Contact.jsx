@@ -13,6 +13,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import LaunchOutlinedIcon from '@mui/icons-material/LaunchOutlined';
 import { COLORS } from '../utils/constants';
 import deryaProfilePhoto from '../assets/derya-profile.png';
+import AarthyMayakrishnan from '../assets/AarthyMayakrishnan.jpg';
 
 const team = [
   {
@@ -36,12 +37,12 @@ const team = [
     extraLink: 'https://emmanuelcobian.vercel.app',
   },
   {
-    name: 'Team Member Name',
-    role: 'Frontend / Backend',
-    bio: 'Short one or two sentence bio about what this teammate focused on for Neighborhood Helper and what they enjoy building.',
-    photo: undefined,
-    email: 'name2@example.com',
-    github: 'https://github.com/username',
+    name: 'Aarthy Mayakrishnan',
+    role: 'Full Stack Developer',
+    bio: 'My journey from the Neighborhood Helper app idea to bringing it to life has been an exciting and rewarding experience. I contributed to the Admin Dashboard UI, Volunteer Approvals UI, User Management backend, Requester Profile frontend and backend, and Messaging/Chat feature across both frontend and backend.I especially enjoyed developing the chat feature and connecting its UI with the backend functionality.',
+    photo: AarthyMayakrishnan,
+    email: 'aarthy.maaya@gmail.com',
+    github: 'https://github.com/Theera12',
     extraLinkLabel: 'Portfolio',
     extraLink: 'https://example.com',
   },

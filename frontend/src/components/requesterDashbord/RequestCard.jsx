@@ -1,3 +1,4 @@
+
 import {
   Avatar,
   Box,
@@ -18,7 +19,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
-import { useAcceptedVolunteerProfile } from '../../hooks/useAcceptedVolunteerProfile.js';
+import { useAcceptedVolunteerProfile } from '../../hooks/useHelpRequests';
 
 import {
   getUrgencyStyle,
@@ -32,7 +33,6 @@ import { COLORS } from '../../utils/constants.js';
 function RequestCard({
   request,
   expandedRequest,
-  setExpandedRequest,
   onEdit,
   onCancel,
   onVolunteerProfile,
@@ -45,7 +45,8 @@ function RequestCard({
 
   const isPending = requestStatus === 'PENDING';
 
-  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
+  const canChat =
+    requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
 
@@ -61,8 +62,9 @@ function RequestCard({
     }
   };
 
+  // Navigate to the request details page
   const handleToggleDetails = () => {
-    setExpandedRequest(isExpanded ? null : request.id);
+    // navigate(`/requests/${request.id}`);
   };
 
   const handleOpenChat = () => {
@@ -104,95 +106,109 @@ function RequestCard({
           flexDirection: 'column',
         }}
       >
-        {/* STATUS + ACTION BUTTONS */}
+        {/* TITLE + EDIT/CANCEL + STATUS */}
 
         <Box
           sx={{
             display: 'flex',
-            justifyContent: 'flex-end',
             alignItems: 'center',
-            gap: 0.5,
+            justifyContent: 'space-between',
+            gap: 2,
             mb: 2,
           }}
         >
-          {/* STATUS */}
+          {/* TITLE */}
 
-          <Chip
-            label={statusStyle.label}
-            size="small"
+          <Typography
+            variant="h6"
             sx={{
-              fontWeight: 500,
-              flexShrink: 0,
-              minHeight: 32,
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.text,
+              color: COLORS.text,
+              fontWeight: 800,
+              mb: 0,
+              flex: 1,
             }}
-          />
+          >
+            {request.title}
+          </Typography>
 
-          {/* EDIT + CANCEL ONLY FOR PENDING */}
+          {/* EDIT + CANCEL + STATUS */}
 
-          {isPending && (
-            <>
-              {/* EDIT */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexShrink: 0,
+            }}
+          >
+            {/* EDIT + CANCEL ONLY FOR PENDING */}
 
-              <Tooltip title="Edit request">
-                <IconButton
-                  onClick={handleEditClick}
-                  aria-label="Edit help request"
-                  size="small"
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    flexShrink: 0,
-                    color: COLORS.primary,
-                    borderRadius: 2,
+            {isPending && (
+              <>
+                {/* EDIT */}
 
-                    '&:hover': {
-                      backgroundColor: COLORS.bgSubtle,
-                    },
-                  }}
-                >
-                  <EditOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+                <Tooltip title="Edit request">
+                  <IconButton
+                    onClick={handleEditClick}
+                    aria-label="Edit help request"
+                    size="small"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      color: COLORS.primary,
+                      borderRadius: 2,
 
-              {/* CANCEL */}
+                      '&:hover': {
+                        backgroundColor: COLORS.bgSubtle,
+                      },
+                    }}
+                  >
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip title="Cancel request">
-                <IconButton
-                  onClick={handleCancelClick}
-                  aria-label="Cancel help request"
-                  size="small"
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    flexShrink: 0,
-                    color: COLORS.primary,
-                    borderRadius: 2,
+                {/* CANCEL */}
 
-                    '&:hover': {
-                      backgroundColor: COLORS.bgSubtle,
-                    },
-                  }}
-                >
-                  <DeleteForeverOutlinedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
+                <Tooltip title="Cancel request">
+                  <IconButton
+                    onClick={handleCancelClick}
+                    aria-label="Cancel help request"
+                    size="small"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      flexShrink: 0,
+                      color: COLORS.primary,
+                      borderRadius: 2,
+
+                      '&:hover': {
+                        backgroundColor: COLORS.bgSubtle,
+                      },
+                    }}
+                  >
+                    <DeleteForeverOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+
+            {/* STATUS */}
+
+            <Chip
+              label={statusStyle.label}
+              size="small"
+              sx={{
+                fontWeight: 500,
+                flexShrink: 0,
+                minHeight: 32,
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.text,
+              }}
+            />
+          </Box>
         </Box>
-        {/* TITLE */}
 
-        <Typography
-          variant="h6"
-          sx={{
-            color: COLORS.text,
-            fontWeight: 800,
-            mb: 1.5,
-          }}
-        >
-          {request.title}
-        </Typography>
         {/* CATEGORY */}
 
         <Typography
@@ -266,90 +282,101 @@ function RequestCard({
           </Typography>
         </Box>
 
-        {/* URGENCY */}
+        {/* URGENCY + ACTIONS */}
 
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: 2,
-            mb: 1.5,
+            mt: 1,
+            flexWrap: 'wrap',
           }}
         >
-          <Typography
-            variant="body2"
+          {/* URGENCY - LEFT */}
+
+          <Box
             sx={{
-              color: COLORS.textMuted,
-              fontSize: '1rem',
-              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
             }}
           >
-            Urgency:
-          </Typography>
-
-          <Chip
-            label={request.urgency}
-            size="small"
-            sx={{
-              minHeight: 32,
-              fontSize: '0.9rem',
-              backgroundColor: urgencyStyle.bg,
-              color: urgencyStyle.text,
-              fontWeight: 700,
-            }}
-          />
-        </Box>
-
-        {/* ACTIONS */}
-
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            mt: 'auto',
-            pt: 1,
-            gap: 1,
-          }}
-        >
-          {/* MESSAGE BUTTON */}
-
-          {canChat && volunteer && (
-            <Button
-              variant="contained"
-              startIcon={<ChatBubbleIcon />}
-              onClick={handleOpenChat}
+            <Typography
+              variant="body2"
               sx={{
-                width: 140,
-                minHeight: 42,
-                px: 2,
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                color: COLORS.textMuted,
+                fontSize: '1rem',
+                fontWeight: 700,
               }}
             >
-              {volunteer.name || 'Volunteer'}
-            </Button>
-          )}
+              Urgency:
+            </Typography>
 
-          {/* VIEW DETAILS BUTTON */}
+            <Chip
+              label={request.urgency}
+              size="small"
+              sx={{
+                minHeight: 32,
+                fontSize: '0.9rem',
+                backgroundColor: urgencyStyle.bg,
+                color: urgencyStyle.text,
+                fontWeight: 700,
+              }}
+            />
+          </Box>
 
-          <Button
-            onClick={handleToggleDetails}
+          {/* ACTIONS - RIGHT */}
+
+          <Box
             sx={{
-              minHeight: 44,
-              px: 2,
-              fontSize: '1rem',
-              fontWeight: 600,
-              textTransform: 'none',
-              color: COLORS.primary,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
             }}
           >
-            {isExpanded ? 'Hide Details' : 'View Details'}
-          </Button>
+            {/* MESSAGE BUTTON */}
+
+            {canChat && (
+              <Button
+                variant="contained"
+                startIcon={<ChatBubbleIcon />}
+                onClick={handleOpenChat}
+                sx={{
+                  minHeight: 42,
+                  px: 2.5,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  boxShadow: 2,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: 4,
+                    transform: 'translateY(-1px)',
+                  },
+                }}
+              >
+                Message
+              </Button>
+            )}
+
+            {/* VIEW DETAILS BUTTON */}
+
+            <Button
+              onClick={handleToggleDetails}
+              sx={{
+                minHeight: 44,
+                px: 2,
+                fontSize: '1rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                color: COLORS.primary,
+              }}
+            >
+              {isExpanded ? 'Hide Details' : 'View Details'}
+            </Button>
+          </Box>
         </Box>
 
         {/* EXPANDED DETAILS */}
@@ -569,3 +596,4 @@ function RequestCard({
 }
 
 export default RequestCard;
+

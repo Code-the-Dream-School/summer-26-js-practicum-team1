@@ -7,7 +7,7 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import GoogleIcon from '@mui/icons-material/Google';
 import logo from '../assets/logo.png';
@@ -20,11 +20,13 @@ const ERROR_MESSAGES = {
 
 const ROLE_REDIRECTS = {
   requester: '/requester-dashboard',
-  volunteer: '/',
+  volunteer: '/volunteer-dashboard',
   admin: '/admin/dashboard',
 };
 
 function Login() {
+  const location = useLocation();
+  const successMessage = location.state?.message;
   const {
     register,
     handleSubmit,
@@ -36,6 +38,11 @@ function Login() {
   const onSubmit = async (formData) => {
     try {
       const data = await login(formData);
+
+      if(data.role?.toLowerCase() === 'volunteer' && data.verificationStatus === 'pending') {
+        navigate('/volunteer-pending');
+        return;
+      }
 
       navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
     } catch (err) {
@@ -81,6 +88,12 @@ function Login() {
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
           Welcome back
         </Typography>
+
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>

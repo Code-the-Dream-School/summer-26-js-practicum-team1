@@ -34,7 +34,17 @@ const getHelpRequests = asyncHandler(async (req, res) => {
     data: helpRequests,
   });
 });
+const getMyAcceptedRequests = asyncHandler(async (req, res) => {
+  const helpRequests =
+    await helpRequestService.getVolunteerAcceptedRequests({
+      volunteerId: req.user.id,
+    });
 
+  return res.status(200).json({
+    success: true,
+    data: helpRequests,
+  });
+});
 const getHelpRequestById = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
 
@@ -169,6 +179,7 @@ module.exports = {
   createHelpRequest,
   getHelpRequests,
   getHelpRequestById,
+  getMyAcceptedRequests,
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,

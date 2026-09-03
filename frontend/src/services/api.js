@@ -79,7 +79,7 @@ function buildHelpRequestParams(filters = {}) {
  * should return category counts for the other active filters.
  */
 function buildFacetsParams(filters = {}) {
-  const { category, ...rest } = filters;
+  const { category: _category, ...rest } = filters;
 
   return buildFilterParams(rest);
 }
@@ -141,6 +141,8 @@ export async function registerUser(userData) {
 
       throw validationError;
     }
+
+    if (err.response.status === 409) throw new Error('EMAIL_TAKEN');
 
     throw new Error('REGISTRATION_FAILED');
   }
@@ -229,13 +231,6 @@ export async function getBrowseHelpRequests(filters = {}) {
       withCredentials: true,
     });
 
-    /*
-     * Supports an API response like:
-     * {
-     *   data: [...],
-     *   meta: {...}
-     * }
-     */
     return {
       data: data.data,
       meta: data.meta,
@@ -277,6 +272,34 @@ export async function getCategoryFacets(filters = {}) {
   }
 }
 
+/** Get accepted help requests for the current volunteer.*/
+export async function getVolunteerAcceptedRequests() {
+  try {
+    const { data } = await api.get('/api/requests/volunteer/accepted', {
+      withCredentials: true,
+    });
+
+    return data.data || [];
+  } catch (err) {
+    console.error('Error getting volunteer accepted requests:', err);
+
+    throw err;
+  }
+}
+
+export async function getAcceptedVolunteerProfile(requestId) {
+  try {
+    const { data } = await api.get(`/api/requests/${requestId}/volunteer`, {
+      withCredentials: true,
+    });
+
+    return data.data;
+  } catch (err) {
+    console.error('Error getting accepted volunteer profile:', err);
+
+    throw err;
+  }
+}
 /**
  * Get one help request by ID.
  */
@@ -292,23 +315,6 @@ export async function getHelpRequestById(id, csrfToken) {
     return data.data;
   } catch (err) {
     console.error('Error getting help request:', err);
-
-    throw err;
-  }
-}
-
-/**
- * Get volunteer profile for an accepted help request.
- */
-export async function getAcceptedVolunteerProfile(requestId) {
-  try {
-    const { data } = await api.get(`/api/requests/${requestId}/volunteer`, {
-      withCredentials: true,
-    });
-
-    return data;
-  } catch (err) {
-    console.error('Error getting accepted volunteer profile:', err);
 
     throw err;
   }

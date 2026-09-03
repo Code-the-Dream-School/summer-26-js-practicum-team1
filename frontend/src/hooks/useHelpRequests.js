@@ -1,8 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 import {
   getBrowseHelpRequests,
   getCategoryFacets,
   createHelpRequest,
+  getVolunteerAcceptedRequests,
+  getAcceptedVolunteerProfile,
 } from '../services/api';
 
 export function useBrowseHelpRequests(filters) {
@@ -59,5 +62,34 @@ export function useHelpRequests() {
     createHelpRequest: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     createError: createMutation.error,
+  };
+}
+export function useAcceptedVolunteerProfile(requestId, enabled = true) {
+  const query = useQuery({
+    queryKey: ['accepted-volunteer-profile', requestId],
+    queryFn: () => getAcceptedVolunteerProfile(requestId),
+    enabled: Boolean(requestId) && enabled,
+  });
+
+  return {
+    volunteer: query.data ?? null,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+  };
+}
+export function useVolunteerAcceptedRequests() {
+  const { data, isLoading, isFetching, isError, error } = useQuery({
+    queryKey: ['volunteer-accepted-requests'],
+    queryFn: getVolunteerAcceptedRequests,
+  });
+
+  return {
+    helpRequests: data || [],
+    isLoading,
+    isFetching,
+    isError,
+    error,
   };
 }

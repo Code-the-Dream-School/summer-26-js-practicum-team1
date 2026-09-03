@@ -67,6 +67,7 @@ function ProfilePage() {
   } = useGetProfileImage();
 
   const updateProfileImage = useUpdateProfileImage();
+
   if (!user) {
     return null;
   }
