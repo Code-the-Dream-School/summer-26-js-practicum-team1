@@ -88,7 +88,9 @@ function RequestCard({
   };
 
   const participantName =
-    userRole === 'VOLUNTEER' ? request.requester?.name : volunteer?.name;
+    userRole === 'VOLUNTEER'
+      ? request.requester?.name
+      : request.volunteer?.name;
 
   return (
     <Card
@@ -96,10 +98,7 @@ function RequestCard({
       sx={{
         borderRadius: 3,
         border: `1px solid ${COLORS.border}`,
-        boxShadow: 'none',
-        '&:hover': {
-          borderColor: COLORS.borderHover,
-        },
+        boxShadow: 3,
       }}
     >
       <CardContent
@@ -351,6 +350,7 @@ function RequestCard({
                 onClick={handleOpenChat}
                 sx={{
                   minHeight: 42,
+                  width: 150,
                   px: 2.5,
                   textTransform: 'none',
                   fontWeight: 600,
