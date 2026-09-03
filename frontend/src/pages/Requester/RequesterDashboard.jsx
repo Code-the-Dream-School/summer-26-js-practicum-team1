@@ -684,6 +684,7 @@ export default function RequesterDashboard() {
               onCancel={handleCancel}
               onVolunteerProfile={handleVolunteerProfile}
               unreadCount={unreadByRequest[request.id] ?? 0}
+                dashboardType="requester"
             />
           ))}
         </Box>

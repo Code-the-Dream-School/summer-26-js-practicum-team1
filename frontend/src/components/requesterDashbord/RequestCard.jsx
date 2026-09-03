@@ -36,7 +36,7 @@ function RequestCard({
   onEdit,
   onCancel,
   onVolunteerProfile,
-  unreadCount,
+   dashboardType,
 }) {
   const navigate = useNavigate();
 
@@ -53,9 +53,15 @@ function RequestCard({
 
   const statusStyle = getStatusStyle(requestStatus);
 
-  const isExpanded = Number(expandedRequest) === Number(request.id);
+  const isExpanded = expandedRequest === request.id;
 
-  const { volunteer } = useAcceptedVolunteerProfile(request.id, accepted);
+  const shouldFetchVolunteer =
+  dashboardType === 'requester' && accepted;
+
+const { volunteer } = useAcceptedVolunteerProfile(
+  request.id,
+  shouldFetchVolunteer
+);
 
   const blurActiveElement = () => {
     if (document.activeElement instanceof HTMLElement) {
@@ -65,7 +71,7 @@ function RequestCard({
 
   // Navigate to the request details page
   const handleToggleDetails = () => {
-    // navigate(`/requests/${request.id}`);
+    navigate(`/requests/${request.id}`);
   };
 
   const handleOpenChat = () => {
@@ -88,7 +94,6 @@ function RequestCard({
 
   return (
     <Card
-      id={`request-card-${request.id}`}
       sx={{
         borderRadius: 3,
         border: `1px solid ${COLORS.border}`,
@@ -145,7 +150,7 @@ function RequestCard({
           >
             {/* EDIT + CANCEL ONLY FOR PENDING */}
 
-            {isPending && (
+          {dashboardType === 'requester' && isPending && (
               <>
                 {/* EDIT */}
 
@@ -376,25 +381,6 @@ function RequestCard({
                 color: COLORS.primary,
               }}
             >
-              {volunteer.name || 'Volunteer'}
-
-              {unreadCount > 0 && (
-                <Chip
-                  label={unreadCount}
-                  size="small"
-                  sx={{
-                    ml: 1,
-                    height: 20,
-                    minWidth: 20,
-                    backgroundColor: 'error.main',
-                    color: 'white',
-                    fontWeight: 700,
-                    '& .MuiChip-label': {
-                      px: 0.75,
-                    },
-                  }}
-                />
-              )}
               {isExpanded ? 'Hide Details' : 'View Details'}
             </Button>
           </Box>
@@ -498,7 +484,7 @@ function RequestCard({
 
             {/* VOLUNTEER */}
 
-            {accepted && volunteer && (
+            {dashboardType === 'requester' && accepted && volunteer && (
               <Box
                 sx={{
                   mt: 2,
