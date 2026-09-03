@@ -164,6 +164,22 @@ export async function declineHelpRequest(requestId, csrfToken) {
   return data;
 }
 
+
+/**
+ * Complete a help request.
+ */
+export async function completeHelpRequest(requestId, csrfToken) {
+  const { data } = await api.post(
+    `/api/requests/${requestId}/complete`,
+    {},
+    {
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      withCredentials: true,
+    }
+  );
+  return data;
+}
+
 /**
  * Create a new help request.
  */
@@ -236,7 +252,7 @@ export async function getCategoryFacets(filters = {}) {
       withCredentials: true,
     });
 
-    return data.categoryCounts;
+    return data.data;
   } catch (err) {
     if (!err.response) {
       throw new Error('NETWORK_ERROR');
@@ -281,20 +297,23 @@ export async function getAcceptedVolunteerProfile(requestId) {
 /**
  * Get one help request by ID.
  */
-export async function getHelpRequestById(id, csrfToken) {
+export async function getHelpRequestById(requestId) {
   try {
-    const { data } = await api.get(`/api/requests/${id}`, {
-      headers: {
-        'X-CSRF-TOKEN': csrfToken,
-      },
+    const { data } = await api.get(`/api/requests/${requestId}`, {
       withCredentials: true,
     });
-
     return data.data;
   } catch (err) {
-    console.error('Error getting help request:', err);
-
-    throw err;
+    if (!err.response) {
+      throw new Error('NETWORK_ERROR');
+    }
+    if (err.response.status === 404) {
+      throw new Error('REQUEST_NOT_FOUND');
+    }
+    if (err.response.status === 403) {
+      throw new Error('REQUEST_FORBIDDEN');
+    }
+    throw new Error('FETCH_HELP_REQUEST_FAILED');
   }
 }
 

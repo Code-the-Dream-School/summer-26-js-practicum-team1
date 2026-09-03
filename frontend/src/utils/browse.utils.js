@@ -112,3 +112,27 @@ const DEFAULT_ICON = L.divIcon({
 export function defaultMarkerIcon() {
   return DEFAULT_ICON;
 }
+
+export function formatPostedLabel(createdAt) {
+  if (!createdAt) return '';
+  const diffMs = Date.now() - new Date(createdAt).getTime();
+  const hours = Math.floor(diffMs / (60 * 60 * 1000));
+  if (hours < 1) return 'Posted just now';
+  if (hours < 24) return `Posted ${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Posted yesterday';
+  return `Posted ${days} days ago`;
+}
+
+export function friendlyDetailErrorMessage(error) {
+  switch (error?.message) {
+    case 'REQUEST_NOT_FOUND':
+      return "This request doesn't exist or has been removed.";
+    case 'REQUEST_FORBIDDEN':
+      return "You don't have access to this request.";
+    case 'NETWORK_ERROR':
+      return "Couldn't reach the server. Check your connection and try again.";
+    default:
+      return 'Something went wrong loading this request.';
+  }
+}

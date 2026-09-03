@@ -55,19 +55,61 @@ async function getHelpRequests({ requesterId }) {
   }));
 }
 
-async function getHelpRequestById({ id, requesterId }) {
-  const helpRequest = await prisma.helpRequest.findUnique({
-    where: {
-      id,
-      requesterId,
+async function getHelpRequestById({ user, requestId }) {
+  const responseInclude =
+    user.role === 'ADMIN'
+      ? { select: { volunteerId: true, action: true, createdAt: true } }
+      : user.role === 'VOLUNTEER'
+        ? {
+            where: { volunteerId: user.id },
+            select: { action: true, createdAt: true },
+          }
+        : undefined;
+
+  const request = await prisma.helpRequest.findUnique({
+    where: { id: requestId },
+    include: {
+      requester: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          requesterProfile: {
+            select: { address: true, city: true },
+          },
+        },
+      },
+      volunteer: {
+        select: {
+          userId: true,
+          user: { select: { name: true, phone: true } },
+        },
+      },
+      ...(responseInclude ? { responses: responseInclude } : {}),
     },
   });
 
-  if (!helpRequest) {
+  if (!request) {
     throw new ApiError(404, 'Help request not found');
   }
 
-  return helpRequest;
+  const isAdmin = user.role === 'ADMIN';
+  const isRequester = request.requesterId === user.id;
+  const isAssignedVolunteer = request.volunteerId === user.id;
+  const isOpenToVolunteers =
+    request.status === RequestStatus.PENDING && request.volunteerId === null;
+
+  const canView =
+    isAdmin ||
+    isRequester ||
+    isAssignedVolunteer ||
+    (user.role === 'VOLUNTEER' && isOpenToVolunteers);
+
+  if (!canView) {
+    throw new ApiError(403, 'You do not have access to this request');
+  }
+
+  return { request, isRequester, isAssignedVolunteer };
 }
 
 async function updateHelpRequest({ id, requesterId, data }) {
@@ -522,7 +564,7 @@ const getBrowseHelpRequests = async ({ user, query }) => {
   const start = (page - 1) * pageSize;
 
   const paginated = data.slice(start, start + pageSize);
-  
+
   return {
     data: paginated,
 
@@ -533,7 +575,7 @@ const getBrowseHelpRequests = async ({ user, query }) => {
       totalPages: Math.ceil(totalCount / pageSize),
     },
   };
-}
+};
 
 async function getCategoryFacets({ user, query }) {
   const { where, hasGeo, lat, lng, radiusMi } = buildRequestWhere({
@@ -622,6 +664,7 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
         data: {
           status: RequestStatus.ACCEPTED,
           volunteerId,
+          acceptedAt: new Date(),
         },
       });
 
@@ -712,6 +755,39 @@ async function declineHelpRequest({ requestId, volunteerId }) {
   }
 }
 
+async function completeHelpRequest({ requestId, volunteerId }) {
+  const request = await prisma.helpRequest.findUnique({
+    where: { id: requestId },
+    select: { id: true, status: true, volunteerId: true },
+  });
+
+  if (!request) {
+    throw new ApiError(404, 'Help request not found');
+  }
+
+  if (request.volunteerId !== volunteerId) {
+    throw new ApiError(
+      403,
+      'Only the assigned volunteer can complete this request'
+    );
+  }
+
+  if (request.status !== RequestStatus.ACCEPTED) {
+    throw new ApiError(
+      409,
+      'Only an accepted request can be marked as completed'
+    );
+  }
+
+  return prisma.helpRequest.update({
+    where: { id: requestId },
+    data: {
+      status: RequestStatus.COMPLETED,
+      completedAt: new Date(),
+    },
+  });
+}
+
 module.exports = {
   createHelpRequest,
   getHelpRequests,
@@ -724,4 +800,5 @@ module.exports = {
   getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
+  completeHelpRequest,
 };
