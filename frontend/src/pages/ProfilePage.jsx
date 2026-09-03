@@ -6,6 +6,7 @@ import {
   Typography,
   Paper,
   Stack,
+  Button,
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 
@@ -20,9 +21,14 @@ import RequesterProfileView from '../components/requesterProfile/RequesterProfil
 import VolunteerPreferencesForm from '../components/profile/VolunteerPreferencesForm';
 import VolunteerPreferencesView from '../components/profile/VolunteerPreferencesView';
 import EditProfileDialog from '../components/profile/EditProfileDialog';
+import { useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 function ProfilePage() {
   const { user } = useAuth();
+
+  const navigate = useNavigate();
 
   const [isRequesterEditing, setIsRequesterEditing] = useState(false);
   const [isVolunteerEditing, setIsVolunteerEditing] = useState(false);
@@ -266,6 +272,25 @@ function ProfilePage() {
               setForm={setRequesterFormData}
             />
           </>
+        )}
+
+        {isVolunteer && verificationStatus === 'APPROVED' && (
+          <Button
+            variant="contained"
+            startIcon={<SearchIcon />}
+            endIcon={<ArrowForwardIcon />}
+            onClick={() => navigate('/browse')}
+            sx={{
+              mt: 3,
+              borderRadius: 2,
+              fontWeight: 700,
+              boxShadow: 'none',
+              transition: '0.3s',
+              '&:hover': { boxShadow: 4 },
+            }}
+          >
+            Browse help requests
+          </Button>
         )}
 
         {isVolunteer && (
