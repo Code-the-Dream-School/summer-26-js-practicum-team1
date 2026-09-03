@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Box, Alert, Button, CircularProgress, Typography } from '@mui/material';
+import {
+  Box,
+  Alert,
+  Button,
+  CircularProgress,
+  Typography,
+} from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 import { searchPlaces } from '../../services/geoapify';
@@ -684,7 +690,10 @@ export default function RequesterDashboard() {
               onCancel={handleCancel}
               onVolunteerProfile={handleVolunteerProfile}
               unreadCount={unreadByRequest[request.id] ?? 0}
+
                 dashboardType="requester"
+              userRole="REQUESTER"
+
             />
           ))}
         </Box>

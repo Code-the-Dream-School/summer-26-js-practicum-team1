@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   Box,
@@ -35,6 +34,7 @@ function RequestCard({
   onVolunteerProfile,
   unreadCount,
   dashboardType,
+  userRole,
 }) {
   const navigate = useNavigate();
 
@@ -42,8 +42,7 @@ function RequestCard({
 
   const isPending = requestStatus === 'PENDING';
 
-  const canChat =
-    requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
+  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
   const showVolunteer =
     dashboardType === 'requester' &&
@@ -52,20 +51,19 @@ function RequestCard({
   const urgencyStyle = getUrgencyStyle(request.urgency);
   const statusStyle = getStatusStyle(requestStatus);
 
-  const { volunteer } = useAcceptedVolunteerProfile(
-    request.id,
-    showVolunteer
-  );
+  const { volunteer } = useAcceptedVolunteerProfile(request.id, showVolunteer);
 
   // Navigate to the request details page
   const handleToggleDetails = () => {
     navigate(`/requests/${request.id}`);
   };
 
+  //chat helper
   const handleOpenChat = () => {
     navigate(`/chat/${request.id}`, {
       state: {
-        participantId: request.volunteerId,
+        participantId:
+          userRole === 'VOLUNTEER' ? request.requesterId : request.volunteerId,
       },
     });
   };
@@ -91,16 +89,17 @@ function RequestCard({
       onVolunteerProfile(volunteer);
     }
   };
+  const participantName =
+    userRole === 'VOLUNTEER'
+      ? request.requester?.name
+      : request.volunteer?.name;
 
   return (
     <Card
       sx={{
         borderRadius: 3,
         border: `1px solid ${COLORS.border}`,
-        boxShadow: 'none',
-        '&:hover': {
-          borderColor: COLORS.borderHover,
-        },
+        boxShadow: 3,
       }}
     >
       <CardContent
@@ -324,16 +323,16 @@ function RequestCard({
         {/* VOLUNTEER + ACTIONS */}
 
         <Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 2,
-    mt: 2,
-    width: '100%',
-    flexWrap: 'wrap',
-  }}
->
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 2,
+            mt: 2,
+            width: '100%',
+            flexWrap: 'wrap',
+          }}
+        >
           {/* VOLUNTEER PROFILE - REQUESTER ONLY */}
 
           {showVolunteer && volunteer && (
@@ -395,14 +394,14 @@ function RequestCard({
           )}
 
           <Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1,
-    flexShrink: 0,
-    marginLeft: 'auto',
-  }}
->
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              flexShrink: 0,
+              marginLeft: 'auto',
+            }}
+          >
             {/* MESSAGE BUTTON */}
 
             {canChat && (
@@ -412,8 +411,8 @@ function RequestCard({
                 onClick={handleOpenChat}
                 sx={{
                   minHeight: 42,
+                  width: 150,
                   px: 2.5,
-                  borderRadius: 2,
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: 2,
@@ -425,7 +424,7 @@ function RequestCard({
                 }}
               >
                 Message
-
+                {participantName || 'User'}
                 {unreadCount > 0 && (
                   <Chip
                     label={unreadCount}
@@ -469,4 +468,3 @@ function RequestCard({
 }
 
 export default RequestCard;
-
