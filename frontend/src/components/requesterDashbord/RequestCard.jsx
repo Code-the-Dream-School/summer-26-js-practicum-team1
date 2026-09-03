@@ -64,7 +64,7 @@ function RequestCard({
 
   // Navigate to the request details page
   const handleToggleDetails = () => {
-    // navigate(`/requests/${request.id}`);
+    navigate(`/requests/${request.id}`);
   };
 
   //chat helper
