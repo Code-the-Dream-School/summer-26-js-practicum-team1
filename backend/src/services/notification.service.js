@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
+const emailDelivery = require('./emailDelivery.service');
 const {
   NotificationType,
   NotificationChannel,
@@ -11,10 +12,10 @@ const RETRY_INTERVAL_MS = 60_000;
 
 const buildDedupeKey = (requestId) => `help_request_accepted:${requestId}`;
 
-const inAppDeliveryWhere = (notificationId) => ({
+const deliveryWhere = (notificationId, channel) => ({
   notificationId_channel: {
     notificationId,
-    channel: NotificationChannel.IN_APP,
+    channel,
   },
 });
 
@@ -44,91 +45,161 @@ const createPendingNotification = async ({
       },
     });
 
-    await tx.notificationDelivery.create({
-      data: {
-        notificationId: notification.id,
-        channel: NotificationChannel.IN_APP,
-        status: NotificationDeliveryStatus.PENDING,
-      },
+    await tx.notificationDelivery.createMany({
+      data: [
+        {
+          notificationId: notification.id,
+          channel: NotificationChannel.IN_APP,
+          status: NotificationDeliveryStatus.PENDING,
+        },
+        {
+          notificationId: notification.id,
+          channel: NotificationChannel.EMAIL,
+          status: NotificationDeliveryStatus.PENDING,
+        },
+      ],
     });
 
     return notification;
   });
 
-const attemptInAppDelivery = async (notificationId, meta = {}) => {
+const markDeliveryDelivered = async (notificationId, channel, meta = {}) => {
   const now = new Date();
 
-  try {
-    const delivery = await prisma.notificationDelivery.update({
-      where: inAppDeliveryWhere(notificationId),
-      data: {
-        status: NotificationDeliveryStatus.DELIVERED,
-        deliveredAt: now,
-        lastAttemptAt: now,
-        attemptCount: { increment: 1 },
-        failureReason: null,
-      },
-    });
-
-    logDelivery({
-      notificationId,
-      channel: NotificationChannel.IN_APP,
+  const delivery = await prisma.notificationDelivery.update({
+    where: deliveryWhere(notificationId, channel),
+    data: {
       status: NotificationDeliveryStatus.DELIVERED,
-      dedupeKey: meta.dedupeKey,
-      recipientId: meta.recipientId,
-      attemptCount: delivery.attemptCount,
-    });
+      deliveredAt: now,
+      lastAttemptAt: now,
+      attemptCount: { increment: 1 },
+      failureReason: null,
+    },
+  });
 
-    return delivery;
-  } catch (err) {
-    const delivery = await prisma.notificationDelivery.update({
-      where: inAppDeliveryWhere(notificationId),
-      data: {
-        status: NotificationDeliveryStatus.FAILED,
-        lastAttemptAt: now,
-        attemptCount: { increment: 1 },
-        failureReason: err.message?.slice(0, 500) || 'Delivery failed',
-      },
-    });
+  logDelivery({
+    notificationId,
+    channel,
+    status: NotificationDeliveryStatus.DELIVERED,
+    dedupeKey: meta.dedupeKey,
+    recipientId: meta.recipientId,
+    attemptCount: delivery.attemptCount,
+  });
 
-    logDelivery({
-      notificationId,
-      channel: NotificationChannel.IN_APP,
+  return delivery;
+};
+
+const markDeliveryFailed = async (
+  notificationId,
+  channel,
+  err,
+  meta = {}
+) => {
+  const now = new Date();
+  const failureReason = err.message?.slice(0, 500) || 'Delivery failed';
+
+  const delivery = await prisma.notificationDelivery.update({
+    where: deliveryWhere(notificationId, channel),
+    data: {
       status: NotificationDeliveryStatus.FAILED,
-      dedupeKey: meta.dedupeKey,
-      recipientId: meta.recipientId,
-      attemptCount: delivery.attemptCount,
-      failureReason: delivery.failureReason,
+      lastAttemptAt: now,
+      attemptCount: { increment: 1 },
+      failureReason,
+    },
+  });
+
+  logDelivery({
+    notificationId,
+    channel,
+    status: NotificationDeliveryStatus.FAILED,
+    dedupeKey: meta.dedupeKey,
+    recipientId: meta.recipientId,
+    attemptCount: delivery.attemptCount,
+    failureReason: delivery.failureReason,
+  });
+
+  return delivery;
+};
+
+const attemptInAppDelivery = async (notificationId, meta = {}) => {
+  try {
+    return await markDeliveryDelivered(
+      notificationId,
+      NotificationChannel.IN_APP,
+      meta
+    );
+  } catch (err) {
+    await markDeliveryFailed(
+      notificationId,
+      NotificationChannel.IN_APP,
+      err,
+      meta
+    );
+    throw err;
+  }
+};
+
+const attemptEmailDelivery = async (notificationId, meta = {}) => {
+  try {
+    const requester = await prisma.user.findUnique({
+      where: { id: meta.recipientId },
+      select: { email: true },
     });
 
+    if (!requester?.email) {
+      throw new Error('Requester email not found');
+    }
+
+    await emailDelivery.sendAcceptanceEmail({
+      to: requester.email,
+      payload: meta.payload,
+    });
+
+    return await markDeliveryDelivered(
+      notificationId,
+      NotificationChannel.EMAIL,
+      meta
+    );
+  } catch (err) {
+    await markDeliveryFailed(
+      notificationId,
+      NotificationChannel.EMAIL,
+      err,
+      meta
+    );
     throw err;
   }
 };
 
 const markDuplicateDeliverySkipped = async (existing, dedupeKey) => {
-  await prisma.notificationDelivery.upsert({
-    where: inAppDeliveryWhere(existing.id),
-    create: {
-      notificationId: existing.id,
-      channel: NotificationChannel.IN_APP,
-      status: NotificationDeliveryStatus.SKIPPED,
-      attemptCount: 0,
-      failureReason: 'Duplicate acceptance notification',
-    },
-    update: {
-      status: NotificationDeliveryStatus.SKIPPED,
-      failureReason: 'Duplicate acceptance notification',
-    },
-  });
+  for (const channel of [
+    NotificationChannel.IN_APP,
+    NotificationChannel.EMAIL,
+  ]) {
+    await prisma.notificationDelivery.upsert({
+      where: deliveryWhere(existing.id, channel),
+      create: {
+        notificationId: existing.id,
+        channel,
+        status: NotificationDeliveryStatus.SKIPPED,
+        attemptCount: 0,
+        failureReason: 'Duplicate acceptance notification',
+      },
+      update: {
+        status: NotificationDeliveryStatus.SKIPPED,
+        failureReason: 'Duplicate acceptance notification',
+      },
+    });
 
-  logDelivery({
-    notificationId: existing.id,
-    channel: NotificationChannel.IN_APP,
-    status: NotificationDeliveryStatus.SKIPPED,
-    dedupeKey,
-    recipientId: existing.recipientId,
-    attemptCount: 0,
-  });
+    logDelivery({
+      notificationId: existing.id,
+      channel,
+      status: NotificationDeliveryStatus.SKIPPED,
+      dedupeKey,
+      recipientId: existing.recipientId,
+      attemptCount: 0,
+    });
+  }
 };
 
 const createNotificationWithDelivery = async ({
@@ -163,8 +234,16 @@ const createNotificationWithDelivery = async ({
     return existing;
   }
 
+  const deliveryMeta = { dedupeKey, recipientId, payload };
+
   try {
-    await attemptInAppDelivery(notification.id, { dedupeKey, recipientId });
+    await attemptInAppDelivery(notification.id, deliveryMeta);
+  } catch {
+    // FAILED row persisted; accept flow should not roll back.
+  }
+
+  try {
+    await attemptEmailDelivery(notification.id, deliveryMeta);
   } catch {
     // FAILED row persisted; accept flow should not roll back.
   }
@@ -276,10 +355,29 @@ async function markNotificationRead({ notificationId, recipientId }) {
   });
 }
 
+const retryDelivery = async (delivery) => {
+  const meta = {
+    dedupeKey: delivery.notification.dedupeKey,
+    recipientId: delivery.notification.recipientId,
+    payload: delivery.notification.payload,
+  };
+
+  if (delivery.channel === NotificationChannel.IN_APP) {
+    await attemptInAppDelivery(delivery.notificationId, meta);
+    return;
+  }
+
+  if (delivery.channel === NotificationChannel.EMAIL) {
+    await attemptEmailDelivery(delivery.notificationId, meta);
+  }
+};
+
 async function retryFailedDeliveries() {
   const retryable = await prisma.notificationDelivery.findMany({
     where: {
-      channel: NotificationChannel.IN_APP,
+      channel: {
+        in: [NotificationChannel.IN_APP, NotificationChannel.EMAIL],
+      },
       status: {
         in: [
           NotificationDeliveryStatus.FAILED,
@@ -294,6 +392,7 @@ async function retryFailedDeliveries() {
           id: true,
           dedupeKey: true,
           recipientId: true,
+          payload: true,
         },
       },
     },
@@ -302,12 +401,9 @@ async function retryFailedDeliveries() {
 
   for (const delivery of retryable) {
     try {
-      await attemptInAppDelivery(delivery.notificationId, {
-        dedupeKey: delivery.notification.dedupeKey,
-        recipientId: delivery.notification.recipientId,
-      });
+      await retryDelivery(delivery);
     } catch {
-      // attemptInAppDelivery already persisted FAILED and logged.
+      // attempt* helpers already persisted FAILED and logged.
     }
   }
 }
@@ -339,5 +435,6 @@ module.exports = {
   startNotificationRetryLoop,
   buildDedupeKey,
   attemptInAppDelivery,
+  attemptEmailDelivery,
   createNotificationWithDelivery,
 };
