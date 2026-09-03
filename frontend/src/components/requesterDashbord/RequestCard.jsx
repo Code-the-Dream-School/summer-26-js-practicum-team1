@@ -1,4 +1,3 @@
-
 import {
   Avatar,
   Box,
@@ -46,8 +45,7 @@ function RequestCard({
 
   const isPending = requestStatus === 'PENDING';
 
-  const canChat =
-    requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
+  const canChat = requestStatus === 'ACCEPTED' || requestStatus === 'COMPLETED';
 
   const urgencyStyle = getUrgencyStyle(request.urgency);
 
@@ -348,7 +346,6 @@ function RequestCard({
                 sx={{
                   minHeight: 42,
                   px: 2.5,
-                  borderRadius: 2,
                   textTransform: 'none',
                   fontWeight: 600,
                   boxShadow: 2,
@@ -359,7 +356,24 @@ function RequestCard({
                   },
                 }}
               >
-                Message
+                {volunteer?.name || 'Volunteer'}
+                {unreadCount > 0 && (
+                  <Chip
+                    label={unreadCount}
+                    size="small"
+                    sx={{
+                      ml: 1,
+                      height: 20,
+                      minWidth: 20,
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      fontWeight: 700,
+                      '& .MuiChip-label': {
+                        px: 0.75,
+                      },
+                    }}
+                  />
+                )}
               </Button>
             )}
 
@@ -376,25 +390,6 @@ function RequestCard({
                 color: COLORS.primary,
               }}
             >
-              {volunteer.name || 'Volunteer'}
-
-              {unreadCount > 0 && (
-                <Chip
-                  label={unreadCount}
-                  size="small"
-                  sx={{
-                    ml: 1,
-                    height: 20,
-                    minWidth: 20,
-                    backgroundColor: 'error.main',
-                    color: 'white',
-                    fontWeight: 700,
-                    '& .MuiChip-label': {
-                      px: 0.75,
-                    },
-                  }}
-                />
-              )}
               {isExpanded ? 'Hide Details' : 'View Details'}
             </Button>
           </Box>
@@ -617,4 +612,3 @@ function RequestCard({
 }
 
 export default RequestCard;
-
