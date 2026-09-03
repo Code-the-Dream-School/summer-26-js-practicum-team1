@@ -413,6 +413,32 @@ export async function getMe() {
 /**
  * Get current user's profile.
  */
+export async function getNotifications({
+  unreadOnly = false,
+  page = 1,
+  pageSize = 20,
+} = {}) {
+  const { data } = await api.get('/api/notifications', {
+    params: { unreadOnly, page, pageSize },
+    withCredentials: true,
+  });
+
+  return data;
+}
+
+export async function markNotificationRead(notificationId, csrfToken) {
+  const { data } = await api.patch(
+    `/api/notifications/${notificationId}/read`,
+    {},
+    {
+      headers: { 'X-CSRF-TOKEN': csrfToken },
+      withCredentials: true,
+    }
+  );
+
+  return data;
+}
+
 export async function getProfile() {
   const { data } = await api.get('/api/profile', {
     withCredentials: true,

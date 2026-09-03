@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const ApiError = require('../utils/ApiError');
 const { RequestStatus } = require('@prisma/client');
+const notificationService = require('./notification.service');
 
 async function createHelpRequest({ requesterId, data }) {
   const scheduledDate = new Date(data.scheduledAt);
@@ -628,7 +629,7 @@ const responseUniqueWhere = (requestId, volunteerId) => ({
 
 async function acceptHelpRequest({ requestId, volunteerId }) {
   try {
-    return await prisma.$transaction(async (tx) => {
+    const helpRequest = await prisma.$transaction(async (tx) => {
       const request = await tx.helpRequest.findUnique({
         where: { id: requestId },
         select: {
@@ -696,6 +697,26 @@ async function acceptHelpRequest({ requestId, volunteerId }) {
       }
       return tx.helpRequest.findUnique({ where: { id: requestId } });
     });
+
+    notificationService
+      .onHelpRequestAccepted({
+        requestId,
+        requesterId: helpRequest.requesterId,
+        volunteerId,
+      })
+      .catch((err) => {
+        console.error(
+          JSON.stringify({
+            event: 'notification_emit_failed',
+            requestId,
+            requesterId: helpRequest.requesterId,
+            volunteerId,
+            message: err.message,
+          })
+        );
+      });
+
+    return helpRequest;
   } catch (err) {
     if (err.code === 'P2002') {
       throw new ApiError(409, 'You have already responded to this request');
