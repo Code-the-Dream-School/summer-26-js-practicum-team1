@@ -5,4 +5,11 @@ const authSchema = Joi.object({
   password: Joi.string().trim().required().max(72, 'utf8'),
 });
 
-module.exports = { authSchema };
+const googleAuthSchema = Joi.object({
+  idToken: Joi.string().trim().required().messages({
+    'any.required': 'Google ID token is required',
+    'string.empty': 'Google ID token is required',
+  }),
+}).unknown(false);
+
+module.exports = { authSchema, googleAuthSchema };

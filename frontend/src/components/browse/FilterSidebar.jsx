@@ -37,9 +37,7 @@ function FilterSidebar({
   return (
     <Box
       sx={{
-        backgroundColor: COLORS.bgSubtle,
-        border: '1px solid',
-        borderColor: COLORS.border,
+        boxShadow: 3,
         borderRadius: 2,
         p: 2,
       }}
@@ -179,8 +177,8 @@ function FilterSidebar({
                   justifyContent: 'center',
                   p: 0,
                   '&:hover': {
-                    borderColor: 'primary.main',
-                    backgroundColor: active ? 'primary.main' : COLORS.bgSubtle,
+                    borderColor: COLORS.borderHover,
+                    backgroundColor: active ? 'primary.main' : COLORS.sage,
                   },
                 }}
               >
@@ -204,9 +202,9 @@ function FilterSidebar({
         sx={{
           mt: 3,
           textTransform: 'none',
-          color: COLORS.textMuted,
+          color: COLORS.textFaint,
           backgroundColor: '#EDEDEA',
-          '&:hover': { backgroundColor: COLORS.border },
+          '&:hover': { backgroundColor: COLORS.border, },
         }}
       >
         Clear all filters

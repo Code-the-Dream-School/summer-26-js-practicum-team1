@@ -5,33 +5,11 @@ import {
   URGENCY_BY_API_VALUE,
 } from '../../utils/browse.constants';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import {
+  formatScheduledLabel,
+  formatPostedLabel,
+} from '../../utils/browse.utils';
 import { COLORS } from '../../utils/constants';
-
-function formatScheduledLabel(scheduledAt) {
-  if (!scheduledAt) return 'Flexible anytime';
-  const d = new Date(scheduledAt);
-  const datePart = d.toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  });
-  const timePart = d.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${datePart} · ${timePart}`;
-}
-
-function formatPostedLabel(createdAt) {
-  if (!createdAt) return '';
-  const diffMs = Date.now() - new Date(createdAt).getTime();
-  const hours = Math.floor(diffMs / (60 * 60 * 1000));
-  if (hours < 1) return 'Posted just now';
-  if (hours < 24) return `Posted ${hours} hour${hours === 1 ? '' : 's'} ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return 'Posted yesterday';
-  return `Posted ${days} days ago`;
-}
 
 function RequestCard({
   request,
@@ -39,6 +17,7 @@ function RequestCard({
   isResponding = false,
   onAccept,
   onDecline,
+  onSelect,
 }) {
   const category = CATEGORY_BY_API_VALUE[request.category];
   const urgency = URGENCY_BY_API_VALUE[request.urgency];
@@ -47,9 +26,9 @@ function RequestCard({
   return (
     <Box
       sx={{
-        border: '1px solid',
-        borderColor: COLORS.border,
-        borderRadius: 2,
+        backgroundColor: COLORS.bgSubtle,
+        borderRadius: 3,
+        boxShadow: 2,
         p: 2.5,
         mb: 2,
       }}
@@ -61,7 +40,7 @@ function RequestCard({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
           <Pill
             label={(category?.label || request.category).toUpperCase()}
-            backgroundColor={COLORS.bgSubtle}
+            backgroundColor="#fff"
             color={COLORS.textMuted}
           />
           <Pill
@@ -113,13 +92,15 @@ function RequestCard({
           <Button
             variant="outlined"
             disabled={actionsDisabled}
+            onClick={onSelect}
             sx={{
               textTransform: 'none',
               borderColor: COLORS.border,
               color: 'text.primary',
+              backgroundColor: '#fff',
               '&:hover': {
                 borderColor: COLORS.borderHover,
-                backgroundColor: COLORS.bgSubtle,
+                backgroundColor: COLORS.sage,
               },
             }}
           >
@@ -133,9 +114,10 @@ function RequestCard({
               textTransform: 'none',
               borderColor: COLORS.border,
               color: COLORS.textMuted,
+              backgroundColor: '#fff',
               '&:hover': {
                 borderColor: COLORS.borderHover,
-                backgroundColor: COLORS.bgSubtle,
+                backgroundColor: COLORS.sage,
               },
             }}
           >

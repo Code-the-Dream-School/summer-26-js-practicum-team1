@@ -6,6 +6,7 @@ const {
   createHelpRequest,
   getHelpRequests,
   getHelpRequestById,
+  getMyAcceptedRequests,
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
@@ -13,6 +14,7 @@ const {
   getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
+  completeHelpRequest,
 } = require('../controllers/helpRequest.controller');
 
 const jwtMiddleware = require('../middleware/jwt.middleware');
@@ -52,7 +54,15 @@ router.get(
   validate(facetsQuerySchema, 'query'),
   getCategoryFacets
 );
+// Get accepted help requests for the authenticated volunteer
 
+router.get(
+  '/volunteer/accepted',
+  jwtMiddleware,
+  requireRole('VOLUNTEER'),
+  requireApprovedIfVolunteer,
+  getMyAcceptedRequests
+);
 // Get accepted volunteer profile for a help request
 router.get(
   '/:id/volunteer',
@@ -65,8 +75,7 @@ router.get(
 router.get(
   '/:id',
   jwtMiddleware,
-  csrfMiddleware,
-  requireRole('REQUESTER'),
+  requireApprovedIfVolunteer,
   getHelpRequestById
 );
 
@@ -115,6 +124,15 @@ router.post(
   requireRole('VOLUNTEER'),
   requireApprovedIfVolunteer,
   declineHelpRequest
+);
+
+router.post(
+  '/:id/complete',
+  jwtMiddleware,
+  csrfMiddleware,
+  requireRole('VOLUNTEER'),
+  requireApprovedIfVolunteer,
+  completeHelpRequest
 );
 
 module.exports = router;

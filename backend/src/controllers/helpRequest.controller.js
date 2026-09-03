@@ -34,22 +34,66 @@ const getHelpRequests = asyncHandler(async (req, res) => {
     data: helpRequests,
   });
 });
-
-const getHelpRequestById = asyncHandler(async (req, res) => {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    throw new ApiError(400, 'Invalid help request ID');
-  }
-
-  const helpRequest = await helpRequestService.getHelpRequestById({
-    id,
-    requesterId: req.user.id,
-  });
+const getMyAcceptedRequests = asyncHandler(async (req, res) => {
+  const helpRequests =
+    await helpRequestService.getVolunteerAcceptedRequests({
+      volunteerId: req.user.id,
+    });
 
   return res.status(200).json({
     success: true,
-    data: helpRequest,
+    data: helpRequests,
+  });
+});
+const getHelpRequestById = asyncHandler(async (req, res) => {
+  const requestId = getRequestId(req);
+
+  const { request, isRequester, isAssignedVolunteer } =
+    await helpRequestService.getHelpRequestById({
+      user: req.user,
+      requestId,
+    });
+
+  const viewerResponse =
+    req.user.role === 'VOLUNTEER'
+      ? (request.responses?.[0]?.action ?? null)
+      : null;
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      id: request.id,
+      title: request.title,
+      description: request.description,
+      category: request.category,
+      urgency: request.urgency,
+      status: request.status,
+      scheduledAt: request.scheduledAt,
+      createdAt: request.createdAt,
+      acceptedAt: request.acceptedAt,
+      completedAt: request.completedAt,
+      address: request.address,
+      latitude: request.latitude,
+      longitude: request.longitude,
+      requester: {
+        name: request.requester.name,
+        phone: request.requester.phone,
+      },
+      volunteer: request.volunteer
+        ? {
+            name: request.volunteer.user.name,
+            phone: request.volunteer.user.phone,
+          }
+        : null,
+      isRequester,
+      isAssignedVolunteer,
+      canRespond:
+        req.user.role === 'VOLUNTEER' &&
+        request.status === 'PENDING' &&
+        request.volunteerId === null &&
+        !viewerResponse,
+      viewerResponse,
+    },
   });
 });
 
@@ -165,10 +209,22 @@ const declineHelpRequest = asyncHandler(async (req, res) => {
   });
 });
 
+const completeHelpRequest = asyncHandler(async (req, res) => {
+  const requestId = getRequestId(req);
+
+  const helpRequest = await helpRequestService.completeHelpRequest({
+    requestId,
+    volunteerId: req.user.id,
+  });
+
+  return res.status(200).json({ success: true, data: helpRequest });
+});
+
 module.exports = {
   createHelpRequest,
   getHelpRequests,
   getHelpRequestById,
+  getMyAcceptedRequests,
   updateHelpRequest,
   cancelHelpRequest,
   getAcceptedVolunteerProfile,
@@ -176,4 +232,5 @@ module.exports = {
  getCategoryFacets,
   acceptHelpRequest,
   declineHelpRequest,
+  completeHelpRequest,
 };

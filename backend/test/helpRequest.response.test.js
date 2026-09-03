@@ -138,6 +138,7 @@ describe('POST /api/requests/:id/accept', () => {
       data: {
         status: 'ACCEPTED',
         volunteerId: APPROVED_VOLUNTEER.id,
+        acceptedAt: expect.any(Date),
       },
     });
     expect(prisma.volunteerResponse.create).toHaveBeenCalledWith({

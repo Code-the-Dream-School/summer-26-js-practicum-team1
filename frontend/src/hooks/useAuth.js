@@ -1,5 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { login, logout, getMe, registerUser } from '../services/api';
+import {
+  login,
+  googleLogin,
+  logout,
+  getMe,
+  registerUser,
+} from '../services/api';
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -15,6 +21,12 @@ export function useAuth() {
     mutationFn: ({ email, password }) => login(email, password),
     onSuccess: (data) => queryClient.setQueryData(['me'], data),
   });
+
+  const googleLoginMutation = useMutation({
+    mutationFn: googleLogin,
+    onSuccess: (data) => queryClient.setQueryData(['me'], data),
+  });
+
   const registerMutation = useMutation({
     mutationFn: registerUser,
   });
@@ -31,12 +43,16 @@ export function useAuth() {
     user,
     isCheckingSession,
     login: loginMutation.mutateAsync,
+    googleLogin: googleLoginMutation.mutateAsync,
     logout: logoutMutation.mutateAsync,
-    register: registerMutation.mutateAsync,
     loginError: loginMutation.error,
-    registerError: registerMutation.error,
+    googleLoginError: googleLoginMutation.error,
     isLoggingIn: loginMutation.isPending,
+    isGoogleLoggingIn: googleLoginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
+    register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
+    registerError: registerMutation.error,
   };
 }
+

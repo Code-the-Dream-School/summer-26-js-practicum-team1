@@ -9,6 +9,7 @@ const profileRoutes = require('./routes/profile.routes');
 const chatRoutes = require('./routes/chat.routes');
 const volunteerProfileRoutes = require('./routes/volunteerProfile.routes');
 const supportCategoriesRoutes = require('./routes/supportCategories.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/profile/volunteer', volunteerProfileRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/support-categories', supportCategoriesRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend API is running');

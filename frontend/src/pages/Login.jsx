@@ -7,10 +7,11 @@ import {
   Alert,
   Divider,
 } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { COLORS } from '../utils/constants';
 import { useAuth } from '../hooks/useAuth';
-import GoogleIcon from '@mui/icons-material/Google';
 import logo from '../assets/logo.png';
+import { GoogleLogin } from '@react-oauth/google';
 
 const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: 'Invalid email or password',
@@ -20,22 +21,50 @@ const ERROR_MESSAGES = {
 
 const ROLE_REDIRECTS = {
   requester: '/requester-dashboard',
-  volunteer: '/',
+  volunteer: '/volunteer-dashboard',
   admin: '/admin/dashboard',
 };
 
 function Login() {
+  const location = useLocation();
+  const successMessage = location.state?.message;
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { login, loginError, isLoggingIn } = useAuth();
+  const {
+    login,
+    loginError,
+    isLoggingIn,
+    googleLogin,
+    googleLoginError,
+    isGoogleLoggingIn,
+  } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const data = await googleLogin(credentialResponse.credential);
+
+      navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.error('Google login failed');
+  };
 
   const onSubmit = async (formData) => {
     try {
       const data = await login(formData);
+
+      if(data.role?.toLowerCase() === 'volunteer' && data.verificationStatus === 'pending') {
+        navigate('/volunteer-pending');
+        return;
+      }
 
       navigate(ROLE_REDIRECTS[data.role?.toLowerCase()] ?? '/');
     } catch (err) {
@@ -46,6 +75,20 @@ function Login() {
   const errorMessage =
     loginError &&
     (ERROR_MESSAGES[loginError.message] ?? ERROR_MESSAGES.NETWORK_ERROR);
+
+  const googleErrorMessage = googleLoginError
+    ? googleLoginError.status === 404
+      ? 'No account exists with this Google email. Please sign up first.'
+      : googleLoginError.status === 409
+        ? 'This account is linked to a different Google account.'
+        : googleLoginError.status === 401
+          ? 'Google authentication failed. Please try again.'
+          : googleLoginError.message === 'NETWORK_ERROR'
+            ? 'Something went wrong. Please try again.'
+            : 'Unable to sign in with Google. Please try again.'
+    : null;
+
+  const isLoginLoading = isLoggingIn || isGoogleLoggingIn;
 
   return (
     <Box
@@ -61,8 +104,9 @@ function Login() {
         sx={{
           width: '100%',
           maxWidth: { xs: 400, sm: 460, md: 500 },
-          bgcolor: 'background.paper',
-          borderRadius: '24px',
+          bgcolor: COLORS.bgSubtle,
+          borderRadius: 3,
+          boxShadow: 2,
           p: { xs: 3, sm: 4, md: 5 },
         }}
       >
@@ -82,6 +126,12 @@ function Login() {
           Welcome back
         </Typography>
 
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
+
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
             Email
@@ -92,7 +142,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="email"
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('email', {
               required: 'Email is required',
               pattern: {
@@ -115,7 +165,7 @@ function Login() {
             variant="outlined"
             fullWidth
             autoComplete="current-password"
-            sx={{ mb: 1 }}
+            sx={{ mb: 1, backgroundColor: '#fff', borderRadius: 1 }}
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors.password?.message}
@@ -134,8 +184,8 @@ function Login() {
             variant="contained"
             color="primary"
             fullWidth
-            disabled={isLoggingIn}
-            loading={isLoggingIn}
+            disabled={isLoginLoading}
+            loading={isLoginLoading}
             disableElevation
             sx={{
               mt: 1,
@@ -154,26 +204,29 @@ function Login() {
             <Divider sx={{ flex: 1 }} />
           </Box>
 
-          <Button
-            type="button"
-            variant="outlined"
-            fullWidth
-            disabled={isLoggingIn}
-            startIcon={<GoogleIcon />}
+          {googleErrorMessage && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {googleErrorMessage}
+            </Alert>
+          )}
+
+          <Box
             sx={{
-              py: 1.3,
-              fontSize: '1rem',
-              color: 'text.primary',
-              borderColor: 'divider',
-              bgcolor: 'white',
-              '&:hover': {
-                borderColor: 'text.secondary',
-                bgcolor: 'white',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              '& > div': {
+                width: '100%',
               },
             }}
           >
-            Continue with Google
-          </Button>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              width="100%"
+            />
+          </Box>
 
           <Typography
             variant="body2"

@@ -22,7 +22,7 @@ import { useGetProfileImage } from '../hooks/useGetProfileImage';
 import { useGetUnreadCount } from '../hooks/useChat';
 
 const PAGES = [
-  { label: 'About', path: '/' },
+  { label: 'About', path: '/about' },
   { label: 'Contact Us', path: '/contact' },
 ];
 
