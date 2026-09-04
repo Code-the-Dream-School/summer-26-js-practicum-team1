@@ -28,7 +28,12 @@ function RoleCard({ label, description, icon, onClick }) {
   return (
     <Card
       variant="outlined"
-      sx={{ borderRadius: '16px', position: 'relative' }}
+      sx={{
+        position: 'relative',
+        boxShadow: 3,
+        border: `1px solid transparent`,
+        borderRadius: 3,
+      }}
     >
       <CardActionArea
         onClick={onClick}
@@ -79,8 +84,10 @@ function SignupPage() {
           width: '100%',
           maxWidth: { xs: 400, sm: 560, md: 640 },
           bgcolor: 'background.paper',
-          borderRadius: '24px',
           p: { xs: 3, sm: 4, md: 5 },
+          boxShadow: 1,
+          border: `1px solid transparent`,
+          borderRadius: 3,
         }}
       >
         <Box

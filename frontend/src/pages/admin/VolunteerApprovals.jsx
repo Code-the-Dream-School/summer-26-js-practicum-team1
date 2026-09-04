@@ -34,7 +34,7 @@ function VolunteerApprovals() {
           color="text.secondary"
           sx={{ textAlign: { xs: 'center', sm: 'left' } }}
         >
-          View Pending Volunteers.
+          Review volunteer applications and help build a trusted community.
         </Typography>
       </Box>
       <VolunteerList volunteers={volunteers} />

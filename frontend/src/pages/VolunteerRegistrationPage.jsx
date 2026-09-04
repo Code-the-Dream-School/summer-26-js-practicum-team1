@@ -17,8 +17,10 @@ const VolunteerRegistrationPage = () => {
           width: '100%',
           maxWidth: { xs: 400, sm: 560, md: 640 },
           bgcolor: 'background.paper',
-          borderRadius: '24px',
           p: { xs: 3, sm: 4, md: 5 },
+          boxShadow: 3,
+          border: `1px solid transparent`,
+          borderRadius: 3,
         }}
       >
         <Box

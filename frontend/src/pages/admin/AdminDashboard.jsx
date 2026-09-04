@@ -1,12 +1,4 @@
-import {
-  Grid,
-  Box,
-  CardContent,
-  Typography,
-  CardActions,
-  Button,
-  Card,
-} from '@mui/material';
+import { Grid, Box, Typography, Button } from '@mui/material';
 
 import { useDashboardStats } from '../../hooks/admin/useDashboardStats';
 import DashboardCard from '../../components/admin/DashboardCard';
@@ -73,7 +65,8 @@ function AdminDashboard() {
           color="text.secondary"
           sx={{ textAlign: { xs: 'center', sm: 'left' } }}
         >
-          Explore User Details.
+          Monitor activity, manage users, and keep the community running
+          smoothly.
         </Typography>
       </Box>
       <Grid container spacing={6}>

@@ -29,7 +29,7 @@ function UsersList() {
           color="text.secondary"
           sx={{ textAlign: { xs: 'center', sm: 'left' } }}
         >
-          Search and review user accounts by role.
+          Keep track of users and maintain a safe, organized community.
         </Typography>
       </Box>
       <UserTable />

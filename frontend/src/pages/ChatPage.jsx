@@ -71,7 +71,7 @@ const ChatPage = () => {
             color: '#6b6b6b',
           }}
         >
-          Your Conversations.
+          Stay connected and keep the conversation going.
         </Typography>
       </Box>
 
