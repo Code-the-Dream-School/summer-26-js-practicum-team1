@@ -1,10 +1,40 @@
+const nodemailer = require('nodemailer');
 const { CLIENT_URL } = require('../utils/constants');
 
-const EMAIL_FROM =
-  process.env.EMAIL_FROM || 'Neighborhood Helper <noreply@localhost>';
-const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
-const EMAIL_DELIVERY_MODE =
-  process.env.EMAIL_DELIVERY_MODE || (SENDGRID_API_KEY ? 'sendgrid' : 'log');
+function getEmailConfig() {
+  const sendgridApiKey = process.env.SENDGRID_API_KEY || '';
+  const smtpUser = process.env.SMTP_USER || '';
+  const smtpPass = process.env.SMTP_PASS || '';
+  const mode =
+    process.env.EMAIL_DELIVERY_MODE ||
+    (sendgridApiKey ? 'sendgrid' : smtpUser && smtpPass ? 'smtp' : 'log');
+
+  const smtpPort = Number(process.env.SMTP_PORT || 465);
+
+  return {
+    mode,
+    sendgridApiKey,
+    emailFrom:
+      process.env.EMAIL_FROM ||
+      (smtpUser
+        ? `Neighborhood Helper <${smtpUser}>`
+        : 'Neighborhood Helper <noreply@localhost>'),
+    emailToOverride: (process.env.EMAIL_TO_OVERRIDE || '').trim(),
+    clientUrl: String(
+      process.env.CLIENT_URL || CLIENT_URL || 'http://localhost:5173'
+    ).replace(/\/$/, ''),
+    smtp: {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: smtpPort,
+      secure:
+        process.env.SMTP_SECURE != null
+          ? process.env.SMTP_SECURE === 'true'
+          : smtpPort === 465,
+      user: smtpUser,
+      pass: smtpPass,
+    },
+  };
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -28,6 +58,20 @@ function formatAcceptedAt(iso) {
   });
 }
 
+function initialsFromName(name) {
+  const parts = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length === 0) {
+    return '?';
+  }
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
 function parseFromAddress(from) {
   const match = from.match(/^(.+?)\s*<([^>]+)>$/);
   if (match) {
@@ -38,35 +82,133 @@ function parseFromAddress(from) {
 }
 
 function buildAcceptanceEmail({ payload }) {
-  const dashboardUrl = `${String(CLIENT_URL).replace(/\/$/, '')}/requester-dashboard`;
+  const { clientUrl } = getEmailConfig();
+  const dashboardUrl = `${clientUrl}/requester-dashboard`;
   const acceptedLabel = formatAcceptedAt(payload.acceptedAt);
   const timeSuffix = acceptedLabel ? ` on ${acceptedLabel}` : '';
+  const volunteerName = String(payload.volunteerName || '');
+  const requestTitle = String(payload.requestTitle || '');
+  const initials = initialsFromName(volunteerName);
 
-  const subject = `${payload.volunteerName} accepted your help request`;
+  const subject = `${volunteerName} accepted your help request`;
   const text = [
-    `Good news! ${payload.volunteerName} accepted your request "${payload.requestTitle}"${timeSuffix}.`,
+    `Good news! ${volunteerName} accepted your request "${requestTitle}"${timeSuffix}.`,
     '',
     `Sign in to view details: ${dashboardUrl}`,
   ].join('\n');
 
-  const html = [
-    `<p>Good news! <strong>${escapeHtml(payload.volunteerName)}</strong> accepted your request <strong>&quot;${escapeHtml(payload.requestTitle)}&quot;</strong>${timeSuffix ? ` on ${escapeHtml(acceptedLabel)}` : ''}.</p>`,
-    `<p><a href="${dashboardUrl}">View your request</a></p>`,
-  ].join('');
+  const safeVolunteer = escapeHtml(volunteerName);
+  const safeTitle = escapeHtml(requestTitle);
+  const safeAccepted = escapeHtml(acceptedLabel);
+  const safeInitials = escapeHtml(initials);
+
+  // Table-based layout for email clients; forest/sage matches app theme.
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:0;background:#eef4f0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#171717;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef4f0;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border:1px solid #e7e5e0;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="padding:20px 28px 12px;">
+              <table role="presentation" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="width:32px;height:32px;border-radius:8px;background:#1e5631;color:#ffffff;font-size:12px;font-weight:700;text-align:center;line-height:32px;">NH</td>
+                  <td style="padding-left:10px;font-size:16px;font-weight:700;color:#171717;">Neighborhood Helper</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 28px 8px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#1e5631;border-radius:10px;">
+                <tr>
+                  <td style="padding:22px;">
+                    <p style="margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8fd4a0;">Accepted</p>
+                    <h1 style="margin:0;font-size:22px;line-height:1.3;font-weight:700;color:#ffffff;">A volunteer accepted your request</h1>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 28px 8px;font-size:16px;line-height:1.55;color:#171717;">
+              Good news! <strong>${safeVolunteer}</strong> accepted your help request.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 28px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eaf3ec;border:1px solid #d7e8dd;border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 16px;width:44px;vertical-align:middle;">
+                    <div style="width:44px;height:44px;border-radius:22px;background:#1e5631;color:#ffffff;font-size:14px;font-weight:700;text-align:center;line-height:44px;">${safeInitials}</div>
+                  </td>
+                  <td style="padding:14px 16px 14px 0;vertical-align:middle;">
+                    <p style="margin:0 0 2px;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#345a41;">Your volunteer</p>
+                    <p style="margin:0;font-size:16px;font-weight:700;color:#143d23;">${safeVolunteer}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 28px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8f8f6;border:1px solid #e7e5e0;border-radius:10px;">
+                <tr>
+                  <td style="padding:16px 18px;">
+                    <p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#6b6b6b;">Help request</p>
+                    <p style="margin:0;font-size:17px;font-weight:700;color:#171717;">${safeTitle}</p>
+                    ${
+                      acceptedLabel
+                        ? `<p style="margin:10px 0 0;padding-top:10px;border-top:1px solid #e7e5e0;font-size:13px;color:#6b6b6b;"><strong style="color:#1e5631;">When</strong> · ${safeAccepted}</p>`
+                        : ''
+                    }
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px 28px 8px;font-size:14px;line-height:1.55;color:#6b6b6b;">
+              Sign in to view details, message your volunteer, and track the request on your dashboard.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px 28px 28px;">
+              <a href="${dashboardUrl}" style="display:inline-block;background:#1e5631;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:8px;">View your request</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 28px 22px;border-top:1px solid #e7e5e0;background:#f8f8f6;font-size:12px;line-height:1.55;color:#9c9c98;">
+              You’re receiving this because a volunteer accepted your help request on Neighborhood Helper.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
 
   return { subject, text, html, dashboardUrl };
 }
 
-async function sendViaSendGrid({ to, subject, text, html }) {
+async function sendViaSendGrid({ to, subject, text, html, emailFrom, sendgridApiKey }) {
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${SENDGRID_API_KEY}`,
+      Authorization: `Bearer ${sendgridApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       personalizations: [{ to: [{ email: to }] }],
-      from: parseFromAddress(EMAIL_FROM),
+      from: parseFromAddress(emailFrom),
       subject,
       content: [
         { type: 'text/plain', value: text },
@@ -83,12 +225,61 @@ async function sendViaSendGrid({ to, subject, text, html }) {
   }
 }
 
+async function sendViaSmtp({ to, subject, text, html, emailFrom, smtp }) {
+  if (!smtp.user || !smtp.pass) {
+    throw new Error('SMTP_USER and SMTP_PASS are required for smtp mode');
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: smtp.host,
+    port: smtp.port,
+    secure: smtp.secure,
+    auth: {
+      user: smtp.user,
+      pass: smtp.pass,
+    },
+  });
+
+  await transporter.sendMail({
+    from: emailFrom,
+    to,
+    subject,
+    text,
+    html,
+  });
+}
+
+function resolveRecipient(to) {
+  const { emailToOverride } = getEmailConfig();
+  if (emailToOverride) {
+    return { to: emailToOverride, overriddenFrom: to };
+  }
+  return { to, overriddenFrom: null };
+}
+
+function logSent({ provider, to, overriddenFrom, subject }) {
+  console.log(
+    JSON.stringify({
+      event: 'email_delivery_sent',
+      provider,
+      to,
+      overriddenFrom,
+      subject,
+      timestamp: new Date().toISOString(),
+    })
+  );
+}
+
 async function sendEmail({ to, subject, text, html }) {
-  if (EMAIL_DELIVERY_MODE === 'log') {
+  const config = getEmailConfig();
+  const resolved = resolveRecipient(to);
+
+  if (config.mode === 'log') {
     console.log(
       JSON.stringify({
         event: 'email_delivery_log',
-        to,
+        to: resolved.to,
+        overriddenFrom: resolved.overriddenFrom,
         subject,
         text,
         timestamp: new Date().toISOString(),
@@ -97,16 +288,49 @@ async function sendEmail({ to, subject, text, html }) {
     return;
   }
 
-  if (EMAIL_DELIVERY_MODE === 'sendgrid') {
-    if (!SENDGRID_API_KEY) {
+  if (config.mode === 'sendgrid') {
+    if (!config.sendgridApiKey) {
       throw new Error('SENDGRID_API_KEY is not configured');
     }
 
-    await sendViaSendGrid({ to, subject, text, html });
+    await sendViaSendGrid({
+      to: resolved.to,
+      subject,
+      text,
+      html,
+      emailFrom: config.emailFrom,
+      sendgridApiKey: config.sendgridApiKey,
+    });
+
+    logSent({
+      provider: 'sendgrid',
+      to: resolved.to,
+      overriddenFrom: resolved.overriddenFrom,
+      subject,
+    });
     return;
   }
 
-  throw new Error(`Unsupported EMAIL_DELIVERY_MODE: ${EMAIL_DELIVERY_MODE}`);
+  if (config.mode === 'smtp') {
+    await sendViaSmtp({
+      to: resolved.to,
+      subject,
+      text,
+      html,
+      emailFrom: config.emailFrom,
+      smtp: config.smtp,
+    });
+
+    logSent({
+      provider: 'smtp',
+      to: resolved.to,
+      overriddenFrom: resolved.overriddenFrom,
+      subject,
+    });
+    return;
+  }
+
+  throw new Error(`Unsupported EMAIL_DELIVERY_MODE: ${config.mode}`);
 }
 
 async function sendAcceptanceEmail({ to, payload }) {
@@ -118,4 +342,5 @@ module.exports = {
   buildAcceptanceEmail,
   sendAcceptanceEmail,
   sendEmail,
+  getEmailConfig,
 };
