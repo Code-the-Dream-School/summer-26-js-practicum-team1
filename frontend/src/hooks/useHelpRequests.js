@@ -83,7 +83,8 @@ export function useAcceptedVolunteerProfile(requestId, enabled = true) {
 }
 
 export function useVolunteerAcceptedRequests() {
-  const { data, isLoading, isFetching, isError, error } = useQuery({
+  const { data, isLoading, isFetching, isError,
+    error,} = useQuery({
     queryKey: ['volunteer-accepted-requests'],
     queryFn: getVolunteerAcceptedRequests,
   });
@@ -92,6 +93,8 @@ export function useVolunteerAcceptedRequests() {
     helpRequests: data || [],
     isLoading,
     isFetching,
+    isError,
+    error,
   };
 }
 

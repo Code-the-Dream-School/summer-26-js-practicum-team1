@@ -15,7 +15,7 @@ import { COLORS } from '../utils/constants';
 import deryaProfilePhoto from '../assets/derya-profile.png';
 import AarthyMayakrishnan from '../assets/AarthyMayakrishnan.jpg';
 import cesarProfilePhoto from '../assets/cesarve-profile.jpg';
-
+import archanaProfilePhoto from '../assets/Archana-Profile.jpg';
 const team = [
   {
     name: 'Derya Kendirci',
@@ -58,12 +58,12 @@ const team = [
     extraLink: 'https://www.linkedin.com/in/cesar-verastegui-445749aa/',
   },
   {
-    name: 'Team Member Name',
+    name: 'Archana Chavan',
     role: 'Frontend / Backend',
-    bio: 'Short one or two sentence bio about what this teammate focused on for Neighborhood Helper and what they enjoy building.',
-    photo: undefined,
-    email: 'name3@example.com',
-    github: 'https://github.com/username',
+    bio: 'I contributed to building the requester-side experience from registration through the complete help-request lifecycle. I worked on creating help requests, editing and cancelling requests, and completing the requester flow. I also contributed to the Volunteer Dashboard and developed backend functionality. I initiated the integration of a third-party Location API to support address autocomplete and location capture.',
+    photo: archanaProfilePhoto,
+    email: 'archana.chavan2@gmail.com',
+    github: 'https://github.com/ArchanaPrithvirajChavan',
     extraLinkLabel: 'Portfolio',
     extraLink: 'https://example.com',
   },

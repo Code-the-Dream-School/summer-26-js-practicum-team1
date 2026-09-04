@@ -75,9 +75,7 @@ export default function RequesterDashboard() {
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
-  /* EXPANDED REQUEST */
-
-  const [expandedRequest, setExpandedRequest] = useState(null);
+  
 
   const { notifications, markRead } = useNotifications({
     enabled: !loading,
@@ -92,23 +90,17 @@ export default function RequesterDashboard() {
     }
   };
 
-  const handleViewAcceptedRequest = async (notification) => {
-    const requestId = Number(notification.payload?.requestId);
-    if (!Number.isInteger(requestId) || requestId <= 0) {
-      return;
-    }
+ const handleViewAcceptedRequest = async (notification) => {
+  const requestId = Number(notification.payload?.requestId);
 
-    setFilter('ALL');
-    setExpandedRequest(requestId);
+  if (!Number.isInteger(requestId) || requestId <= 0) {
+    return;
+  }
 
-    window.setTimeout(() => {
-      document
-        .getElementById(`request-card-${requestId}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 150);
+  await handleDismissNotification(notification);
 
-    await handleDismissNotification(notification);
-  };
+  navigate(`/requests/${requestId}`);
+};
 
   /* VOLUNTEER PROFILE DIALOG  */
 
@@ -684,13 +676,14 @@ export default function RequesterDashboard() {
             <RequestCard
               key={request.id}
               request={request}
-              expandedRequest={expandedRequest}
-              setExpandedRequest={setExpandedRequest}
               onEdit={handleEdit}
               onCancel={handleCancel}
               onVolunteerProfile={handleVolunteerProfile}
               unreadCount={unreadByRequest[request.id] ?? 0}
+
+                dashboardType="requester"
               userRole="REQUESTER"
+
             />
           ))}
         </Box>
