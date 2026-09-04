@@ -47,6 +47,8 @@ describe('emailDelivery.service', () => {
     expect(message.html).toContain('EG');
     expect(message.html).toContain('View your request');
     expect(message.html).toContain('http://localhost:5173/requester-dashboard');
+    expect(message.html).toContain('data:image/png;base64,');
+    expect(message.html).not.toContain('>NH<');
     expect(message.html).not.toContain('alice@example.com');
   });
 
@@ -155,6 +157,12 @@ describe('emailDelivery.service', () => {
         to: 'alice@example.com',
         subject: 'Accepted',
         from: 'Neighborhood Helper <you@gmail.com>',
+        attachments: [
+          expect.objectContaining({
+            cid: 'nh-logo',
+            filename: 'email-logo.png',
+          }),
+        ],
       })
     );
     expect(logSpy).toHaveBeenCalledWith(

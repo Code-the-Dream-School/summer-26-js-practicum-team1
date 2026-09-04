@@ -1,5 +1,31 @@
+const fs = require('fs');
+const path = require('path');
 const nodemailer = require('nodemailer');
 const { CLIENT_URL } = require('../utils/constants');
+
+const EMAIL_LOGO_PATH = path.join(__dirname, '../../assets/email-logo.png');
+const EMAIL_LOGO_CID = 'nh-logo';
+
+function getEmailLogoAttachment() {
+  if (!fs.existsSync(EMAIL_LOGO_PATH)) {
+    return null;
+  }
+
+  return {
+    filename: 'email-logo.png',
+    path: EMAIL_LOGO_PATH,
+    cid: EMAIL_LOGO_CID,
+    contentType: 'image/png',
+  };
+}
+
+function getEmailLogoBase64() {
+  if (!fs.existsSync(EMAIL_LOGO_PATH)) {
+    return null;
+  }
+
+  return fs.readFileSync(EMAIL_LOGO_PATH).toString('base64');
+}
 
 function getEmailConfig() {
   const sendgridApiKey = process.env.SENDGRID_API_KEY || '';
@@ -101,6 +127,15 @@ function buildAcceptanceEmail({ payload }) {
   const safeTitle = escapeHtml(requestTitle);
   const safeAccepted = escapeHtml(acceptedLabel);
   const safeInitials = escapeHtml(initials);
+  const logoBase64 = getEmailLogoBase64();
+  // Data URI so the real app logo renders in clients and in local HTML preview.
+  // SMTP/SendGrid still attach the same file inline (cid) as a reliable fallback.
+  const logoSrc = logoBase64
+    ? `data:image/png;base64,${logoBase64}`
+    : `cid:${EMAIL_LOGO_CID}`;
+  const logoImg = logoBase64
+    ? `<img src="${logoSrc}" width="32" height="32" alt="Neighborhood Helper" style="display:block;width:32px;height:32px;border:0;" />`
+    : `<img src="cid:${EMAIL_LOGO_CID}" width="32" height="32" alt="Neighborhood Helper" style="display:block;width:32px;height:32px;border:0;" />`;
 
   // Table-based layout for email clients; forest/sage matches app theme.
   const html = `<!DOCTYPE html>
@@ -119,8 +154,8 @@ function buildAcceptanceEmail({ payload }) {
             <td style="padding:20px 28px 12px;">
               <table role="presentation" cellspacing="0" cellpadding="0">
                 <tr>
-                  <td style="width:32px;height:32px;border-radius:8px;background:#1e5631;color:#ffffff;font-size:12px;font-weight:700;text-align:center;line-height:32px;">NH</td>
-                  <td style="padding-left:10px;font-size:16px;font-weight:700;color:#171717;">Neighborhood Helper</td>
+                  <td style="vertical-align:middle;width:32px;">${logoImg}</td>
+                  <td style="padding-left:10px;font-size:16px;font-weight:700;color:#171717;vertical-align:middle;">Neighborhood Helper</td>
                 </tr>
               </table>
             </td>
@@ -199,22 +234,44 @@ function buildAcceptanceEmail({ payload }) {
   return { subject, text, html, dashboardUrl };
 }
 
-async function sendViaSendGrid({ to, subject, text, html, emailFrom, sendgridApiKey }) {
+async function sendViaSendGrid({
+  to,
+  subject,
+  text,
+  html,
+  emailFrom,
+  sendgridApiKey,
+  logoAttachment,
+}) {
+  const payload = {
+    personalizations: [{ to: [{ email: to }] }],
+    from: parseFromAddress(emailFrom),
+    subject,
+    content: [
+      { type: 'text/plain', value: text },
+      { type: 'text/html', value: html },
+    ],
+  };
+
+  if (logoAttachment) {
+    payload.attachments = [
+      {
+        content: fs.readFileSync(logoAttachment.path).toString('base64'),
+        filename: logoAttachment.filename,
+        type: logoAttachment.contentType,
+        disposition: 'inline',
+        content_id: logoAttachment.cid,
+      },
+    ];
+  }
+
   const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${sendgridApiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
-      from: parseFromAddress(emailFrom),
-      subject,
-      content: [
-        { type: 'text/plain', value: text },
-        { type: 'text/html', value: html },
-      ],
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -225,7 +282,15 @@ async function sendViaSendGrid({ to, subject, text, html, emailFrom, sendgridApi
   }
 }
 
-async function sendViaSmtp({ to, subject, text, html, emailFrom, smtp }) {
+async function sendViaSmtp({
+  to,
+  subject,
+  text,
+  html,
+  emailFrom,
+  smtp,
+  logoAttachment,
+}) {
   if (!smtp.user || !smtp.pass) {
     throw new Error('SMTP_USER and SMTP_PASS are required for smtp mode');
   }
@@ -240,13 +305,27 @@ async function sendViaSmtp({ to, subject, text, html, emailFrom, smtp }) {
     },
   });
 
-  await transporter.sendMail({
+  const mail = {
     from: emailFrom,
     to,
     subject,
     text,
     html,
-  });
+  };
+
+  if (logoAttachment) {
+    mail.attachments = [
+      {
+        filename: logoAttachment.filename,
+        path: logoAttachment.path,
+        cid: logoAttachment.cid,
+        contentType: logoAttachment.contentType,
+        contentDisposition: 'inline',
+      },
+    ];
+  }
+
+  await transporter.sendMail(mail);
 }
 
 function resolveRecipient(to) {
@@ -273,6 +352,7 @@ function logSent({ provider, to, overriddenFrom, subject }) {
 async function sendEmail({ to, subject, text, html }) {
   const config = getEmailConfig();
   const resolved = resolveRecipient(to);
+  const logoAttachment = getEmailLogoAttachment();
 
   if (config.mode === 'log') {
     console.log(
@@ -300,6 +380,7 @@ async function sendEmail({ to, subject, text, html }) {
       html,
       emailFrom: config.emailFrom,
       sendgridApiKey: config.sendgridApiKey,
+      logoAttachment,
     });
 
     logSent({
@@ -319,6 +400,7 @@ async function sendEmail({ to, subject, text, html }) {
       html,
       emailFrom: config.emailFrom,
       smtp: config.smtp,
+      logoAttachment,
     });
 
     logSent({
