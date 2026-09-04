@@ -51,7 +51,6 @@ const filterFieldSx = {
 };
 
 const viewButtonSx = {
-  borderRadius: 1.5,
   fontSize: '0.8125rem',
   fontWeight: 400,
   textTransform: 'none',

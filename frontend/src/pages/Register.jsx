@@ -107,7 +107,9 @@ function Register() {
           width: '100%',
           maxWidth: { xs: 400, sm: 550, md: 600 },
           bgcolor: 'background.paper',
-          borderRadius: '24px',
+          boxShadow: 3,
+          border: `1px solid transparent`,
+          borderRadius: 3,
           p: { xs: 3, sm: 4, md: 5 },
         }}
       >

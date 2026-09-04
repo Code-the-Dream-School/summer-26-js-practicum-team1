@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useAuth } from './useAuth';
+
 import {
   getMessages,
   sendMessage,
@@ -9,10 +11,13 @@ import {
 } from '../services/chatApi';
 
 export function useGetUnreadCount() {
+  const { user } = useAuth();
+
   return useQuery({
     queryKey: ['chat', 'unread-count'],
     queryFn: getUnreadMessageCount,
-    refetchInterval: 15000,
+    enabled: Boolean(user),
+    refetchInterval: user ? 15000 : false,
   });
 }
 

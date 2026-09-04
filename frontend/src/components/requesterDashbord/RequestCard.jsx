@@ -164,8 +164,11 @@ function RequestCard({
                       flexShrink: 0,
                       color: COLORS.primary,
                       borderRadius: 2,
+                      transition: '0.3s',
+
                       '&:hover': {
-                        backgroundColor: COLORS.bgSubtle,
+                        boxShadow: 5,
+                        transform: 'translateY(-2px)',
                       },
                     }}
                   >
@@ -186,8 +189,10 @@ function RequestCard({
                       flexShrink: 0,
                       color: COLORS.primary,
                       borderRadius: 2,
+                      transition: '0.3s',
                       '&:hover': {
-                        backgroundColor: COLORS.bgSubtle,
+                        boxShadow: 5,
+                        transform: 'translateY(-2px)',
                       },
                     }}
                   >
@@ -423,7 +428,6 @@ function RequestCard({
                   },
                 }}
               >
-                
                 {participantName || 'User'}
                 {unreadCount > 0 && (
                   <Chip
