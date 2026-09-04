@@ -9,153 +9,245 @@ import {
   Divider,
   Chip,
   Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import EmailIcon from '@mui/icons-material/Email';
 import CakeIcon from '@mui/icons-material/Cake';
 import WcIcon from '@mui/icons-material/Wc';
+
 import { useAdminUserProfileImage } from '../../hooks/admin/useAdminUserProfileImage';
 import { useNavigate } from 'react-router-dom';
 import { grey } from '@mui/material/colors';
 import { useApproveVolunteer } from '../../hooks/admin/useApproveVolunteer';
 import { useRejectVolunteer } from '../../hooks/admin/useRejectVolunteer';
+import { useState } from 'react';
 
 function VolunteerCard({ userId, name, email, status, phone, dob, gender }) {
   const navigate = useNavigate();
 
+  const [confirmAction, setConfirmAction] = useState(null);
+
   const approveMutation = useApproveVolunteer();
   const rejectMutation = useRejectVolunteer();
+
   const { data: profileImageUrl } = useAdminUserProfileImage(userId);
+
+  const handleConfirm = () => {
+    if (confirmAction === 'approve') {
+      approveMutation.mutate(userId, {
+        onSuccess: () => {
+          setConfirmAction(null);
+        },
+      });
+    } else if (confirmAction === 'reject') {
+      rejectMutation.mutate(userId, {
+        onSuccess: () => {
+          setConfirmAction(null);
+        },
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setConfirmAction(null);
+  };
+
+  const isPending = approveMutation.isPending || rejectMutation.isPending;
+
   return (
-    <Card
-      sx={{
-        width: '100%',
-        borderRadius: 3,
-        boxShadow: 3,
-        bgcolor: grey[100],
-      }}
-    >
-      <CardHeader
-        avatar={
-          <IconButton
+    <>
+      <Card
+        sx={{
+          width: '100%',
+          borderRadius: 3,
+          boxShadow: 3,
+          bgcolor: grey[100],
+        }}
+      >
+        <CardHeader
+          avatar={
+            <IconButton
+              onClick={() =>
+                navigate(`/admin/users/${userId}?from=pending-volunteers`)
+              }
+              aria-label={`View ${name}'s profile`}
+              sx={{
+                p: 0,
+                borderRadius: '50%',
+              }}
+            >
+              <Avatar
+                src={profileImageUrl || undefined}
+                alt={name}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  bgcolor: 'primary.main',
+                  transition: '0.2s',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: 3,
+                  },
+                }}
+              >
+                {name?.charAt(0)}
+              </Avatar>
+            </IconButton>
+          }
+          title={<Typography variant="h5">{name}</Typography>}
+          action={
+            <Chip
+              label={status}
+              sx={{
+                backgroundColor: '#C1791E',
+                color: '#fff',
+              }}
+              size="small"
+            />
+          }
+          subheader={
+            <Stack
+              spacing={{ xs: 1.5, sm: 3 }}
+              direction={{ xs: 'column', sm: 'row' }}
+              sx={{ mt: 1 }}
+            >
+              {[
+                {
+                  icon: (
+                    <LocalPhoneIcon
+                      color="warning"
+                      sx={{ fontSize: '1.1rem' }}
+                    />
+                  ),
+                  value: phone,
+                },
+                {
+                  icon: (
+                    <EmailIcon color="primary" sx={{ fontSize: '1.1rem' }} />
+                  ),
+                  value: email,
+                },
+                {
+                  icon: <CakeIcon color="error" sx={{ fontSize: '1.1rem' }} />,
+                  value: dob
+                    ? new Date(dob).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    : 'N/A',
+                },
+                {
+                  icon: <WcIcon sx={{ fontSize: '1.1rem' }} />,
+                  value: gender,
+                },
+              ].map((item, index) => (
+                <Typography
+                  key={index}
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                  }}
+                >
+                  {item.icon}
+                  {item.value}
+                </Typography>
+              ))}
+            </Stack>
+          }
+        />
+
+        <Divider />
+
+        <CardActions
+          sx={{
+            gap: 2,
+            p: 2,
+            justifyContent: 'space-between',
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="primary"
             onClick={() =>
               navigate(`/admin/users/${userId}?from=pending-volunteers`)
             }
-            aria-label={`View ${name}'s profile`}
-            sx={{
-              p: 0,
-              borderRadius: '50%',
-            }}
           >
-            <Avatar
-              src={profileImageUrl || undefined}
-              alt={name}
-              sx={{
-                width: 56,
-                height: 56,
-                bgcolor: 'primary.main',
-                transition: '0.2s',
-                '&:hover': {
-                  transform: 'scale(1.05)',
-                  boxShadow: 3,
-                },
-              }}
+            View Profile
+          </Button>
+
+          <Stack direction="row" spacing={2}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={() => setConfirmAction('approve')}
+              disabled={isPending}
             >
-              {name?.charAt(0)}
-            </Avatar>
-          </IconButton>
-        }
+              Approve
+            </Button>
 
-        title={<Typography variant="h5">{name}</Typography>}
-
-        action={
-          <Chip
-            label={status}
-            sx={{ backgroundColor: '#C1791E', color: '#fff' }}
-            size="small"
-          />
-        }
-        subheader={
-          <Stack
-            spacing={{ xs: 1.5, sm: 3 }}
-            direction={{ xs: 'column', sm: 'row' }}
-            sx={{ mt: 1 }}
-          >
-            {[
-              {
-                icon: (
-                  <LocalPhoneIcon color="warning" sx={{ fontSize: '1.1rem' }} />
-                ),
-                value: phone,
-              },
-              {
-                icon: <EmailIcon color="primary" sx={{ fontSize: '1.1rem' }} />,
-                value: email,
-              },
-              {
-                icon: <CakeIcon color="error" sx={{ fontSize: '1.1rem' }} />,
-                value: dob
-                  ? new Date(dob).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  : 'N/A',
-              },
-              { icon: <WcIcon sx={{ fontSize: '1.1rem' }} />, value: gender },
-            ].map((item, index) => (
-              <Typography
-                key={index}
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 0.75,
-                }}
-              >
-                {item.icon}
-                {item.value}
-              </Typography>
-            ))}
+            <Button
+              color="error"
+              variant="contained"
+              onClick={() => setConfirmAction('reject')}
+              disabled={isPending}
+            >
+              Reject
+            </Button>
           </Stack>
-        }
-      />
-      <Divider />
+        </CardActions>
+      </Card>
 
-      <CardActions sx={{ gap: 2, p: 2, justifyContent: 'space-between' }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() =>
-            navigate(`/admin/users/${userId}?from=pending-volunteers`)
-          }
-        >
-          View Profile
-        </Button>
+      <Dialog
+        open={confirmAction !== null}
+        onClose={isPending ? undefined : handleCancel}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          {confirmAction === 'approve'
+            ? 'Approve Volunteer?'
+            : 'Reject Volunteer?'}
+        </DialogTitle>
 
-        <Stack direction="row" spacing={2}>
-          <Button
-            color="primary"
-            variant="contained"
+        <DialogContent>
+          <DialogContentText>
+            {confirmAction === 'approve'
+              ? `Are you sure you want to approve ${name} as a volunteer?`
+              : `Are you sure you want to reject ${name}'s volunteer application?`}
+          </DialogContentText>
+        </DialogContent>
 
-            onClick={() => approveMutation.mutate(userId)}
-          >
-            Approve
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleCancel} disabled={isPending}>
+            Cancel
           </Button>
 
           <Button
-            color="error"
             variant="contained"
-
-            onClick={() => rejectMutation.mutate(userId)}
+            color={confirmAction === 'approve' ? 'primary' : 'error'}
+            onClick={handleConfirm}
+            disabled={isPending}
           >
-            Reject
+            {isPending
+              ? 'Processing...'
+              : confirmAction === 'approve'
+                ? 'Approve'
+                : 'Reject'}
           </Button>
-        </Stack>
-      </CardActions>
-    </Card>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
+
 export default VolunteerCard;
