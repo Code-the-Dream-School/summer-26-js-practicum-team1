@@ -20,7 +20,7 @@ const team = [
   {
     name: 'Derya Kendirci',
     role: 'Frontend / Backend',
-    bio: "On the backend, I built registration APIs, volunteer profile APIs, accept/decline with notifications, and admin user detail endpoints. On the frontend, I built volunteer preferences, admin user detail, browse accept/decline actions, and dashboard alerts. The accept flow was my favorite because one volunteer's yes can change someone's day.",
+    bio: "I designed and implemented role based registration, volunteer profile APIs, and admin user detail views for reviewing requesters and volunteers. A core part of my work was the accept and decline system: accepting a request assigns the volunteer and triggers in-app and email notifications for the requester. On the frontend, I built volunteer preferences, browse accept and decline actions, and requester dashboard alerts so that backend flow is visible in the product.",
     photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
