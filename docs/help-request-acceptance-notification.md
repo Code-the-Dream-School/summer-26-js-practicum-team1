@@ -465,10 +465,13 @@ Accept still returns 200 if email fails; `NotificationDelivery` for `EMAIL` reco
 
 | Variable | Purpose |
 |----------|---------|
-| `EMAIL_DELIVERY_MODE` | `log` (dev default) or `sendgrid` |
-| `EMAIL_FROM` | From address, e.g. `Neighborhood Helper <noreply@example.com>` |
+| `EMAIL_DELIVERY_MODE` | `log` (dev default), `sendgrid`, or `smtp` |
+| `EMAIL_FROM` | From address, e.g. `Neighborhood Helper <you@gmail.com>` |
 | `SENDGRID_API_KEY` | Required when mode is `sendgrid` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | SMTP server (Gmail defaults: `smtp.gmail.com`, `465`, `true`) |
+| `SMTP_USER` / `SMTP_PASS` | SMTP login; for Gmail use an [App Password](https://myaccount.google.com/apppasswords), not your normal password |
 | `CLIENT_URL` | Dashboard link in email body |
+| `EMAIL_TO_OVERRIDE` | Optional; redirects every acceptance email to this address (use your real inbox while seed users still have `@example.com`) |
 
 ### 16.3 Email content (privacy)
 
@@ -480,7 +483,7 @@ Same fields as in-app alert: volunteer display name, request title, acceptance t
 
 ### 16.4 Implementation
 
-- `backend/src/services/emailDelivery.service.js` — template + SendGrid/log sender
+- `backend/src/services/emailDelivery.service.js` — template + log / SendGrid / SMTP (Gmail) sender
 - `notification.service.js` — `attemptEmailDelivery()` after `attemptInAppDelivery()`
 
 ---

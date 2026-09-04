@@ -1,3 +1,8 @@
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn(),
+}));
+
+const nodemailer = require('nodemailer');
 const {
   buildAcceptanceEmail,
   sendEmail,
@@ -11,7 +16,12 @@ describe('emailDelivery.service', () => {
       ...originalEnv,
       CLIENT_URL: 'http://localhost:5173',
       EMAIL_DELIVERY_MODE: 'log',
+      EMAIL_TO_OVERRIDE: '',
+      SENDGRID_API_KEY: '',
+      SMTP_USER: '',
+      SMTP_PASS: '',
     };
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -31,6 +41,14 @@ describe('emailDelivery.service', () => {
     expect(message.text).toContain('Need help picking up groceries');
     expect(message.text).toContain('Emma Garcia');
     expect(message.text).toContain('http://localhost:5173/requester-dashboard');
+    expect(message.html).toContain('Neighborhood Helper');
+    expect(message.html).toContain('Emma Garcia');
+    expect(message.html).toContain('Need help picking up groceries');
+    expect(message.html).toContain('EG');
+    expect(message.html).toContain('View your request');
+    expect(message.html).toContain('http://localhost:5173/requester-dashboard');
+    expect(message.html).toContain('data:image/png;base64,');
+    expect(message.html).not.toContain('>NH<');
     expect(message.html).not.toContain('alice@example.com');
   });
 
@@ -46,6 +64,109 @@ describe('emailDelivery.service', () => {
 
     expect(logSpy).toHaveBeenCalledWith(
       expect.stringContaining('"event":"email_delivery_log"')
+    );
+
+    logSpy.mockRestore();
+  });
+
+  it('redirects recipient when EMAIL_TO_OVERRIDE is set', async () => {
+    process.env.EMAIL_TO_OVERRIDE = 'you@real-inbox.com';
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await sendEmail({
+      to: 'alice.requester@example.com',
+      subject: 'Test subject',
+      text: 'Test body',
+      html: '<p>Test body</p>',
+    });
+
+    const logged = JSON.parse(logSpy.mock.calls[0][0]);
+    expect(logged.to).toBe('you@real-inbox.com');
+    expect(logged.overriddenFrom).toBe('alice.requester@example.com');
+
+    logSpy.mockRestore();
+  });
+
+  it('sends via SendGrid when mode is sendgrid', async () => {
+    process.env.EMAIL_DELIVERY_MODE = 'sendgrid';
+    process.env.SENDGRID_API_KEY = 'sg.test-key';
+    process.env.EMAIL_FROM = 'Neighborhood Helper <noreply@test.com>';
+
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => '',
+    });
+    global.fetch = fetchMock;
+
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await sendEmail({
+      to: 'alice@example.com',
+      subject: 'Accepted',
+      text: 'Body',
+      html: '<p>Body</p>',
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://api.sendgrid.com/v3/mail/send',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer sg.test-key',
+        }),
+      })
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"event":"email_delivery_sent"')
+    );
+
+    logSpy.mockRestore();
+  });
+
+  it('sends via SMTP when mode is smtp', async () => {
+    process.env.EMAIL_DELIVERY_MODE = 'smtp';
+    process.env.SMTP_USER = 'you@gmail.com';
+    process.env.SMTP_PASS = 'abcd efgh ijkl mnop';
+    process.env.EMAIL_FROM = 'Neighborhood Helper <you@gmail.com>';
+
+    const sendMail = jest.fn().mockResolvedValue({ messageId: '1' });
+    nodemailer.createTransport.mockReturnValue({ sendMail });
+
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    await sendEmail({
+      to: 'alice@example.com',
+      subject: 'Accepted',
+      text: 'Body',
+      html: '<p>Body</p>',
+    });
+
+    expect(nodemailer.createTransport).toHaveBeenCalledWith(
+      expect.objectContaining({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: 'you@gmail.com',
+          pass: 'abcd efgh ijkl mnop',
+        },
+      })
+    );
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'alice@example.com',
+        subject: 'Accepted',
+        from: 'Neighborhood Helper <you@gmail.com>',
+        attachments: [
+          expect.objectContaining({
+            cid: 'nh-logo',
+            filename: 'email-logo.png',
+          }),
+        ],
+      })
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"provider":"smtp"')
     );
 
     logSpy.mockRestore();
