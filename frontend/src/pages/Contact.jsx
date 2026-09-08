@@ -16,11 +16,13 @@ import deryaProfilePhoto from '../assets/derya-profile.png';
 import AarthyMayakrishnan from '../assets/AarthyMayakrishnan.jpg';
 import cesarProfilePhoto from '../assets/cesarve-profile.jpg';
 import archanaProfilePhoto from '../assets/Archana-Profile.jpg';
+import emmanuelProfilePhoto from '../assets/emmanuel-profile.jpg';
+
 const team = [
   {
     name: 'Derya Kendirci',
     role: 'Frontend / Backend',
-    bio: "I designed and implemented role based registration, volunteer profile APIs, and admin user detail views for reviewing requesters and volunteers. A core part of my work was the accept and decline system: accepting a request assigns the volunteer and triggers in-app and email notifications for the requester. On the frontend, I built volunteer preferences, browse accept and decline actions, and requester dashboard alerts so that backend flow is visible in the product.",
+    bio: 'I designed and implemented role based registration, volunteer profile APIs, and admin user detail views for reviewing requesters and volunteers. A core part of my work was the accept and decline system: accepting a request assigns the volunteer and triggers in-app and email notifications for the requester. On the frontend, I built volunteer preferences, browse accept and decline actions, and requester dashboard alerts so that backend flow is visible in the product.',
     photo: deryaProfilePhoto,
     email: 'deryakendircikahraman@gmail.com',
     github: 'https://github.com/deryakendircikahraman',
@@ -30,8 +32,8 @@ const team = [
   {
     name: 'Emmanuel Cobian',
     role: 'Frontend / Backend',
-    bio: "I worked on secure login and authentication, the volunteer browse page, and our landing and content pages. The map's clustering feature was my favorite to build because it stays intuitive and clean while still surfacing details like multiple requests from the same person, and it makes it easy to spot which areas need more help than others.",
-    photo: undefined,
+    bio: "I handled login and authentication, the volunteer browse page with its filters, pagination, and list/map views, and the landing and content pages. A core part of my work was the requests/:id page, which merges the volunteer and requester views to show assignment status, location, and chat in one place. My favorite, however, was the map's clustering feature, since it stays clean and readable while still surfacing things like multiple requests from the same person.",
+    photo: emmanuelProfilePhoto,
     email: 'emmanuel12310@berkeley.edu',
     github: 'https://github.com/EmmanuelCobian',
     extraLinkLabel: 'Portfolio',
