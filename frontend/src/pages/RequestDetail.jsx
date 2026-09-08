@@ -275,35 +275,31 @@ function RequestDetail() {
             />
 
             <Stack spacing={2} sx={{ mt: 2 }}>
-              {helpRequest.isRequester ? (
-  helpRequest.volunteer && (
-    <>
-      <InfoRow
-        icon={<PersonIcon fontSize="small" />}
-        label="Assigned volunteer"
-        value={helpRequest.volunteer.name}
-      />
-      <InfoRow
-        icon={<PhoneIcon fontSize="small" />}
-        label="Volunteer phone"
-        value={helpRequest.volunteer.phone}
-      />
-    </>
-  )
-) : (
-  <>
-    <InfoRow
-      icon={<PersonIcon fontSize="small" />}
-      label="Requested by"
-      value={helpRequest.requester?.name}
-    />
-    <InfoRow
-      icon={<PhoneIcon fontSize="small" />}
-      label="Requester phone"
-      value={helpRequest.requester?.phone}
-    />
-  </>
-)}
+              <InfoRow
+                icon={<PersonIcon fontSize="small" />}
+                label="Requested by"
+                value={helpRequest.requester?.name}
+              />
+              <InfoRow
+                icon={<PhoneIcon fontSize="small" />}
+                label="Requester phone"
+                value={helpRequest.requester?.phone}
+              />
+
+              {helpRequest.volunteer && (
+                <>
+                  <InfoRow
+                    icon={<PersonIcon fontSize="small" />}
+                    label="Assigned volunteer"
+                    value={helpRequest.volunteer.name}
+                  />
+                  <InfoRow
+                    icon={<PhoneIcon fontSize="small" />}
+                    label="Volunteer phone"
+                    value={helpRequest.volunteer.phone}
+                  />
+                </>
+              )}
             </Stack>
           </Box>
         </Stack>
