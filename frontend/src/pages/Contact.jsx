@@ -17,6 +17,8 @@ import AarthyMayakrishnan from '../assets/AarthyMayakrishnan.jpg';
 import cesarProfilePhoto from '../assets/cesarve-profile.jpg';
 import archanaProfilePhoto from '../assets/Archana-Profile.jpg';
 import emmanuelProfilePhoto from '../assets/emmanuel-profile.jpg';
+import royProfilePhoto from '../assets/roy-profile.jpg'
+import anastasiaProfilePhoto from '../assets/anastasia-profile.jpg'
 
 const team = [
   {
@@ -75,14 +77,14 @@ const mentors = [
   {
     name: 'Roy Mosby',
     role: 'Lead Mentor',
-    photo: undefined,
+    photo: royProfilePhoto,
     email: 'roy@codethedream.org',
     github: 'https://github.com/royemosby',
   },
   {
     name: 'Anastasia Nikulkina',
     role: 'Assistant Mentor',
-    photo: undefined,
+    photo: anastasiaProfilePhoto,
     email: 'nikoulkina@gmail.com',
     github: 'http://github.com/nasnik',
   },
