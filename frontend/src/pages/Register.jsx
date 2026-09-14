@@ -10,7 +10,6 @@ import {
   Alert,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
 import { useState } from 'react';
 
 const GENDER_OPTIONS = [
@@ -44,9 +43,7 @@ const textFieldSx = {
     backgroundColor: '#fff',
     transition: 'background-color 0.2s ease',
 
-    '&:hover': {
-      backgroundColor: '#eaeef1ff',
-    },
+   
   },
 };
 function Register() {
@@ -113,44 +110,19 @@ function Register() {
           p: { xs: 3, sm: 4, md: 5 },
         }}
       >
-        <Box
+       <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 1,
             mb: 4,
           }}
         >
-          <Box
-            component="img"
-            src={logo}
-            alt="Neighborhood Helper Logo"
-            sx={{
-              width: 25,
-              height: 25,
-            }}
-          />
-
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Neighborhood Helper
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+             Requester Registration
           </Typography>
         </Box>
-
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 700,
-            mb: 3,
-          }}
-        >
-          Create account
-        </Typography>
-
         {errorMessage && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {errorMessage}
@@ -333,32 +305,17 @@ function Register() {
           <ProfileImageUpload onFileChange={setProfileImage} />
 
           <Button
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={isRegistering}
-            disableElevation
-            sx={{
-              py: 1.3,
-              fontSize: '1rem',
-              backgroundColor: '#1B741B',
-              transition:
-                'transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
-
-              '&:hover': {
-                backgroundColor: '#385d38ff ',
-                transform: 'translateY(-4px) scale(1.02)',
-                boxShadow: '0 8px 20px rgba(27, 116, 27, 0.4)',
-              },
-
-              '&:active': {
-                transform: 'translateY(-1px) scale(1)',
-                boxShadow: '0 3px 8px rgba(185, 226, 185, 0.3)',
-              },
-            }}
-          >
-            {isRegistering ? 'Creating account...' : 'Register'}
-          </Button>
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        disableElevation
+        disabled={isRegistering}
+        loading={isRegistering}
+        sx={{ mt: 3, py: 1.3, fontSize: '1rem' }}
+      >
+        Create  account
+      </Button>
           <Typography
             variant="body2"
             color="text.secondary"
